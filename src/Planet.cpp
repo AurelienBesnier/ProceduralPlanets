@@ -10,12 +10,10 @@
 
 Planet::Planet( QOpenGLContext* context )
 {
-
     glContext = context;
     init();
     initGLSL();
     initPlanet();
-
 }
 
 Planet::~Planet(){
