@@ -36,14 +36,6 @@ protected :
     void updateCamera(const qglviewer::Vec & center, float radius);
 
 
-    Vec3Df cut;
-    Vec3Df cutDirection;
-
-    std::map<unsigned char, bool> iDisplayMap;
-    std::map<unsigned char, QColor> iColorMap;
-    std::vector<unsigned char> subdomain_indices;
-
-
 public slots:
     void setPlateNumber(int _plateNum);
     void generatePlanet();

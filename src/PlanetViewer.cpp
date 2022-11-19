@@ -23,7 +23,8 @@ void PlanetViewer::draw(){
     
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     glDisable(GL_BLEND);
-    
+
+    glClearColor(0.1f,0.1f,0.1f,0.0f);
 
     planet.draw( camera() );
 
@@ -76,11 +77,6 @@ void PlanetViewer::init()
     //Set blend parameters
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    
-    imageLoaded = false;
-    
-    cut = Vec3Df(0.,0.,0.),
-    cutDirection = Vec3Df(1.,1.,1.);
 }
 
 void PlanetViewer::clear(){
