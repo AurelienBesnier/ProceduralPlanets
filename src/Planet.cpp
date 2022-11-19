@@ -78,6 +78,13 @@ void Planet::initPlanet()
 
 }
 
+void Planet::setPlateNumber(int _plateNum)
+{
+    this->plateNum = _plateNum;
+
+    std::cout<<"planet plate number: "<<this->plateNum<<std::endl;
+}
+
 void /*GLAPIENTRY */Planet::MessageCallback( GLenum source, GLenum type,
                                               GLuint id, GLenum severity,
                                               GLsizei length, const GLchar* message,
@@ -185,11 +192,7 @@ void Planet::draw( const qglviewer::Camera * camera ){
     glFunctions->glUniformMatrix4fv(glFunctions->glGetUniformLocation(programID, "mv_matrix"),
                                    1, GL_FALSE, mvMatrix);
 
-
-
     glFunctions->glEnable(GL_LIGHTING);
-
-
 }
 
 void Planet::clear(){

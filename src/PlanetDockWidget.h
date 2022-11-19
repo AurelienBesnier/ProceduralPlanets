@@ -35,6 +35,9 @@ class PlanetDockWidget : public QDockWidget
 public:
     PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent );
     PlanetViewer *viewer;
+    QSlider *numPlateSlider;
+    QPushButton *confirmButton;
+    QLabel * platenumLabel;
 protected:
     QGroupBox * getCuttingPlaneGroupBox(QWidget * parent);
     QGroupBox * displayImageGroupBox;
@@ -42,6 +45,7 @@ protected:
     QSignalMapper * signalIMapper;
 
 public slots:
+    void setPlateNumText();
 };
 
 #endif // TEXTUREDOCKWINDOW_H

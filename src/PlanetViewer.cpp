@@ -81,14 +81,25 @@ void PlanetViewer::init()
     
     cut = Vec3Df(0.,0.,0.),
     cutDirection = Vec3Df(1.,1.,1.);
-    
-
 }
 
 void PlanetViewer::clear(){
     planet.clear();
 }
 
+
+
+void PlanetViewer::setPlateNumber(int _plateNum)
+{
+    planet.setPlateNumber(_plateNum);
+    update();
+}
+
+void PlanetViewer::generatePlanet()
+{
+    planet.initPlanet();
+    update();
+}
 
 void PlanetViewer::updateCamera(const qglviewer::Vec & center, float radius){
     camera()->setSceneCenter(center);

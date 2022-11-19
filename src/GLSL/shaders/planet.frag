@@ -1,4 +1,4 @@
-#version 430
+#version 420
 
 
 // --------------------------------------------------
@@ -9,7 +9,7 @@
 uniform sampler2D Mask; // declaration de la map mask
 
 in vec3 position;
-in vec3 textCoord;
+in vec2 textCoord;
 
 out vec4 fragColor;
 

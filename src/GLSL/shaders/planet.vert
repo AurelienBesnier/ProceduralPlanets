@@ -1,7 +1,7 @@
 // --------------------------------------------------
 // shader definition
 // --------------------------------------------------
-#version 430
+#version 420
 
 layout (location=0) in vec3 i_position;
 
@@ -15,7 +15,7 @@ uniform mat4 proj_matrix;
 // varying variables
 // --------------------------------------------------
 out vec3 position;
-out vec3 textCoord;
+out vec2 textCoord;
 // --------------------------------------------------
 // Vertex-Shader
 // --------------------------------------------------

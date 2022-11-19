@@ -45,7 +45,8 @@ protected :
 
 
 public slots:
-
+    void setPlateNumber(int _plateNum);
+    void generatePlanet();
 
  signals:
 

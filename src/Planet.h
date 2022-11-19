@@ -14,6 +14,7 @@
 class Planet
 {
 private :
+    unsigned int plateNum;
 
     bool planetCreated;
 public:
@@ -30,6 +31,8 @@ public:
 
     void draw( const qglviewer::Camera * camera );
     void clear();
+
+    void setPlateNumber(int _plateNum);
 
     bool printShaderErrors(GLuint shader);
     bool printProgramErrors(int program);
