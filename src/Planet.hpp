@@ -11,12 +11,19 @@
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
 
+struct Plate
+{
+
+};
+
 class Planet
 {
 private :
     unsigned int plateNum;
 
-    GLuint bufferId;
+    GLuint VBO,VAO;
+
+    std::vector< qglviewer::Vec > positions;
 
     bool planetCreated;
 public:
@@ -28,7 +35,7 @@ public:
 
     void init();
     void initGLSL();
-
+    void makeSphere(float x,float y,float z,int slices,int stacks);
     void initPlanet();
 
     void draw( const qglviewer::Camera * camera );

@@ -24,8 +24,6 @@ void PlanetViewer::draw(){
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     glDisable(GL_BLEND);
 
-    glClearColor(0.1f,0.1f,0.1f,0.0f);
-
     planet.draw( camera() );
 
     glDisable(GL_LIGHTING);
@@ -71,7 +69,7 @@ void PlanetViewer::init()
     glEnable(GL_CLIP_PLANE0);
     
     //Set background color
-    setBackgroundColor(QColor(255,255,255));
+    setBackgroundColor(QColor(20,20,20));
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     
     //Set blend parameters

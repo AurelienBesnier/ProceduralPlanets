@@ -12,11 +12,13 @@ Planet::Planet( QOpenGLContext* context )
 {
     glContext = context;
     init();
-    //initGLSL();
+    initGLSL();
     initPlanet();
 }
 
 Planet::~Planet(){
+    glFunctions->glDeleteVertexArrays(1, &VAO);
+    glFunctions->glDeleteBuffers(1, &VBO);
 }
 
 void Planet::init(){
@@ -43,7 +45,6 @@ void Planet::initGLSL(){
     glFunctions->glEnable(GL_COLOR_MATERIAL);
     glFunctions->glEnable(GL_BLEND);
     glFunctions->glEnable(GL_TEXTURE_2D);
-    glFunctions->glEnable(GL_TEXTURE_3D);
     glFunctions->glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
     // Create programs and link shaders
@@ -75,6 +76,23 @@ void Planet::initGLSL(){
 
 void Planet::initPlanet()
 {
+    makeSphere(0,0,0,10,10);
+
+    glFunctions->glGenVertexArrays(1, &VAO);
+    glFunctions->glGenBuffers(1,&VBO);
+
+    glFunctions->glBindVertexArray(VAO);
+
+    glFunctions->glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glFunctions->glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float)*3, positions.data(), GL_STATIC_DRAW);
+
+    glFunctions->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glFunctions->glEnableVertexAttribArray(0);
+
+    glFunctions->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glFunctions->glBindVertexArray(0);
+
 }
 
 void Planet::setPlateNumber(int _plateNum)
@@ -168,7 +186,40 @@ std::string Planet::readShaderSource(std::string filename)
     return content;
 }
 
+void Planet::makeSphere(float x,float y,float z,int slices,int stacks)
+{
+   if(stacks < 2){stacks = 2;}
+   if(stacks > 20){stacks = 20;}
+   if(slices < 3){slices = 3;}
+   if(slices > 30){slices = 30;}
+   //Pas essentiel ...
 
+   int Nb = slices*stacks +2;
+   positions.clear();
+   positions.resize(Nb);
+
+   qglviewer::Vec centre(x,y,z);
+
+   float sinP , cosP , sinT , cosT , Phi , Theta;
+   positions[0] = qglviewer::Vec(0,0,1);
+   positions[Nb-1] = qglviewer::Vec(0,0,-1);
+
+   for(int i=1; i<=stacks; i++)
+   {
+       Phi = 90 - (float)(i*180)/(float)(stacks+1);
+       sinP = sinf(Phi*3.14159265/180);
+       cosP = cosf(Phi*3.14159265/180);
+
+       for(int j=1; j<=slices; j++)
+       {
+           Theta = (float)(j*360)/(float)(slices);
+           sinT = sinf(Theta*3.14159265/180);
+           cosT = cosf(Theta*3.14159265/180);
+
+           positions[ j + (i-1)*slices ] = qglviewer::Vec(cosT*cosP,sinT*cosP,sinP);
+       }
+   }
+}
 
 void Planet::draw( const qglviewer::Camera * camera ){
 
@@ -191,6 +242,8 @@ void Planet::draw( const qglviewer::Camera * camera ){
     glFunctions->glUniformMatrix4fv(glFunctions->glGetUniformLocation(programID, "mv_matrix"),
                                    1, GL_FALSE, mvMatrix);
 
+    glFunctions->glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES,0,positions.size());
     glFunctions->glEnable(GL_LIGHTING);
 }
 

@@ -6,7 +6,7 @@
 // --------------------------------------------------
 
 
-uniform sampler2D Mask; // declaration de la map mask
+uniform sampler2D Mask;
 
 in vec3 position;
 in vec2 textCoord;
