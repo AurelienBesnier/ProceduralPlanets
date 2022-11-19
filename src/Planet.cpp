@@ -12,7 +12,7 @@ Planet::Planet( QOpenGLContext* context )
 {
     glContext = context;
     init();
-    initGLSL();
+    //initGLSL();
     initPlanet();
 }
 
@@ -75,7 +75,6 @@ void Planet::initGLSL(){
 
 void Planet::initPlanet()
 {
-
 }
 
 void Planet::setPlateNumber(int _plateNum)
