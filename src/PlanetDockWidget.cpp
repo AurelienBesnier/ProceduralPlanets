@@ -1,4 +1,4 @@
-#include "PlanetDockWidget.h"
+#include "PlanetDockWidget.hpp"
 #include <QFileDialog>
 #include <QComboBox>
 

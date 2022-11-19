@@ -9,7 +9,7 @@
 #include <string>
 #include <math.h>
 #include <algorithm>
-#include "Planet.h"
+#include "Planet.hpp"
 
 class PlanetViewer : public QGLViewer
 {

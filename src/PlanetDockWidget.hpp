@@ -26,7 +26,7 @@
 #include <QTabWidget>
 #include <QSignalMapper>
 
-#include "PlanetViewer.h"
+#include "PlanetViewer.hpp"
 
 
 class PlanetDockWidget : public QDockWidget

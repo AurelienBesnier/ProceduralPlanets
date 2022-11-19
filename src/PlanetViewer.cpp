@@ -1,4 +1,4 @@
-#include "PlanetViewer.h"
+#include "PlanetViewer.hpp"
 #include <cfloat>
 #include <QFileDialog>
 #include <QGLViewer/manipulatedCameraFrame.h>

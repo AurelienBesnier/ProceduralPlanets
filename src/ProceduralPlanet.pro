@@ -10,11 +10,12 @@ SOURCES += Main.cpp \
     PlanetDockWidget.cpp \
     PlanetViewer.cpp \
     Window.cpp
-HEADERS += Window.h \
-    Planet.h \
-    PlanetDockWidget.h \
-    PlanetViewer.h \
-    Vec3D.h
+HEADERS += \
+    Planet.hpp \
+    PlanetDockWidget.hpp \
+    PlanetViewer.hpp \
+    Vec3D.hpp \
+    Window.hpp
 INCLUDEPATH = ./GLSL
 LIBS = -lQGLViewer-qt5 \
     -lglut \

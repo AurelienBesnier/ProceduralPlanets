@@ -6,7 +6,7 @@
 #include <QTextStream>
 
 
-#include "Planet.h"
+#include "Planet.hpp"
 
 Planet::Planet( QOpenGLContext* context )
 {

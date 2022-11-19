@@ -9,7 +9,7 @@
 #include <QWidget>
 #include <QGroupBox>
 
-#include "PlanetDockWidget.h"
+#include "PlanetDockWidget.hpp"
 
 class Window : public QMainWindow
 {

@@ -1,7 +1,7 @@
 #ifndef PLANET_H
 #define PLANET_H
 
-#include "Vec3D.h"
+#include "Vec3D.hpp"
 
 #include <QString>
 #include <QColor>
@@ -15,6 +15,8 @@ class Planet
 {
 private :
     unsigned int plateNum;
+
+    GLuint bufferId;
 
     bool planetCreated;
 public:
