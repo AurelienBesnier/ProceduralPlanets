@@ -19,6 +19,7 @@ HEADERS += \
 INCLUDEPATH = ./GLSL
 LIBS = -lQGLViewer-qt5 \
     -lglut \
-    -lGLU
+    -lGLU \
+    -lm
 
 OTHER_FILES = ./GLSL/shaders/*
