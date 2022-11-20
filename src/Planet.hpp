@@ -21,9 +21,10 @@ class Planet
 private :
     unsigned int plateNum;
 
-    GLuint VBO,VAO;
+    GLuint VBO,VAO,EBO;
 
     std::vector< qglviewer::Vec > positions;
+    std::vector<unsigned int> indices;
 
     bool planetCreated;
 public:
@@ -35,7 +36,7 @@ public:
 
     void init();
     void initGLSL();
-    void makeSphere(float x,float y,float z,int slices,int stacks);
+    void makeSphere(float x,float y,float z,float radius,int slices,int stacks);
     void initPlanet();
 
     void draw( const qglviewer::Camera * camera );
