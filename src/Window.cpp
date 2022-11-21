@@ -19,7 +19,7 @@ Window::Window()
 
     menuFile->addAction(actionLoad3Dimage);
 
-    connect(actionLoad3Dimage, SIGNAL(triggered()), this, SLOT(savePlanet()));
+    connect(actionLoad3Dimage, SIGNAL(triggered()), viewer, SLOT(savePlanet()));
 
     QGroupBox * viewerGroupBox = new QGroupBox ("Planet Generator", this);
     QHBoxLayout * viewerLayout = new QHBoxLayout (viewerGroupBox);

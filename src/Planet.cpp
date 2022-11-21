@@ -312,3 +312,25 @@ void Planet::clear(){
     }
 }
 
+
+void Planet::save()
+{
+    std::string filename = "planet.obj";
+    std::ofstream ostream;
+
+    ostream.open(filename, std::ios_base::out);
+
+    for(size_t i = 0; i< positions.size(); ++i)
+    {
+        ostream<<"v "<<positions[i].x<<" "<<positions[i].y<<" "<<positions[i].z<<std::endl;
+    }
+
+    for(size_t i = 0; i< indices.size(); i+=3)
+    {
+        ostream<<"f  v"<<indices[i]<<" v"<<indices[i+1]<<" v"<<indices[i+2]<<std::endl;
+    }
+
+    ostream.close();
+
+    std::cout<<"Wrote to file "<<filename<<std::endl;
+}

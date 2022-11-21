@@ -30,7 +30,6 @@ void PlanetViewer::draw(){
 
 void PlanetViewer::drawClippingPlane(){
     
-    
     glEnable(GL_LIGHTING);
     
     glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
@@ -48,8 +47,6 @@ void PlanetViewer::drawClippingPlane(){
     
     qreal norm[] = {equation[0] + p[0], equation[1]+ p[1], equation[2]+ p[2]};
     qreal normResult[3];
-    camera()->getWorldCoordinatesOf(norm, normResult);
-    
     qglviewer::Vec normal(normResult[0]-projP[0], normResult[1]-projP[1], normResult[2]-projP[2]);
     qglviewer::Vec point(projP[0], projP[1],projP[2]);
     
@@ -120,6 +117,11 @@ void PlanetViewer::updateCamera(const qglviewer::Vec & center, float radius){
 }
 
 
+void PlanetViewer::savePlanet()
+{
+    planet.save();
+
+}
 
 std::istream & operator>>(std::istream & stream, qglviewer::Vec & v)
 {

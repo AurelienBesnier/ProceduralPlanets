@@ -51,6 +51,7 @@ public:
 
     void draw( const qglviewer::Camera * camera );
     void clear();
+    void save();
 
     void setPlateNumber(int _plateNum);
     void setRadius(double _r);

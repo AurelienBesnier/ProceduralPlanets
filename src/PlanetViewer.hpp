@@ -42,6 +42,7 @@ public slots:
     void clearPlanet();
     void setPlanetRadius(QString _r);
     void setPlanetElem(int _elems);
+    void savePlanet();
  signals:
 
 };
