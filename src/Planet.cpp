@@ -77,7 +77,7 @@ void Planet::initGLSL(){
 
 void Planet::initPlanet()
 {
-    makeSphere(0,0,0,1,10,10);
+    makeSphere(0,0,0,1,30,30);
 
     glFunctions->glGenVertexArrays(1, &VAO);
     glFunctions->glGenBuffers(1,&VBO);

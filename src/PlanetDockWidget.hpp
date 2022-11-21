@@ -25,6 +25,7 @@
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QSignalMapper>
+#include <QLineEdit>
 
 #include "PlanetViewer.hpp"
 
@@ -35,12 +36,21 @@ class PlanetDockWidget : public QDockWidget
 public:
     PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent );
     PlanetViewer *viewer;
+
+    //General planet parameters
     QSlider *numPlateSlider;
     QPushButton *confirmButton;
-    QLabel * platenumLabel;
+    QLabel * platenumLabel, *planetRadiusLabel;
+    QLineEdit *planetRadius;
+
+
+    //Plate type parameters
+    QLabel *oThicknessLabel, *oElevationLabel;
+    QLineEdit *oceanicThickness, *oceanicElevation;
+    QLabel *cThicknessLabel, *cElevationLabel;
+    QLineEdit *continentalElevation, *continentalThickness;
+
 protected:
-    QGroupBox * getCuttingPlaneGroupBox(QWidget * parent);
-    QGroupBox * displayImageGroupBox;
     QGridLayout * segIGridLayout;
     QSignalMapper * signalIMapper;
 

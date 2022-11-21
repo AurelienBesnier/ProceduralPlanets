@@ -11,9 +11,18 @@
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
 
+enum PlateType {
+    OCEANIC,
+    CONTINENTAL
+};
+
 struct Plate
 {
-
+    PlateType type;
+    std::vector<unsigned int> points;
+    qglviewer::Vec mouvement;
+    double e;
+    double z;
 };
 
 class Planet

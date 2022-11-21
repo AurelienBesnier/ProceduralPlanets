@@ -89,3 +89,6 @@ compile_commands.json
 
 *.kdev4
 src/build/
+
+.qmake.stash
+ProceduralPlanet
