@@ -320,14 +320,18 @@ void Planet::save()
 
     ostream.open(filename, std::ios_base::out);
 
+    ostream<<"o "<<filename<<std::endl;
+
     for(size_t i = 0; i< positions.size(); ++i)
     {
         ostream<<"v "<<positions[i].x<<" "<<positions[i].y<<" "<<positions[i].z<<std::endl;
     }
 
-    for(size_t i = 0; i< indices.size(); i+=3)
+    for(size_t i = 0; i< indices.size(); i+=9)
     {
-        ostream<<"f  v"<<indices[i]<<" v"<<indices[i+1]<<" v"<<indices[i+2]<<std::endl;
+        ostream<<"f  "<<indices[i]<<"/"<<indices[i+1]<<"/"<<indices[i+2]<<" "
+            <<indices[i+3]<<"/"<<indices[i+4]<<"/"<<indices[i+5]<<" "
+            <<indices[i+6]<<"/"<<indices[i+7]<<"/"<<indices[i+8]<<std::endl;
     }
 
     ostream.close();
