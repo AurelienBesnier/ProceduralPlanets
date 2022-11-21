@@ -35,6 +35,8 @@ private :
     std::vector<qglviewer::Vec> positions;
     std::vector<Plate> plates;
     std::vector<unsigned int> indices;
+    std::vector<float> normals;
+    std::vector<float> texCoods;
 
 public:
     bool planetCreated;
