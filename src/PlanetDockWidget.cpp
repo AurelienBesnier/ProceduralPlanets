@@ -41,6 +41,10 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
     planetParamLayout->addWidget(confirmButton, 4, 1, 1, 1);
     connect(confirmButton, SIGNAL(clicked()), viewer, SLOT(generatePlanet()));
 
+    clearButton = new QPushButton("Clear", groupBox);
+    planetParamLayout->addWidget(clearButton, 4, 2, 1, 1);
+    connect(clearButton, SIGNAL(clicked()), viewer, SLOT(clearPlanet()));
+
 
     QGroupBox *oceanicPlateBox = new QGroupBox("Oceanic Plate", parent);
     oceanicPlateBox->setMaximumSize(QSize(16777215, 200));

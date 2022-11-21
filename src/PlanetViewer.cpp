@@ -10,7 +10,6 @@ PlanetViewer::PlanetViewer(QWidget *parent)
     : QGLViewer(parent){
 }
 
-
 void PlanetViewer::draw(){
     // initLights();
     
@@ -81,8 +80,6 @@ void PlanetViewer::clear(){
     planet.clear();
 }
 
-
-
 void PlanetViewer::setPlateNumber(int _plateNum)
 {
     planet.setPlateNumber(_plateNum);
@@ -92,6 +89,12 @@ void PlanetViewer::setPlateNumber(int _plateNum)
 void PlanetViewer::generatePlanet()
 {
     planet.initPlanet();
+    update();
+}
+
+void PlanetViewer::clearPlanet()
+{
+    planet.clear();
     update();
 }
 

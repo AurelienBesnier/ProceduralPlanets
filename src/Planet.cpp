@@ -13,7 +13,6 @@ Planet::Planet( QOpenGLContext* context )
     glContext = context;
     init();
     initGLSL();
-    initPlanet();
 }
 
 Planet::~Planet(){
@@ -77,7 +76,7 @@ void Planet::initGLSL(){
 
 void Planet::initPlanet()
 {
-    makeSphere(0,0,0,1,30,30);
+    makeSphere(1,30,30);
 
     glFunctions->glGenVertexArrays(1, &VAO);
     glFunctions->glGenBuffers(1,&VBO);
@@ -193,7 +192,7 @@ std::string Planet::readShaderSource(std::string filename)
 }
 
 
-void Planet::makeSphere(float x,float y,float z, float radius, int slices, int stacks)
+void Planet::makeSphere(float radius, int slices, int stacks)
 {
     // Calc The Vertices
     for (int i = 0; i <= stacks; ++i){
@@ -270,6 +269,11 @@ void Planet::draw( const qglviewer::Camera * camera ){
 
 void Planet::clear(){
     if( planetCreated )
+    {
         init();
+        positions.clear();
+        indices.clear();
+        planetCreated = false;
+    }
 }
 
