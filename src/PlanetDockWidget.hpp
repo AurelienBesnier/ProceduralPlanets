@@ -38,9 +38,9 @@ public:
     PlanetViewer *viewer;
 
     //General planet parameters
-    QSlider *numPlateSlider;
+    QSlider *numPlateSlider, *planetElements;
     QPushButton *confirmButton, *clearButton;
-    QLabel * platenumLabel, *planetRadiusLabel;
+    QLabel * platenumLabel, *planetRadiusLabel, *planetElementLabel;
     QLineEdit *planetRadius;
 
 
@@ -56,6 +56,7 @@ protected:
 
 public slots:
     void setPlateNumText();
+    void setPlanetElemsText();
 };
 
 #endif // TEXTUREDOCKWINDOW_H

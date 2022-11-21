@@ -15,6 +15,9 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
     groupBox->setMaximumSize(QSize(16777215, 200));
     contentLayout->addWidget ( groupBox) ;
 
+    
+
+    //********************Planet Editor***********************/
     QGridLayout * planetParamLayout = new QGridLayout(groupBox);
 
     numPlateSlider = new QSlider(groupBox);
@@ -36,6 +39,22 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
     planetRadiusLabel = new QLabel(QString("Planet Radius:"));
     planetParamLayout->addWidget(planetRadiusLabel, 1,0,1,1); 
 
+    connect(planetRadius, SIGNAL(textChanged(QString)), viewer, SLOT(setPlanetRadius(QString)));
+
+    planetElements = new QSlider();
+    planetElements->setOrientation(Qt::Horizontal);
+    planetElements->setMaximum(10);
+    planetElements->setMaximum(500);
+
+    planetElementLabel = new QLabel(QString("Planet Slices/Stacks:%1").arg(planetElements->value()),groupBox);
+    planetParamLayout->addWidget(planetElementLabel, 2,0,1,1); 
+
+
+    planetParamLayout->addWidget(planetElements, 2,1,1,1) ;
+
+    connect(planetElements, SIGNAL(valueChanged(int)), viewer, SLOT(setPlanetElem(int)));
+    connect(planetElements, SIGNAL(valueChanged(int)), this, SLOT(setPlanetElemsText()));
+
 
     confirmButton = new QPushButton("Generate", groupBox);
     planetParamLayout->addWidget(confirmButton, 4, 1, 1, 1);
@@ -46,6 +65,7 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
     connect(clearButton, SIGNAL(clicked()), viewer, SLOT(clearPlanet()));
 
 
+    //********************Oceanic Editor***********************/
     QGroupBox *oceanicPlateBox = new QGroupBox("Oceanic Plate", parent);
     oceanicPlateBox->setMaximumSize(QSize(16777215, 200));
     
@@ -62,6 +82,7 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
     oceanicElevation = new QLineEdit();
     oceanParamLayout->addWidget(oceanicElevation, 2,1,1,1) ;
 
+    //********************Continent Editor***********************/
     QGroupBox *continentalPlateBox = new QGroupBox("Continental Plate", parent);
     continentalPlateBox->setMaximumSize(QSize(16777215, 200));
     QGridLayout * contParamLayout = new QGridLayout(continentalPlateBox);
@@ -79,11 +100,14 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
 
 
     //Make lineedits accept numbers only
-    planetRadius->setValidator( new QIntValidator(0, 10000000, this) );
-    oceanicThickness->setValidator( new QIntValidator(0, 10000000, this) );
-    oceanicElevation->setValidator( new QIntValidator(0, 10000000, this) );
-    continentalThickness->setValidator( new QIntValidator(0,10000000, this) );
-    continentalElevation->setValidator( new QIntValidator(0,10000000, this) );
+    QDoubleValidator* validator = new QDoubleValidator(0.0, 10000000.0, 6, this);
+    validator->setLocale(QLocale::C);
+    validator->setNotation(QDoubleValidator::StandardNotation);
+    planetRadius->setValidator( validator );
+    oceanicThickness->setValidator( validator );
+    oceanicElevation->setValidator( validator );
+    continentalThickness->setValidator( validator );
+    continentalElevation->setValidator( validator );
 
     contentLayout->addStretch(0);
     this->setWidget(contents);
@@ -92,5 +116,11 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
 void PlanetDockWidget::setPlateNumText()
 {
     platenumLabel->setText(QString("Plate Number:%1").arg(numPlateSlider->value()));
+    update();
+}
+
+void PlanetDockWidget::setPlanetElemsText()
+{
+    planetElementLabel->setText(QString("Planet Slices/Stacks:%1").arg(planetElements->value()));
     update();
 }

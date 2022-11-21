@@ -29,15 +29,16 @@ class Planet
 {
 private :
     unsigned int plateNum;
+    double radius;
+    int elems;
 
     GLuint VBO,VAO,EBO;
 
     std::vector<qglviewer::Vec> positions;
     std::vector<unsigned int> indices;
 
-    bool planetCreated;
 public:
-
+    bool planetCreated;
 
     Planet(){}
     Planet( QOpenGLContext* context );
@@ -52,6 +53,8 @@ public:
     void clear();
 
     void setPlateNumber(int _plateNum);
+    void setRadius(double _r);
+    void setElems(int _elems);
 
     bool printShaderErrors(GLuint shader);
     bool printProgramErrors(int program);

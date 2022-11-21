@@ -40,6 +40,8 @@ public slots:
     void setPlateNumber(int _plateNum);
     void generatePlanet();
     void clearPlanet();
+    void setPlanetRadius(QString _r);
+    void setPlanetElem(int _elems);
  signals:
 
 };

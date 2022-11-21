@@ -24,6 +24,8 @@ Planet::~Planet(){
 void Planet::init(){
 
     planetCreated = false;
+    this->radius = 1;
+    this->elems = 20;
 
 }
 
@@ -76,7 +78,7 @@ void Planet::initGLSL(){
 
 void Planet::initPlanet()
 {
-    makeSphere(1,30,30);
+    makeSphere(this->radius,elems, elems);
 
     glFunctions->glGenVertexArrays(1, &VAO);
     glFunctions->glGenBuffers(1,&VBO);
@@ -105,6 +107,20 @@ void Planet::setPlateNumber(int _plateNum)
     this->plateNum = _plateNum;
 
     std::cout<<"planet plate number: "<<this->plateNum<<std::endl;
+}
+
+void Planet::setRadius(double _r)
+{
+    this->radius = _r;
+
+    std::cout<<"planet radius set to "<<this->radius<<std::endl;
+}
+
+void Planet::setElems(int _elems)
+{
+    this->elems = _elems;
+
+    std::cout<<"planet elems set to "<<this->elems<<std::endl;
 }
 
 void /*GLAPIENTRY */Planet::MessageCallback( GLenum source, GLenum type,
@@ -229,7 +245,6 @@ void Planet::makeSphere(float radius, int slices, int stacks)
     }
 }
 
-
 void Planet::draw( const qglviewer::Camera * camera ){
 
     if(!planetCreated)
@@ -239,7 +254,6 @@ void Planet::draw( const qglviewer::Camera * camera ){
 
     glPolygonMode( GL_FRONT_AND_BACK , GL_FILL );
 
-    //TODO complete
     //GPU start
     // Récuperation des matrices de projection / vue-modèle
     float pMatrix[16];
@@ -253,6 +267,7 @@ void Planet::draw( const qglviewer::Camera * camera ){
 
     /*glFunctions->glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS,0,positions.size());*/
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
     glPointSize(4);
     glBegin(GL_TRIANGLES);
@@ -263,6 +278,9 @@ void Planet::draw( const qglviewer::Camera * camera ){
         glVertex3f(positions[indices[i+2]].x,positions[indices[i+2]].y,positions[indices[i+2]].z);
     }
     glEnd();
+
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
 
     glFunctions->glEnable(GL_LIGHTING);
 }
