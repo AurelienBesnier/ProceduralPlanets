@@ -73,6 +73,14 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
     continentalElevation = new QLineEdit();
     contParamLayout->addWidget(continentalElevation, 2,1,1,1) ;
 
+
+    //Make lineedits accept numbers only
+    planetRadius->setValidator( new QIntValidator(0, 10000000, this) );
+    oceanicThickness->setValidator( new QIntValidator(0, 10000000, this) );
+    oceanicElevation->setValidator( new QIntValidator(0, 10000000, this) );
+    continentalThickness->setValidator( new QIntValidator(0,10000000, this) );
+    continentalElevation->setValidator( new QIntValidator(0,10000000, this) );
+
     contentLayout->addStretch(0);
     this->setWidget(contents);
 }
