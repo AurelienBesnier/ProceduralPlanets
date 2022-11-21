@@ -14,7 +14,6 @@ HEADERS += \
     Planet.hpp \
     PlanetDockWidget.hpp \
     PlanetViewer.hpp \
-    Vec3D.hpp \
     Window.hpp
 INCLUDEPATH = ./GLSL
 LIBS = -lQGLViewer-qt5 \

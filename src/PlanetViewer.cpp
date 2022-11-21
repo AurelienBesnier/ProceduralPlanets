@@ -50,8 +50,8 @@ void PlanetViewer::drawClippingPlane(){
     qreal normResult[3];
     camera()->getWorldCoordinatesOf(norm, normResult);
     
-    Vec3Df normal(normResult[0]-projP[0], normResult[1]-projP[1], normResult[2]-projP[2]);
-    Vec3Df point(projP[0], projP[1],projP[2]);
+    qglviewer::Vec normal(normResult[0]-projP[0], normResult[1]-projP[1], normResult[2]-projP[2]);
+    qglviewer::Vec point(projP[0], projP[1],projP[2]);
     
 
 }

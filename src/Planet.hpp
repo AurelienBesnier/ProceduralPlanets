@@ -1,8 +1,6 @@
 #ifndef PLANET_H
 #define PLANET_H
 
-#include "Vec3D.hpp"
-
 #include <QString>
 #include <QColor>
 #include <QVector>
