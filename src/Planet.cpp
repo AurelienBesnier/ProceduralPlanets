@@ -16,6 +16,8 @@ Planet::Planet( QOpenGLContext* context )
 }
 
 Planet::~Planet(){
+    positions.clear();
+    indices.clear();
     glFunctions->glDeleteVertexArrays(1, &VAO);
     glFunctions->glDeleteBuffers(1, &VBO);
     glFunctions->glDeleteProgram(this->programID);
@@ -26,7 +28,6 @@ void Planet::init(){
     planetCreated = false;
     this->radius = 1;
     this->elems = 20;
-
 }
 
 void Planet::initGLSL(){
@@ -79,6 +80,7 @@ void Planet::initGLSL(){
 void Planet::initPlanet()
 {
     makeSphere(this->radius,elems, elems);
+    makePlates();
 
     glFunctions->glGenVertexArrays(1, &VAO);
     glFunctions->glGenBuffers(1,&VBO);
@@ -102,6 +104,13 @@ void Planet::initPlanet()
     planetCreated = true;
 }
 
+void Planet::makePlates()
+{
+    plates.resize(plateNum);
+    std::vector<unsigned int> tmp_init.resize(plateNum);
+    
+}
+
 void Planet::setPlateNumber(int _plateNum)
 {
     this->plateNum = _plateNum;
@@ -121,6 +130,43 @@ void Planet::setElems(int _elems)
     this->elems = _elems;
 
     std::cout<<"planet elems set to "<<this->elems<<std::endl;
+}
+
+void Planet::makeSphere(float radius, int slices, int stacks)
+{
+    // Calc The Vertices
+    for (int i = 0; i <= stacks; ++i){
+
+        float V   = i / (float) stacks;
+        float phi = V * 3.14159265;
+
+        // Loop Through Slices
+        for (int j = 0; j <= slices; ++j){
+
+            float U = j / (float) slices;
+            float theta = U * (3.14159265 * 2);
+
+            // Calc The Vertex Positions
+            float x = cosf (theta) * sinf (phi);
+            float y = cosf (phi);
+            float z = sinf (theta) * sinf (phi);
+
+            // Push Back Vertex Data
+            positions.push_back (qglviewer::Vec(x, y, z) * radius);
+        }
+    }
+
+    // Calc The Index Positions
+    for (int i = 0; i < slices * stacks + slices; ++i){
+
+        indices.push_back (i);
+        indices.push_back (i + slices + 1);
+        indices.push_back (i + slices);
+
+        indices.push_back (i + slices + 1);
+        indices.push_back (i);
+        indices.push_back (i + 1);
+    }
 }
 
 void /*GLAPIENTRY */Planet::MessageCallback( GLenum source, GLenum type,
@@ -208,42 +254,6 @@ std::string Planet::readShaderSource(std::string filename)
 }
 
 
-void Planet::makeSphere(float radius, int slices, int stacks)
-{
-    // Calc The Vertices
-    for (int i = 0; i <= stacks; ++i){
-
-        float V   = i / (float) stacks;
-        float phi = V * 3.14159265;
-
-        // Loop Through Slices
-        for (int j = 0; j <= slices; ++j){
-
-            float U = j / (float) slices;
-            float theta = U * (3.14159265 * 2);
-
-            // Calc The Vertex Positions
-            float x = cosf (theta) * sinf (phi);
-            float y = cosf (phi);
-            float z = sinf (theta) * sinf (phi);
-
-            // Push Back Vertex Data
-            positions.push_back (qglviewer::Vec(x, y, z) * radius);
-        }
-    }
-
-    // Calc The Index Positions
-    for (int i = 0; i < slices * stacks + slices; ++i){
-
-        indices.push_back (i);
-        indices.push_back (i + slices + 1);
-        indices.push_back (i + slices);
-
-        indices.push_back (i + slices + 1);
-        indices.push_back (i);
-        indices.push_back (i + 1);
-    }
-}
 
 void Planet::draw( const qglviewer::Camera * camera ){
 
@@ -288,7 +298,6 @@ void Planet::draw( const qglviewer::Camera * camera ){
 void Planet::clear(){
     if( planetCreated )
     {
-        init();
         positions.clear();
         indices.clear();
         planetCreated = false;

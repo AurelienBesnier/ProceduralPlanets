@@ -35,6 +35,7 @@ private :
     GLuint VBO,VAO,EBO;
 
     std::vector<qglviewer::Vec> positions;
+    std::vector<Plate> plates;
     std::vector<unsigned int> indices;
 
 public:
@@ -47,6 +48,7 @@ public:
     void init();
     void initGLSL();
     void makeSphere(float radius,int slices,int stacks);
+    void makePlate();
     void initPlanet();
 
     void draw( const qglviewer::Camera * camera );
