@@ -1,6 +1,10 @@
 # Procedural Planets
 Procedural tectonic planets
 
+## Dependencies
+- QT5
+- libQGLViewer
+
 ## Compilation
 
 ```
