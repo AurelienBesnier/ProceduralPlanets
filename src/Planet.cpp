@@ -26,6 +26,7 @@ Planet::~Planet(){
 void Planet::init(){
 
     planetCreated = false;
+    this->plateNum = 1;
     this->radius = 1;
     this->elems = 20;
 }
@@ -106,8 +107,12 @@ void Planet::initPlanet()
 
 void Planet::makePlates()
 {
-    plates.resize(plateNum);
-    std::vector<unsigned int> tmp_init.resize(plateNum);
+    if(plates.size() < 1){
+        plates.clear();
+        plates.resize(plateNum);
+        std::vector<unsigned int> tmp_init;
+        tmp_init.resize(plateNum);
+    }
     
 }
 
@@ -300,6 +305,9 @@ void Planet::clear(){
     {
         positions.clear();
         indices.clear();
+
+        glFunctions->glDeleteVertexArrays(1, &VAO);
+        glFunctions->glDeleteBuffers(1, &VBO);
         planetCreated = false;
     }
 }

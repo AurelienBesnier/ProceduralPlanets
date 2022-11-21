@@ -43,7 +43,7 @@ PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QD
 
     planetElements = new QSlider();
     planetElements->setOrientation(Qt::Horizontal);
-    planetElements->setMaximum(10);
+    planetElements->setMinimum(10);
     planetElements->setMaximum(500);
 
     planetElementLabel = new QLabel(QString("Planet Slices/Stacks:%1").arg(planetElements->value()),groupBox);
