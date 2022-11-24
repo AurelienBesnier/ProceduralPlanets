@@ -11,20 +11,18 @@
 
 #include "PlanetDockWidget.hpp"
 
-class Window : public QMainWindow
-{
+class Window : public QMainWindow {
 Q_OBJECT
 
 public:
-Window();
+	Window ();
 
 private:
-    PlanetDockWidget *madDockWidget;
-    PlanetViewer * viewer;
-    QStatusBar * statusbar;
+	PlanetDockWidget *madDockWidget;
+	PlanetViewer *viewer;
+	QStatusBar *statusbar;
 
 public slots:
 };
-
 
 #endif // MAINWINDOW_H

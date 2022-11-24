@@ -3,124 +3,143 @@
 #include <QComboBox>
 
 using namespace std;
-PlanetDockWidget::PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent ):QDockWidget(parent)
+PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QDockWidget (
+		parent)
 {
-    viewer = _viewer;
+	viewer = _viewer;
 
-    QWidget * contents = new QWidget();
+	QWidget *contents = new QWidget ();
 
-    QVBoxLayout * contentLayout = new QVBoxLayout(contents);
+	QVBoxLayout *contentLayout = new QVBoxLayout (contents);
 
-    QGroupBox * groupBox = new QGroupBox("Planet Parameters", parent);
-    groupBox->setMaximumSize(QSize(16777215, 200));
-    contentLayout->addWidget ( groupBox) ;
+	QGroupBox *groupBox = new QGroupBox ("Planet Parameters", parent);
+	groupBox->setMaximumSize (QSize (16777215, 200));
+	contentLayout->addWidget (groupBox);
 
-    
+	//********************Planet Editor***********************/
+	QGridLayout *planetParamLayout = new QGridLayout (groupBox);
 
-    //********************Planet Editor***********************/
-    QGridLayout * planetParamLayout = new QGridLayout(groupBox);
+	numPlateSlider = new QSlider (groupBox);
+	numPlateSlider->setOrientation (Qt::Horizontal);
+	numPlateSlider->setMinimum (1);
+	numPlateSlider->setMaximum (10);
 
-    numPlateSlider = new QSlider(groupBox);
-    numPlateSlider->setOrientation(Qt::Horizontal);
-    numPlateSlider->setMinimum(1);
-    numPlateSlider->setMaximum(10);
-    
-    planetParamLayout->addWidget(numPlateSlider, 0, 1, 1, 1);
+	planetParamLayout->addWidget (numPlateSlider, 0, 1, 1, 1);
 
-    platenumLabel = new QLabel(QString("Plate Number:%1").arg(numPlateSlider->value()), groupBox);
-    planetParamLayout->addWidget(platenumLabel, 0, 0, 1, 1);
-    connect(numPlateSlider, SIGNAL(valueChanged(int)), viewer, SLOT(setPlateNumber(int)));
-    connect(numPlateSlider, SIGNAL(valueChanged(int)), this, SLOT(setPlateNumText()));
+	platenumLabel = new QLabel (
+			QString ("Plate Number:%1").arg (numPlateSlider->value ()),
+			groupBox);
+	planetParamLayout->addWidget (platenumLabel, 0, 0, 1, 1);
+	connect (numPlateSlider, SIGNAL(valueChanged(int)), viewer,
+				SLOT(setPlateNumber(int)));
+	connect (numPlateSlider, SIGNAL(valueChanged(int)), this,
+				SLOT(setPlateNumText()));
 
+	planetRadius = new QLineEdit ();
+	planetParamLayout->addWidget (planetRadius, 1, 1, 1, 1);
 
-    planetRadius = new QLineEdit();
-    planetParamLayout->addWidget(planetRadius, 1,1,1,1) ;
+	planetRadiusLabel = new QLabel (QString ("Planet Radius:"));
+	planetParamLayout->addWidget (planetRadiusLabel, 1, 0, 1, 1);
 
-    planetRadiusLabel = new QLabel(QString("Planet Radius:"));
-    planetParamLayout->addWidget(planetRadiusLabel, 1,0,1,1); 
+	connect (planetRadius, SIGNAL(textChanged(QString)), viewer,
+				SLOT(setPlanetRadius(QString)));
 
-    connect(planetRadius, SIGNAL(textChanged(QString)), viewer, SLOT(setPlanetRadius(QString)));
+	planetElements = new QSlider ();
+	planetElements->setOrientation (Qt::Horizontal);
+	planetElements->setMinimum (10);
+	planetElements->setMaximum (500);
 
-    planetElements = new QSlider();
-    planetElements->setOrientation(Qt::Horizontal);
-    planetElements->setMinimum(10);
-    planetElements->setMaximum(500);
+	planetElementLabel = new QLabel (
+			QString ("Planet Slices/Stacks:%1").arg (planetElements->value ()),
+			groupBox);
+	planetParamLayout->addWidget (planetElementLabel, 2, 0, 1, 1);
 
-    planetElementLabel = new QLabel(QString("Planet Slices/Stacks:%1").arg(planetElements->value()),groupBox);
-    planetParamLayout->addWidget(planetElementLabel, 2,0,1,1); 
+	planetParamLayout->addWidget (planetElements, 2, 1, 1, 1);
 
+	connect (planetElements, SIGNAL(valueChanged(int)), viewer,
+				SLOT(setPlanetElem(int)));
+	connect (planetElements, SIGNAL(valueChanged(int)), this,
+				SLOT(setPlanetElemsText()));
 
-    planetParamLayout->addWidget(planetElements, 2,1,1,1) ;
+	confirmButton = new QPushButton ("Generate", groupBox);
+	planetParamLayout->addWidget (confirmButton, 4, 1, 1, 1);
+	connect (confirmButton, SIGNAL(clicked()), viewer, SLOT(generatePlanet()));
 
-    connect(planetElements, SIGNAL(valueChanged(int)), viewer, SLOT(setPlanetElem(int)));
-    connect(planetElements, SIGNAL(valueChanged(int)), this, SLOT(setPlanetElemsText()));
+	clearButton = new QPushButton ("Clear", groupBox);
+	planetParamLayout->addWidget (clearButton, 4, 2, 1, 1);
+	connect (clearButton, SIGNAL(clicked()), viewer, SLOT(clearPlanet()));
 
+	//********************Oceanic Editor***********************/
+	QGroupBox *oceanicPlateBox = new QGroupBox ("Oceanic Plate", parent);
+	oceanicPlateBox->setMaximumSize (QSize (16777215, 200));
 
-    confirmButton = new QPushButton("Generate", groupBox);
-    planetParamLayout->addWidget(confirmButton, 4, 1, 1, 1);
-    connect(confirmButton, SIGNAL(clicked()), viewer, SLOT(generatePlanet()));
+	QGridLayout *oceanParamLayout = new QGridLayout (oceanicPlateBox);
+	contentLayout->addWidget (oceanicPlateBox);
 
-    clearButton = new QPushButton("Clear", groupBox);
-    planetParamLayout->addWidget(clearButton, 4, 2, 1, 1);
-    connect(clearButton, SIGNAL(clicked()), viewer, SLOT(clearPlanet()));
+	oThicknessLabel = new QLabel (QString ("Oceanic Thickness:"));
+	oceanParamLayout->addWidget (oThicknessLabel, 1, 0, 1, 1);
+	oceanicThickness = new QLineEdit ();
+	oceanParamLayout->addWidget (oceanicThickness, 1, 1, 1, 1);
 
+	connect (oceanicThickness, SIGNAL(textChanged(QString)), viewer,
+				SLOT(setOceanicThickness(QString)));
 
-    //********************Oceanic Editor***********************/
-    QGroupBox *oceanicPlateBox = new QGroupBox("Oceanic Plate", parent);
-    oceanicPlateBox->setMaximumSize(QSize(16777215, 200));
-    
-    QGridLayout * oceanParamLayout = new QGridLayout(oceanicPlateBox);
-    contentLayout->addWidget(oceanicPlateBox);
+	oElevationLabel = new QLabel (QString ("Oceanic Elevation:"));
+	oceanParamLayout->addWidget (oElevationLabel, 2, 0, 1, 1);
+	oceanicElevation = new QLineEdit ();
+	oceanParamLayout->addWidget (oceanicElevation, 2, 1, 1, 1);
 
-    oThicknessLabel = new QLabel(QString("Oceanic Thickness:"));
-    oceanParamLayout->addWidget(oThicknessLabel, 1,0,1,1); 
-    oceanicThickness = new QLineEdit();
-    oceanParamLayout->addWidget(oceanicThickness, 1,1,1,1) ;
+	connect (oceanicElevation, SIGNAL(textChanged(QString)), viewer,
+				SLOT(setOceanicElevation(QString)));
 
-    oElevationLabel = new QLabel(QString("Oceanic Elevation:"));
-    oceanParamLayout->addWidget(oElevationLabel, 2,0,1,1); 
-    oceanicElevation = new QLineEdit();
-    oceanParamLayout->addWidget(oceanicElevation, 2,1,1,1) ;
+	//********************Continent Editor***********************/
+	QGroupBox *continentalPlateBox = new QGroupBox ("Continental Plate",
+													parent);
+	continentalPlateBox->setMaximumSize (QSize (16777215, 200));
+	QGridLayout *contParamLayout = new QGridLayout (continentalPlateBox);
+	contentLayout->addWidget (continentalPlateBox);
 
-    //********************Continent Editor***********************/
-    QGroupBox *continentalPlateBox = new QGroupBox("Continental Plate", parent);
-    continentalPlateBox->setMaximumSize(QSize(16777215, 200));
-    QGridLayout * contParamLayout = new QGridLayout(continentalPlateBox);
-    contentLayout->addWidget(continentalPlateBox);
+	cThicknessLabel = new QLabel (QString ("Continental Thickness:"));
+	contParamLayout->addWidget (cThicknessLabel, 1, 0, 1, 1);
+	continentalThickness = new QLineEdit ();
+	contParamLayout->addWidget (continentalThickness, 1, 1, 1, 1);
 
-    cThicknessLabel = new QLabel(QString("Continental Thickness:"));
-    contParamLayout->addWidget(cThicknessLabel, 1,0,1,1); 
-    continentalThickness = new QLineEdit();
-    contParamLayout->addWidget(continentalThickness, 1,1,1,1) ;
+	connect (continentalThickness, SIGNAL(textChanged(QString)), viewer,
+				SLOT(setContinentThickness(QString)));
 
-    cElevationLabel = new QLabel(QString("Oceanic Elevation:"));
-    contParamLayout->addWidget(cElevationLabel, 2,0,1,1); 
-    continentalElevation = new QLineEdit();
-    contParamLayout->addWidget(continentalElevation, 2,1,1,1) ;
+	cElevationLabel = new QLabel (QString ("Oceanic Elevation:"));
+	contParamLayout->addWidget (cElevationLabel, 2, 0, 1, 1);
+	continentalElevation = new QLineEdit ();
+	contParamLayout->addWidget (continentalElevation, 2, 1, 1, 1);
 
+	connect (continentalElevation, SIGNAL(textChanged(QString)), viewer,
+				SLOT(setContinentElevation(QString)));
 
-    //Make lineedits accept numbers only
-    QDoubleValidator* validator = new QDoubleValidator(0.0, 10000000.0, 6, this);
-    validator->setLocale(QLocale::C);
-    validator->setNotation(QDoubleValidator::StandardNotation);
-    planetRadius->setValidator( validator );
-    oceanicThickness->setValidator( validator );
-    oceanicElevation->setValidator( validator );
-    continentalThickness->setValidator( validator );
-    continentalElevation->setValidator( validator );
+	//Make lineedits accept numbers only
+	QDoubleValidator *validator = new QDoubleValidator (0.0, 10000000.0, 6,
+														this);
+	validator->setLocale (QLocale::C);
+	validator->setNotation (QDoubleValidator::StandardNotation);
+	planetRadius->setValidator (validator);
+	oceanicThickness->setValidator (validator);
+	oceanicElevation->setValidator (validator);
+	continentalThickness->setValidator (validator);
+	continentalElevation->setValidator (validator);
 
-    contentLayout->addStretch(0);
-    this->setWidget(contents);
+	contentLayout->addStretch (0);
+	this->setWidget (contents);
 }
 
-void PlanetDockWidget::setPlateNumText()
+void PlanetDockWidget::setPlateNumText ()
 {
-    platenumLabel->setText(QString("Plate Number:%1").arg(numPlateSlider->value()));
-    update();
+	platenumLabel->setText (
+			QString ("Plate Number:%1").arg (numPlateSlider->value ()));
+	update ();
 }
 
-void PlanetDockWidget::setPlanetElemsText()
+void PlanetDockWidget::setPlanetElemsText ()
 {
-    planetElementLabel->setText(QString("Planet Slices/Stacks:%1").arg(planetElements->value()));
-    update();
+	planetElementLabel->setText (
+			QString ("Planet Slices/Stacks:%1").arg (planetElements->value ()));
+	update ();
 }

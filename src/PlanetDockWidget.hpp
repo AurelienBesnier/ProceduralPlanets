@@ -1,7 +1,6 @@
 #ifndef TEXTUREDOCKWINDOW_H
 #define TEXTUREDOCKWINDOW_H
 
-
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QDockWidget>
@@ -29,34 +28,28 @@
 
 #include "PlanetViewer.hpp"
 
-
-class PlanetDockWidget : public QDockWidget
-{
-    Q_OBJECT
+class PlanetDockWidget : public QDockWidget {
+Q_OBJECT
 public:
-    PlanetDockWidget(PlanetViewer * _viewer, QWidget * parent );
-    PlanetViewer *viewer;
+	PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent);
+	PlanetViewer *viewer;
 
-    //General planet parameters
-    QSlider *numPlateSlider, *planetElements;
-    QPushButton *confirmButton, *clearButton;
-    QLabel * platenumLabel, *planetRadiusLabel, *planetElementLabel;
-    QLineEdit *planetRadius;
+	//General planet parameters
+	QSlider *numPlateSlider, *planetElements;
+	QPushButton *confirmButton, *clearButton;
+	QLabel *platenumLabel, *planetRadiusLabel, *planetElementLabel;
+	QLineEdit *planetRadius;
 
-
-    //Plate type parameters
-    QLabel *oThicknessLabel, *oElevationLabel;
-    QLineEdit *oceanicThickness, *oceanicElevation;
-    QLabel *cThicknessLabel, *cElevationLabel;
-    QLineEdit *continentalElevation, *continentalThickness;
-
-protected:
-    QGridLayout * segIGridLayout;
-    QSignalMapper * signalIMapper;
+	//Plate type parameters
+	QLabel *oThicknessLabel, *oElevationLabel;
+	QLineEdit *oceanicThickness, *oceanicElevation;
+	QLabel *cThicknessLabel, *cElevationLabel;
+	QLineEdit *continentalElevation, *continentalThickness;
 
 public slots:
-    void setPlateNumText();
-    void setPlanetElemsText();
+	void setPlateNumText ();
+	void setPlanetElemsText ();
+
 };
 
 #endif // TEXTUREDOCKWINDOW_H

@@ -11,38 +11,40 @@
 #include <algorithm>
 #include "Planet.hpp"
 
-class PlanetViewer : public QGLViewer
-{
-    Q_OBJECT
+class PlanetViewer : public QGLViewer {
+Q_OBJECT
 
-public :
-    PlanetViewer(QWidget *parent);
+public:
+	PlanetViewer (QWidget *parent);
 
+protected:
 
-protected :
+	Planet planet;
+	qglviewer::Vec cam;
 
-    Planet planet;
+	virtual void draw ();
+	virtual void changeViewMode ();
+	virtual void init ();
+	virtual QString helpString () const;
+	virtual void keyPressEvent (QKeyEvent *e);
 
-    virtual void draw();
-    virtual void changeViewMode();
-    virtual void init();
-    virtual QString helpString() const;
-    virtual void keyPressEvent(QKeyEvent *e);
+	void drawClippingPlane ();
 
-    void drawClippingPlane();
-
-    void clear();
-    void updateCamera(const qglviewer::Vec & center, float radius);
-
+	void clear ();
+	void updateCamera (const qglviewer::Vec &center, float radius);
 
 public slots:
-    void setPlateNumber(int _plateNum);
-    void generatePlanet();
-    void clearPlanet();
-    void setPlanetRadius(QString _r);
-    void setPlanetElem(int _elems);
-    void savePlanet();
- signals:
+	void setPlateNumber (int _plateNum);
+	void generatePlanet ();
+	void clearPlanet ();
+	void setPlanetRadius (QString _r);
+	void setPlanetElem (int _elems);
+	void savePlanet ();
+	void setOceanicThickness ();
+	void setOceanicElevation ();
+	void setContinentThickness ();
+	void setContinentElevation ();
+signals:
 
 };
 
