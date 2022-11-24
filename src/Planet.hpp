@@ -38,6 +38,8 @@ private :
     std::vector<float> normals;
     std::vector<float> texCoods;
 
+    bool wireframe = false;
+
 public:
     bool planetCreated;
 
@@ -52,6 +54,7 @@ public:
     void initPlanet();
 
     void draw( const qglviewer::Camera * camera );
+    void changeViewMode();
     void clear();
     void save();
 

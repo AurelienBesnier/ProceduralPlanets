@@ -258,6 +258,10 @@ std::string Planet::readShaderSource(std::string filename)
     return content;
 }
 
+void Planet::changeViewMode()
+{
+    this->wireframe = !wireframe;
+}
 
 
 void Planet::draw( const qglviewer::Camera * camera ){
@@ -267,7 +271,10 @@ void Planet::draw( const qglviewer::Camera * camera ){
 
     glFunctions->glDisable(GL_LIGHTING);
 
-    glPolygonMode( GL_FRONT_AND_BACK , GL_FILL );
+    if(wireframe)
+        glPolygonMode( GL_FRONT_AND_BACK , GL_LINE );
+    else
+        glPolygonMode(GL_FRONT_AND_BACK , GL_FILL );
 
     //GPU start
     // Récuperation des matrices de projection / vue-modèle
@@ -282,7 +289,6 @@ void Planet::draw( const qglviewer::Camera * camera ){
 
     /*glFunctions->glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS,0,positions.size());*/
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
     glPointSize(4);
     glBegin(GL_TRIANGLES);
@@ -293,9 +299,6 @@ void Planet::draw( const qglviewer::Camera * camera ){
         glVertex3f(positions[indices[i+2]].x,positions[indices[i+2]].y,positions[indices[i+2]].z);
     }
     glEnd();
-
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
 
     glFunctions->glEnable(GL_LIGHTING);
 }

@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QGLViewer/manipulatedCameraFrame.h>
 
+
 using namespace std;
 using namespace qglviewer;
 
@@ -133,12 +134,18 @@ std::istream & operator>>(std::istream & stream, qglviewer::Vec & v)
     return stream;
 }
 
+void PlanetViewer::changeViewMode()
+{
+    this->planet.changeViewMode();
+    update();
+}
 
 void PlanetViewer::keyPressEvent(QKeyEvent *e)
 {
     switch (e->key())
     {
     case Qt::Key_R :update(); break;
+    case Qt::Key_W :changeViewMode(); break;
     default : QGLViewer::keyPressEvent(e);
     }
 }
