@@ -116,7 +116,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 				SLOT(setContinentElevation(QString)));
 
 	//Make lineedits accept numbers only
-	QDoubleValidator *validator = new QDoubleValidator (0.0, 10000000.0, 6,
+	QDoubleValidator *validator = new QDoubleValidator (-10000000.0, 10000000.0, 6,
 														this);
 	validator->setLocale (QLocale::C);
 	validator->setNotation (QDoubleValidator::StandardNotation);
