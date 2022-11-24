@@ -112,27 +112,28 @@ void PlanetViewer::clearPlanet ()
 	update ();
 }
 
-void PlanetViewer::setOceanicThickness ()
+void PlanetViewer::setOceanicThickness (QString _t)
 {
 
+	planet.setOceanicThickness (_t.toDouble ());
 	update ();
 }
 
-void PlanetViewer::setOceanicElevation ()
+void PlanetViewer::setOceanicElevation (QString _e)
 {
-
+	planet.setOceanicElevation (_e.toDouble ());
 	update ();
 }
 
-void PlanetViewer::setContinentThickness ()
+void PlanetViewer::setContinentThickness (QString _t)
 {
-
+	planet.setContinentalThickness (_t.toDouble ());
 	update ();
 }
 
-void PlanetViewer::setContinentElevation ()
+void PlanetViewer::setContinentElevation (QString _e)
 {
-
+	planet.setContinentalElevation (_e.toDouble ());
 	update ();
 }
 

@@ -25,7 +25,6 @@ Planet::~Planet ()
 
 void Planet::init ()
 {
-
 	planetCreated = false;
 	this->plateNum = 1;
 	this->radius = 1;
@@ -121,7 +120,30 @@ void Planet::makePlates ()
 		std::vector<unsigned int> tmp_init;
 		tmp_init.resize (plateNum);
 	}
+}
 
+void Planet::setOceanicThickness (double _t)
+{
+	plateParams.oceanicThickness = _t;
+	std::cout << "Oceanic thickness: " << this->plateParams.oceanicThickness << std::endl;
+}
+
+void Planet::setOceanicElevation (double _e)
+{
+	plateParams.oceanicEleavation= _e;
+	std::cout << "Oceanic elevation: " << this->plateParams.oceanicEleavation << std::endl;
+}
+
+void Planet::setContinentalThickness (double _t)
+{
+	plateParams.continentalThickness = _t;
+	std::cout << "Continental thickness: " << this->plateParams.continentalThickness << std::endl;
+}
+
+void Planet::setContinentalElevation (double _e)
+{
+	plateParams.continentalElevation = _e;
+	std::cout << "Continental elevation: " << this->plateParams.continentalElevation << std::endl;
 }
 
 void Planet::setPlateNumber (int _plateNum)
@@ -305,10 +327,12 @@ void Planet::draw (const qglviewer::Camera *camera)
 	camera->getModelViewMatrix (mvMatrix);
 	glFunctions->glUniformMatrix4fv (
 			glFunctions->glGetUniformLocation (programID, "proj_matrix"), 1,
-			GL_FALSE, pMatrix);
+			GL_FALSE,
+			pMatrix);
 	glFunctions->glUniformMatrix4fv (
 			glFunctions->glGetUniformLocation (programID, "mv_matrix"), 1,
-			GL_FALSE, mvMatrix);
+			GL_FALSE,
+			mvMatrix);
 
 	/*glFunctions->glBindVertexArray(VAO);
 	 glDrawArrays(GL_POINTS,0,positions.size());*/

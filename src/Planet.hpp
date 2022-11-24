@@ -14,6 +14,7 @@
 class Planet {
 private:
 	unsigned int plateNum;
+	PlateParameters plateParams;
 	double radius;
 	int elems;
 
@@ -50,6 +51,11 @@ public:
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
 	void setElems (int _elems);
+
+	void setOceanicThickness (double _t);
+	void setOceanicElevation (double _e);
+	void setContinentalThickness (double _t);
+	void setContinentalElevation (double _e);
 
 	bool printShaderErrors (GLuint shader);
 	bool printProgramErrors (int program);

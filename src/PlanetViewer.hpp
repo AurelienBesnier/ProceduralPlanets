@@ -40,10 +40,10 @@ public slots:
 	void setPlanetRadius (QString _r);
 	void setPlanetElem (int _elems);
 	void savePlanet ();
-	void setOceanicThickness ();
-	void setOceanicElevation ();
-	void setContinentThickness ();
-	void setContinentElevation ();
+	void setOceanicThickness (QString _t);
+	void setOceanicElevation (QString _e);
+	void setContinentThickness (QString _t);
+	void setContinentElevation (QString _e);
 signals:
 
 };
