@@ -18,8 +18,6 @@ private:
 	double radius;
 	int elems;
 
-	GLuint VBO, VAO, EBO;
-
 	std::vector<qglviewer::Vec> positions;
 	std::vector<Plate> plates;
 	std::vector<unsigned int> indices;
@@ -29,7 +27,9 @@ private:
 	bool wireframe = false;
 
 public:
+	GLuint VBO, VAO, EBO;
 	bool planetCreated;
+	bool buffersCreated = false;
 
 	Planet ()
 	{
@@ -42,11 +42,12 @@ public:
 	void makeSphere (float radius, int slices, int stacks);
 	void makePlates ();
 	void initPlanet ();
+	void createBuffers ();
 
-	void draw (const qglviewer::Camera *camera)const;
+	void draw (const qglviewer::Camera *camera);
 	void changeViewMode ();
 	void clear ();
-	void save ()const;
+	void save () const;
 
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
@@ -71,10 +72,6 @@ public:
 												GLsizei length,
 												const GLchar *message,
 												const void *userParam);
-	void operator=(const Planet& planet)
-	{
-
-	}
 };
 
 #endif // PLANET_H

@@ -20,6 +20,7 @@ Planet::~Planet ()
 	indices.clear ();
 	glFunctions->glDeleteVertexArrays (1, &VAO);
 	glFunctions->glDeleteBuffers (1, &VBO);
+	glFunctions->glDeleteBuffers (1, &EBO);
 	glFunctions->glDeleteProgram (this->programID);
 }
 
@@ -85,29 +86,6 @@ void Planet::initPlanet ()
 	makeSphere (this->radius, elems, elems);
 	makePlates ();
 
-	glFunctions->glGenVertexArrays (1, &VAO);
-	glFunctions->glGenBuffers (1, &VBO);
-	glFunctions->glGenBuffers (1, &EBO);
-
-	glFunctions->glBindVertexArray (VAO);
-
-	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
-	glFunctions->glBufferData (GL_ARRAY_BUFFER,
-								positions.size () * sizeof(float) * 3,
-								positions.data (), GL_STATIC_DRAW);
-
-	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),
-								indices.data (), GL_STATIC_DRAW);
-
-	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
-										3 * sizeof(float), (void*) 0);
-	glFunctions->glEnableVertexAttribArray (0);
-
-	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
-
-	glFunctions->glBindVertexArray (0);
-
 	planetCreated = true;
 }
 
@@ -125,25 +103,29 @@ void Planet::makePlates ()
 void Planet::setOceanicThickness (double _t)
 {
 	plateParams.oceanicThickness = _t;
-	std::cout << "Oceanic thickness: " << this->plateParams.oceanicThickness << std::endl;
+	std::cout << "Oceanic thickness: " << this->plateParams.oceanicThickness
+			<< std::endl;
 }
 
 void Planet::setOceanicElevation (double _e)
 {
-	plateParams.oceanicEleavation= _e;
-	std::cout << "Oceanic elevation: " << this->plateParams.oceanicEleavation << std::endl;
+	plateParams.oceanicEleavation = _e;
+	std::cout << "Oceanic elevation: " << this->plateParams.oceanicEleavation
+			<< std::endl;
 }
 
 void Planet::setContinentalThickness (double _t)
 {
 	plateParams.continentalThickness = _t;
-	std::cout << "Continental thickness: " << this->plateParams.continentalThickness << std::endl;
+	std::cout << "Continental thickness: "
+			<< this->plateParams.continentalThickness << std::endl;
 }
 
 void Planet::setContinentalElevation (double _e)
 {
 	plateParams.continentalElevation = _e;
-	std::cout << "Continental elevation: " << this->plateParams.continentalElevation << std::endl;
+	std::cout << "Continental elevation: "
+			<< this->plateParams.continentalElevation << std::endl;
 }
 
 void Planet::setPlateNumber (int _plateNum)
@@ -306,11 +288,43 @@ void Planet::changeViewMode ()
 	this->wireframe = !wireframe;
 }
 
-void Planet::draw (const qglviewer::Camera *camera) const
+void Planet::createBuffers ()
+{
+	glFunctions->glGenVertexArrays (1, &VAO);
+	glFunctions->glGenBuffers (1, &VBO);
+	glFunctions->glGenBuffers (1, &EBO);
+
+	glFunctions->glBindVertexArray (VAO);
+
+	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
+	glFunctions->glBufferData (GL_ARRAY_BUFFER,
+								positions.size () * sizeof(qglviewer::Vec),
+								&positions[0], GL_DYNAMIC_DRAW);
+
+	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size (),
+								&indices[0], GL_DYNAMIC_DRAW);
+
+	glFunctions->glEnableVertexAttribArray (0);
+	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
+										sizeof(qglviewer::Vec), (void*) 0);
+
+	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
+
+	glFunctions->glBindVertexArray (0);
+}
+
+void Planet::draw (const qglviewer::Camera *camera)
 {
 
 	if (!planetCreated)
 		return;
+
+	if (!buffersCreated)
+	{
+		buffersCreated = true;
+		createBuffers ();
+	}
 
 	glFunctions->glDisable (GL_LIGHTING);
 
@@ -334,21 +348,20 @@ void Planet::draw (const qglviewer::Camera *camera) const
 			GL_FALSE,
 			mvMatrix);
 
-	/*glFunctions->glBindVertexArray(VAO);
-	 glDrawArrays(GL_POINTS,0,positions.size());*/
+	glFunctions->glBindVertexArray (VAO);
+	glDrawElements (GL_TRIANGLES, indices.size (), GL_UNSIGNED_INT, 0);
 
-	glPointSize (4);
-	glBegin (GL_TRIANGLES);
-	for (size_t i = 0; i < indices.size (); i += 3)
-	{
-		glVertex3f (positions[indices[i]].x, positions[indices[i]].y,
-					positions[indices[i]].z);
-		glVertex3f (positions[indices[i + 1]].x, positions[indices[i + 1]].y,
-					positions[indices[i + 1]].z);
-		glVertex3f (positions[indices[i + 2]].x, positions[indices[i + 2]].y,
-					positions[indices[i + 2]].z);
-	}
-	glEnd ();
+	/*glBegin (GL_TRIANGLES);
+	 for (size_t i = 0; i < indices.size (); i += 3)
+	 {
+	 glVertex3f (positions[indices[i]].x, positions[indices[i]].y,
+	 positions[indices[i]].z);
+	 glVertex3f (positions[indices[i + 1]].x, positions[indices[i + 1]].y,
+	 positions[indices[i + 1]].z);
+	 glVertex3f (positions[indices[i + 2]].x, positions[indices[i + 2]].y,
+	 positions[indices[i + 2]].z);
+	 }
+	 glEnd ();*/
 
 	glFunctions->glEnable (GL_LIGHTING);
 }
@@ -362,10 +375,11 @@ void Planet::clear ()
 
 		glFunctions->glDeleteVertexArrays (1, &VAO);
 		glFunctions->glDeleteBuffers (1, &VBO);
+		glFunctions->glDeleteBuffers (1, &EBO);
+		buffersCreated = false;
 		planetCreated = false;
 	}
 }
-
 
 void Planet::save () const
 {
@@ -375,7 +389,8 @@ void Planet::save () const
 	ostream.open (filename, std::ios_base::out);
 
 	ostream << "OFF " << std::endl;
-	ostream << (positions.size()) << " " << indices.size() << " 0" << std::endl;
+	ostream << (positions.size ()) << " " << indices.size () << " 0"
+			<< std::endl;
 
 	for (size_t i = 0; i < positions.size (); ++i)
 	{
@@ -383,10 +398,11 @@ void Planet::save () const
 				<< positions[i].z << std::endl;
 	}
 
-    for( unsigned int t = 0 ; t < indices.size() ; t+=3 )
-    {
-    	ostream << "3 " << (indices[t]) << " " << (indices[t+1]) << " " << (indices[t+2]) << std::endl;
-    }
+	for (unsigned int t = 0; t < indices.size (); t += 3)
+	{
+		ostream << "3 " << (indices[t]) << " " << (indices[t + 1]) << " "
+				<< (indices[t + 2]) << std::endl;
+	}
 
 	ostream.close ();
 
