@@ -43,10 +43,10 @@ public:
 	void makePlates ();
 	void initPlanet ();
 
-	void draw (const qglviewer::Camera *camera);
+	void draw (const qglviewer::Camera *camera)const;
 	void changeViewMode ();
 	void clear ();
-	void save ();
+	void save ()const;
 
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
@@ -71,6 +71,10 @@ public:
 												GLsizei length,
 												const GLchar *message,
 												const void *userParam);
+	void operator=(const Planet& planet)
+	{
+
+	}
 };
 
 #endif // PLANET_H

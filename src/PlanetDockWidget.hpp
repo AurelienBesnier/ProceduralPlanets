@@ -15,15 +15,10 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QSpacerItem>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include <QStatusBar>
 #include <QWidget>
 #include <QFormLayout>
 #include <QListWidget>
 #include <QScrollArea>
-#include <QTabWidget>
-#include <QSignalMapper>
 #include <QLineEdit>
 
 #include "PlanetViewer.hpp"

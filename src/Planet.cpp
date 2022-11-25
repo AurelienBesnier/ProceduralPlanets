@@ -306,7 +306,7 @@ void Planet::changeViewMode ()
 	this->wireframe = !wireframe;
 }
 
-void Planet::draw (const qglviewer::Camera *camera)
+void Planet::draw (const qglviewer::Camera *camera) const
 {
 
 	if (!planetCreated)
@@ -366,29 +366,27 @@ void Planet::clear ()
 	}
 }
 
-void Planet::save ()
+
+void Planet::save () const
 {
-	std::string filename = "planet.obj";
+	std::string filename = "planet.off";
 	std::ofstream ostream;
 
 	ostream.open (filename, std::ios_base::out);
 
-	ostream << "o " << filename << std::endl;
+	ostream << "OFF " << std::endl;
+	ostream << (positions.size()) << " " << indices.size() << " 0" << std::endl;
 
 	for (size_t i = 0; i < positions.size (); ++i)
 	{
-		ostream << "v " << positions[i].x << " " << positions[i].y << " "
+		ostream << "" << positions[i].x << " " << positions[i].y << " "
 				<< positions[i].z << std::endl;
 	}
 
-	for (size_t i = 0; i < indices.size (); i += 9)
-	{
-		ostream << "f  " << indices[i] << "/" << indices[i + 1] << "/"
-				<< indices[i + 2] << " " << indices[i + 3] << "/"
-				<< indices[i + 4] << "/" << indices[i + 5] << " "
-				<< indices[i + 6] << "/" << indices[i + 7] << "/"
-				<< indices[i + 8] << std::endl;
-	}
+    for( unsigned int t = 0 ; t < indices.size() ; t+=3 )
+    {
+    	ostream << "3 " << (indices[t]) << " " << (indices[t+1]) << " " << (indices[t+2]) << std::endl;
+    }
 
 	ostream.close ();
 
