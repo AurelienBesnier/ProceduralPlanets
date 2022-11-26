@@ -304,12 +304,13 @@ void Planet::createBuffers ()
 								&positions[0], GL_DYNAMIC_DRAW);
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size () * 3 * sizeof(unsigned int),
+	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
+								indices.size () * 3 * sizeof(unsigned int),
 								&indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
 	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
-										sizeof(float)*3, (void*) 0);
+										sizeof(float) * 3, (void*) 0);
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
 
@@ -382,10 +383,10 @@ void Planet::save () const
 	ostream << (positions.size ()) << " " << indices.size () << " 0"
 			<< std::endl;
 
-	for (size_t i = 0; i < positions.size (); i+=3)
+	for (size_t i = 0; i < positions.size (); i += 3)
 	{
-		ostream << "" << positions[i] << " " << positions[i+1] << " "
-				<< positions[i+2] << std::endl;
+		ostream << "" << positions[i] << " " << positions[i + 1] << " "
+				<< positions[i + 2] << std::endl;
 	}
 
 	for (unsigned int t = 0; t < indices.size (); t += 3)
