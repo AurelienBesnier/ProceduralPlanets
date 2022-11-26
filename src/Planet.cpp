@@ -16,7 +16,7 @@ Planet::Planet (QOpenGLContext *context)
 
 Planet::~Planet ()
 {
-	positions.clear ();
+	vertices.clear ();
 	indices.clear ();
 	glFunctions->glDeleteVertexArrays (1, &VAO);
 	glFunctions->glDeleteBuffers (1, &VBO);
@@ -29,7 +29,7 @@ void Planet::init ()
 	planetCreated = false;
 	this->plateNum = 1;
 	this->radius = 1;
-	this->elems = 20;
+	this->elems = 3;
 }
 
 void Planet::initGLSL ()
@@ -91,7 +91,7 @@ void Planet::initPlanet ()
 
 void Planet::makePlates ()
 {
-	if (plates.size () < 1)
+	if (plates.size () > 1)
 	{
 		plates.clear ();
 		plates.resize (plateNum);
@@ -154,14 +154,12 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 	// Calc The Vertices
 	for (int i = 0; i <= stacks; ++i)
 	{
-
 		float V = i / (float) stacks;
 		float phi = V * 3.14159265;
 
 		// Loop Through Slices
 		for (int j = 0; j <= slices; ++j)
 		{
-
 			float U = j / (float) slices;
 			float theta = U * (3.14159265 * 2);
 
@@ -171,16 +169,15 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 			float z = sinf (theta) * sinf (phi);
 
 			// Push Back Vertex Data
-			positions.push_back (x * radius);
-			positions.push_back (y * radius);
-			positions.push_back (z * radius);
+			Vertex newVertex = { .pos = QVector3D (x, y, z) * radius,
+					.normal = QVector3D (x,y,z), .texCoord = QVector2D(0,0)};
+			vertices.push_back (newVertex);
 		}
 	}
 
 	// Calc The Index Positions
 	for (int i = 0; i < slices * stacks + slices; ++i)
 	{
-
 		indices.push_back (i);
 		indices.push_back (i + slices + 1);
 		indices.push_back (i + slices);
@@ -300,17 +297,25 @@ void Planet::createBuffers ()
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
 	glFunctions->glBufferData (GL_ARRAY_BUFFER,
-								positions.size () * sizeof(float),
-								&positions[0], GL_DYNAMIC_DRAW);
+								vertices.size () * sizeof(Vertex),
+								&vertices[0], GL_DYNAMIC_DRAW);
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
 								indices.size () * 3 * sizeof(unsigned int),
-								&indices[0], GL_STATIC_DRAW);
+								&indices[0], GL_DYNAMIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
 	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
-										sizeof(float) * 3, (void*) 0);
+										sizeof(Vertex), (void*) 0);
+	glFunctions->glEnableVertexAttribArray (1);
+	glFunctions->glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE,
+										sizeof(Vertex),
+										(void*) offsetof(Vertex, normal));
+	glFunctions->glEnableVertexAttribArray (2);
+	glFunctions->glVertexAttribPointer (2, 2, GL_FLOAT, GL_FALSE,
+										sizeof(Vertex),
+										(void*) offsetof(Vertex, texCoord));
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
 
@@ -361,7 +366,7 @@ void Planet::clear ()
 {
 	if (planetCreated)
 	{
-		positions.clear ();
+		vertices.clear ();
 		indices.clear ();
 
 		glFunctions->glDeleteVertexArrays (1, &VAO);
@@ -380,13 +385,13 @@ void Planet::save () const
 	ostream.open (filename, std::ios_base::out);
 
 	ostream << "OFF " << std::endl;
-	ostream << (positions.size ()) << " " << indices.size () << " 0"
+	ostream << (vertices.size ()) << " " << indices.size () << " 0"
 			<< std::endl;
 
-	for (size_t i = 0; i < positions.size (); i += 3)
+	for (size_t i = 0; i < vertices.size (); i ++)
 	{
-		ostream << "" << positions[i] << " " << positions[i + 1] << " "
-				<< positions[i + 2] << std::endl;
+		ostream << vertices[i].pos.x() << " " << vertices[i].pos.y() << " "
+				<< vertices[i].pos.z() << std::endl;
 	}
 
 	for (unsigned int t = 0; t < indices.size (); t += 3)

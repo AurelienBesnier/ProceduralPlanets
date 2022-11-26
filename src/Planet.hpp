@@ -2,14 +2,19 @@
 #define PLANET_H
 
 #include <QString>
-#include <QColor>
-#include <QVector>
-#include <QGLViewer/vec.h>
+#include <QVector2D>
+#include <QVector3D>
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
 
 #include "Plate.hpp"
+
+struct Vertex {
+	QVector3D pos;
+	QVector3D normal;
+	QVector2D texCoord;
+};
 
 class Planet {
 private:
@@ -18,11 +23,9 @@ private:
 	double radius;
 	int elems;
 
-	std::vector<float> positions;
+	std::vector<Vertex> vertices;
 	std::vector<Plate> plates;
 	std::vector<unsigned int> indices;
-	std::vector<float> normals;
-	std::vector<float> texCoods;
 
 	bool wireframe = false;
 
@@ -31,7 +34,7 @@ public:
 	bool planetCreated;
 	bool buffersCreated = false;
 
-	Planet ()
+	Planet () // @suppress("Class members should be properly initialized")
 	{
 	}
 	Planet (QOpenGLContext *context);
