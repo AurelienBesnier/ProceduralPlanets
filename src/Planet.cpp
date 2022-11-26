@@ -169,8 +169,11 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 			float z = sinf (theta) * sinf (phi);
 
 			// Push Back Vertex Data
-			Vertex newVertex = { .pos = QVector3D (x, y, z) * radius,
-					.normal = QVector3D (x,y,z), .texCoord = QVector2D(0,0)};
+			QVector3D position = QVector3D (x, y, z) * radius;
+			QVector3D normal = position.normalized();
+			QVector2D texCoord = QVector2D(j/slices,i/stacks);
+			Vertex newVertex = { .pos = position,
+					.normal = normal, .texCoord = texCoord};
 			vertices.push_back (newVertex);
 		}
 	}
