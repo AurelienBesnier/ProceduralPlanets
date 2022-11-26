@@ -18,7 +18,7 @@ private:
 	double radius;
 	int elems;
 
-	std::vector<qglviewer::Vec> positions;
+	std::vector<float> positions;
 	std::vector<Plate> plates;
 	std::vector<unsigned int> indices;
 	std::vector<float> normals;

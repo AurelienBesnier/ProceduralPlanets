@@ -171,7 +171,9 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 			float z = sinf (theta) * sinf (phi);
 
 			// Push Back Vertex Data
-			positions.push_back (qglviewer::Vec (x, y, z) * radius);
+			positions.push_back (x * radius);
+			positions.push_back (y * radius);
+			positions.push_back (z * radius);
 		}
 	}
 
@@ -298,16 +300,16 @@ void Planet::createBuffers ()
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
 	glFunctions->glBufferData (GL_ARRAY_BUFFER,
-								positions.size () * sizeof(qglviewer::Vec),
+								positions.size () * sizeof(float),
 								&positions[0], GL_DYNAMIC_DRAW);
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size (),
-								&indices[0], GL_DYNAMIC_DRAW);
+	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size () * 3 * sizeof(unsigned int),
+								&indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
 	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
-										sizeof(qglviewer::Vec), (void*) 0);
+										sizeof(float)*3, (void*) 0);
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
 
@@ -351,18 +353,6 @@ void Planet::draw (const qglviewer::Camera *camera)
 	glFunctions->glBindVertexArray (VAO);
 	glDrawElements (GL_TRIANGLES, indices.size (), GL_UNSIGNED_INT, 0);
 
-	/*glBegin (GL_TRIANGLES);
-	 for (size_t i = 0; i < indices.size (); i += 3)
-	 {
-	 glVertex3f (positions[indices[i]].x, positions[indices[i]].y,
-	 positions[indices[i]].z);
-	 glVertex3f (positions[indices[i + 1]].x, positions[indices[i + 1]].y,
-	 positions[indices[i + 1]].z);
-	 glVertex3f (positions[indices[i + 2]].x, positions[indices[i + 2]].y,
-	 positions[indices[i + 2]].z);
-	 }
-	 glEnd ();*/
-
 	glFunctions->glEnable (GL_LIGHTING);
 }
 
@@ -392,10 +382,10 @@ void Planet::save () const
 	ostream << (positions.size ()) << " " << indices.size () << " 0"
 			<< std::endl;
 
-	for (size_t i = 0; i < positions.size (); ++i)
+	for (size_t i = 0; i < positions.size (); i+=3)
 	{
-		ostream << "" << positions[i].x << " " << positions[i].y << " "
-				<< positions[i].z << std::endl;
+		ostream << "" << positions[i] << " " << positions[i+1] << " "
+				<< positions[i+2] << std::endl;
 	}
 
 	for (unsigned int t = 0; t < indices.size (); t += 3)
