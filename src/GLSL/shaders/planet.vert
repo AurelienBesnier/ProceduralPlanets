@@ -26,5 +26,6 @@ out vec2 textCoord;
 void main()
 {
     position = i_position.xyz;
+    textCoord = i_texCoords;
     gl_Position = proj_matrix * mv_matrix * vec4(position, 1.0);
 }

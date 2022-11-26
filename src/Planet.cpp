@@ -170,10 +170,10 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 
 			// Push Back Vertex Data
 			QVector3D position = QVector3D (x, y, z) * radius;
-			QVector3D normal = position.normalized();
-			QVector2D texCoord = QVector2D(j/slices,i/stacks);
-			Vertex newVertex = { .pos = position,
-					.normal = normal, .texCoord = texCoord};
+			QVector3D normal = position.normalized ();
+			QVector2D texCoord = QVector2D (j / slices, i / stacks);
+			Vertex newVertex = { .pos = position, .normal = normal, .texCoord =
+					texCoord };
 			vertices.push_back (newVertex);
 		}
 	}
@@ -300,8 +300,8 @@ void Planet::createBuffers ()
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
 	glFunctions->glBufferData (GL_ARRAY_BUFFER,
-								vertices.size () * sizeof(Vertex),
-								&vertices[0], GL_DYNAMIC_DRAW);
+								vertices.size () * sizeof(Vertex), &vertices[0],
+								GL_DYNAMIC_DRAW);
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
@@ -382,8 +382,52 @@ void Planet::clear ()
 
 void Planet::save () const
 {
+	std::string filename = "planet.obj";
+	std::ofstream ostream;
+	ostream.precision (6);
+
+	ostream.open (filename, std::ios_base::out);
+	ostream << "o planet" << std::endl;
+	for (size_t i = 0; i < vertices.size (); i++)
+	{
+		ostream << "v " << std::fixed << vertices[i].pos.x () << " "
+				<< std::fixed << vertices[i].pos.y () << " " << std::fixed
+				<< vertices[i].pos.z () << std::endl;
+	}
+
+	for (size_t i = 0; i < vertices.size (); i++)
+	{
+		ostream << "vt " << vertices[i].texCoord.x () << " "
+				<< vertices[i].pos.y () << std::endl;
+	}
+
+	for (size_t i = 0; i < vertices.size (); i++)
+	{
+		ostream << "vn " << vertices[i].normal.x () << " "
+				<< vertices[i].normal.y () << " " << vertices[i].normal.z ()
+				<< std::endl;
+	}
+	ostream << "s 0" << std::endl;
+
+	for (size_t i = 0; i < indices.size (); i += 3)
+	{
+		Vertex v1 = vertices[indices[i]];
+		Vertex v2 = vertices[indices[i + 1]];
+		Vertex v3 = vertices[indices[i + 2]];
+		ostream << "f " << indices[i] << " " << indices[i + 1] << " "
+				<< indices[i + 2] << std::endl;
+	}
+
+	ostream.close ();
+
+	std::cout << "Wrote to file " << filename << std::endl;
+}
+
+void Planet::saveOFF () const
+{
 	std::string filename = "planet.off";
 	std::ofstream ostream;
+	ostream.precision (4);
 
 	ostream.open (filename, std::ios_base::out);
 
@@ -391,10 +435,10 @@ void Planet::save () const
 	ostream << (vertices.size ()) << " " << indices.size () << " 0"
 			<< std::endl;
 
-	for (size_t i = 0; i < vertices.size (); i ++)
+	for (size_t i = 0; i < vertices.size (); i++)
 	{
-		ostream << vertices[i].pos.x() << " " << vertices[i].pos.y() << " "
-				<< vertices[i].pos.z() << std::endl;
+		ostream << vertices[i].pos.x () << " " << vertices[i].pos.y () << " "
+				<< vertices[i].pos.z () << std::endl;
 	}
 
 	for (unsigned int t = 0; t < indices.size (); t += 3)

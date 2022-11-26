@@ -39,7 +39,8 @@ public slots:
 	void clearPlanet ();
 	void setPlanetRadius (QString _r);
 	void setPlanetElem (int _elems);
-	void savePlanet ();
+	void savePlanetOff () const;
+	void savePlanetObj () const;
 	void setOceanicThickness (QString _t);
 	void setOceanicElevation (QString _e);
 	void setContinentThickness (QString _t);

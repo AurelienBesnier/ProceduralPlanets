@@ -13,14 +13,16 @@ Window::Window ()
 
 	gridLayout->addWidget (viewer, 0, 1, 1, 1);
 
-	QAction *actionLoad3Dimage = new QAction ("Save Planet", this);
+	QAction *actionSaveOFF = new QAction ("Save Planet as .off", this);
+	QAction *actionSaveOBJ = new QAction ("Save Planet as .obj", this);
 
 	QMenu *menuFile = new QMenu ("File", this);
 
-	menuFile->addAction (actionLoad3Dimage);
+	menuFile->addAction (actionSaveOFF);
+	menuFile->addAction (actionSaveOBJ);
 
-	connect (actionLoad3Dimage, SIGNAL(triggered()), viewer,
-				SLOT(savePlanet()));
+	connect (actionSaveOFF, SIGNAL(triggered()), viewer, SLOT(savePlanetOff()));
+	connect (actionSaveOBJ, SIGNAL(triggered()), viewer, SLOT(savePlanetObj()));
 
 	QGroupBox *viewerGroupBox = new QGroupBox ("Planet Generator", this);
 	QHBoxLayout *viewerLayout = new QHBoxLayout (viewerGroupBox);

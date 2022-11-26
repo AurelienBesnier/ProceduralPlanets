@@ -145,10 +145,14 @@ void PlanetViewer::updateCamera (const qglviewer::Vec &center, float radius)
 	camera ()->showEntireScene ();
 }
 
-void PlanetViewer::savePlanet ()
+void PlanetViewer::savePlanetOff () const
+{
+	planet.saveOFF ();
+}
+
+void PlanetViewer::savePlanetObj () const
 {
 	planet.save ();
-
 }
 
 std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)

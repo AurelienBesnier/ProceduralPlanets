@@ -51,6 +51,7 @@ public:
 	void changeViewMode ();
 	void clear ();
 	void save () const;
+	void saveOFF () const;
 
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
