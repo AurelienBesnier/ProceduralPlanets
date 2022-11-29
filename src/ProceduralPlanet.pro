@@ -1,4 +1,5 @@
-QT += xml
+QT += xml \
+    widgets
 QT += opengl
 TARGET = ProceduralPlanet
 MOC_DIR = ./moc
@@ -9,11 +10,13 @@ SOURCES += Main.cpp \
     Planet.cpp \
     PlanetDockWidget.cpp \
     PlanetViewer.cpp \
+    PlanetViewer2.cpp \
     Window.cpp
 HEADERS += \
     Planet.hpp \
     PlanetDockWidget.hpp \
     PlanetViewer.hpp \
+    PlanetViewer2.hpp \
     Window.hpp
 INCLUDEPATH = ./GLSL
 LIBS = -lQGLViewer-qt5 \
