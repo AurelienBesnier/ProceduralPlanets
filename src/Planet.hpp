@@ -5,7 +5,6 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
-#include <igl/readOFF.h>
 #include <Eigen/Dense>
 
 #include "Plate.hpp"
@@ -29,7 +28,7 @@ private:
 
 	std::vector<Vertex> vertices;
 	std::vector<Plate> plates;
-	std::vector<unsigned int> indices;
+	std::vector<int> indices;
 
 	bool wireframe = false;
 

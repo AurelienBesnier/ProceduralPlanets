@@ -17,6 +17,7 @@ uniform mat4 proj_matrix;
 // varying variables
 // --------------------------------------------------
 out vec3 position;
+out vec3 normal;
 out vec2 textCoord;
 // --------------------------------------------------
 // Vertex-Shader
@@ -26,6 +27,7 @@ out vec2 textCoord;
 void main()
 {
     position = i_position.xyz;
+    normal = mat3(mv_matrix) * i_normals;
     textCoord = i_texCoords;
     gl_Position = proj_matrix * mv_matrix * vec4(position, 1.0);
 }

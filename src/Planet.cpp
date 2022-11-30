@@ -6,7 +6,6 @@
 #include <QTextStream>
 
 #include "Planet.hpp"
-using Eigen::MatrixXd;
 
 Planet::Planet (QOpenGLContext *context)
 {
@@ -160,7 +159,6 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 	std::vector<Vector3d> positions;
 	std::vector<Vector3d> normals;
 	std::vector<Vector2d> texCoords;
-	Eigen::MatrixXd l;
 
 	for (int i = 0; i <= stacks; ++i)
 	{
@@ -201,6 +199,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 		indices.push_back (i);
 		indices.push_back (i + 1);
 	}
+
 
 	for(size_t i = 0; i < positions.size(); i++)
 	{
@@ -325,7 +324,7 @@ void Planet::createBuffers ()
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
-								indices.size () * sizeof(unsigned int),
+								indices.size () * sizeof(int),
 								&indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
@@ -357,8 +356,6 @@ void Planet::draw (const qglviewer::Camera *camera)
 		createBuffers ();
 	}
 
-	glFunctions->glDisable (GL_LIGHTING);
-
 	if (wireframe)
 		glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE);
 	else
@@ -378,11 +375,32 @@ void Planet::draw (const qglviewer::Camera *camera)
 			glFunctions->glGetUniformLocation (programID, "mv_matrix"), 1,
 			GL_FALSE,
 			mvMatrix);
+	
+	float color[3] = {0.5,0.1,0.5};
+	float lightColor[3] = {1,1,1};
+	glFunctions->glUniform3fv(
+			glFunctions->glGetUniformLocation(programID, "objectColor"), 1,
+			color
+			);
+
+	glFunctions->glUniform3fv(
+			glFunctions->glGetUniformLocation(programID, "viewPos"), 1,
+			camera->position()
+			);
+
+	glFunctions->glUniform3fv(
+			glFunctions->glGetUniformLocation(programID, "lightPos"), 1,
+			camera->position()
+			);
+	
+	glFunctions->glUniform3fv(
+			glFunctions->glGetUniformLocation(programID, "lightColor"), 1,
+			lightColor
+			);
 
 	glFunctions->glBindVertexArray (VAO);
 	glDrawElements (GL_TRIANGLES, indices.size (), GL_UNSIGNED_INT, 0);
 
-	glFunctions->glEnable (GL_LIGHTING);
 }
 
 void Planet::clear ()

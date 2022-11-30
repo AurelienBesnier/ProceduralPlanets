@@ -10,14 +10,31 @@ PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
 }
 
+void initLights () {
+    GLfloat light_position1[4] = {22.0f, 16.0f, 50.0f, 0.0f};
+    GLfloat direction1[3] = {-52.0f,-16.0f,-50.0f};
+    GLfloat color1[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat ambient[4] = {0.3f, 0.3f, 0.3f, 0.5f};
+
+    glLightfv (GL_LIGHT1, GL_POSITION, light_position1);
+    glLightfv (GL_LIGHT1, GL_SPOT_DIRECTION, direction1);
+    glLightfv (GL_LIGHT1, GL_DIFFUSE, color1);
+    glLightfv (GL_LIGHT1, GL_SPECULAR, color1);
+    glLightModelfv (GL_LIGHT_MODEL_AMBIENT, ambient);
+    glEnable (GL_LIGHT1);
+    glEnable (GL_LIGHTING);
+}
+
 void PlanetViewer::draw ()
 {
-	// initLights();
+	initLights();
 
 	drawClippingPlane ();
 	glEnable (GL_LIGHTING);
 
 	this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
+	glLightfv(GL_LIGHT1, GL_POSITION, cam);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, camera()->viewDirection());
 	updateCamera(qglviewer::Vec (0.,0.,0.));
 
 	glEnable (GL_DEPTH_TEST);
@@ -27,7 +44,6 @@ void PlanetViewer::draw ()
 
 	planet.draw (camera ());
 
-	glDisable (GL_LIGHTING);
 }
 
 void PlanetViewer::drawClippingPlane ()
@@ -37,7 +53,6 @@ void PlanetViewer::drawClippingPlane ()
 
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
-	glDisable (GL_LIGHTING);
 
 	GLdouble equation[4];
 	glGetClipPlane (GL_CLIP_PLANE0, equation);
