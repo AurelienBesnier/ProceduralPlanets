@@ -171,7 +171,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 			// Push Back Vertex Data
 			QVector3D position = QVector3D (x, y, z) * radius;
 			QVector3D normal = position.normalized ();
-			QVector2D texCoord = QVector2D (j / slices, i / stacks);
+			QVector2D texCoord = QVector2D ((float )j / slices, (float)i / stacks);
 			Vertex newVertex = { .pos = position, .normal = normal, .texCoord =
 					texCoord };
 			vertices.push_back (newVertex);
@@ -301,12 +301,12 @@ void Planet::createBuffers ()
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
 	glFunctions->glBufferData (GL_ARRAY_BUFFER,
 								vertices.size () * sizeof(Vertex), &vertices[0],
-								GL_DYNAMIC_DRAW);
+								GL_STATIC_DRAW);
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
-								indices.size () * 3 * sizeof(unsigned int),
-								&indices[0], GL_DYNAMIC_DRAW);
+								indices.size () * sizeof(unsigned int),
+								&indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
 	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
@@ -384,7 +384,7 @@ void Planet::save () const
 {
 	std::string filename = "planet.obj";
 	std::ofstream ostream;
-	ostream.precision (6);
+	ostream.precision (4);
 
 	ostream.open (filename, std::ios_base::out);
 	ostream << "o planet" << std::endl;
@@ -398,8 +398,9 @@ void Planet::save () const
 	for (size_t i = 0; i < vertices.size (); i++)
 	{
 		ostream << "vt " << vertices[i].texCoord.x () << " "
-				<< vertices[i].pos.y () << std::endl;
+				<< vertices[i].texCoord.y () << std::endl;
 	}
+
 
 	for (size_t i = 0; i < vertices.size (); i++)
 	{

@@ -8,7 +8,7 @@ enum PlateType {
 struct Plate {
 	PlateType type;
 	std::vector<unsigned int> points;
-	qglviewer::Vec mouvement;
+	QVector3D mouvement;
 	double e;
 	double z;
 };
