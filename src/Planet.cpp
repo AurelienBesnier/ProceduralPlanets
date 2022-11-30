@@ -6,6 +6,7 @@
 #include <QTextStream>
 
 #include "Planet.hpp"
+using Eigen::MatrixXd;
 
 Planet::Planet (QOpenGLContext *context)
 {
@@ -94,7 +95,6 @@ void Planet::makePlates ()
 	if (plates.size () > 1)
 	{
 		plates.clear ();
-		plates.resize (plateNum);
 		std::vector<unsigned int> tmp_init;
 		tmp_init.resize (plateNum);
 	}
@@ -142,6 +142,11 @@ void Planet::setRadius (double _r)
 	std::cout << "planet radius set to " << this->radius << std::endl;
 }
 
+double Planet::getRadius() const
+{
+	return this->radius;
+}
+
 void Planet::setElems (int _elems)
 {
 	this->elems = _elems;
@@ -152,6 +157,11 @@ void Planet::setElems (int _elems)
 void Planet::makeSphere (float radius, int slices, int stacks)
 {
 	// Calc The Vertices
+	std::vector<Vector3d> positions;
+	std::vector<Vector3d> normals;
+	std::vector<Vector2d> texCoords;
+	Eigen::MatrixXd l;
+
 	for (int i = 0; i <= stacks; ++i)
 	{
 		float V = i / (float) stacks;
@@ -161,7 +171,9 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 		for (int j = 0; j <= slices; ++j)
 		{
 			float U = j / (float) slices;
+			float goldenRatio = (1 + 5* expf(0.5))/2;
 			float theta = U * (3.14159265 * 2);
+			// float theta = theta = 2 * 3.14159265 * j / goldenRatio;
 
 			// Calc The Vertex Positions
 			float x = cosf (theta) * sinf (phi);
@@ -169,12 +181,12 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 			float z = sinf (theta) * sinf (phi);
 
 			// Push Back Vertex Data
-			QVector3D position = QVector3D (x, y, z) * radius;
-			QVector3D normal = position.normalized ();
-			QVector2D texCoord = QVector2D ((float )j / slices, (float)i / stacks);
-			Vertex newVertex = { .pos = position, .normal = normal, .texCoord =
-					texCoord };
-			vertices.push_back (newVertex);
+			Vector3d position = Vector3d (x, y, z) * radius;
+			Vector3d normal = position.normalized ();
+			Vector2d texCoord = Vector2d ((float )j / slices, (float)i / stacks);
+			positions.push_back(position);
+		 	normals.push_back(normal);
+		 	texCoords.push_back(texCoord);
 		}
 	}
 
@@ -189,6 +201,14 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 		indices.push_back (i);
 		indices.push_back (i + 1);
 	}
+
+	for(size_t i = 0; i < positions.size(); i++)
+	{
+			Vertex newVertex = { .pos = positions[i], .normal = normals[i], .texCoord =
+					texCoords[i] };
+			vertices.push_back (newVertex);
+	}
+
 }
 
 void /*GLAPIENTRY */Planet::MessageCallback (GLenum source, GLenum type,
@@ -309,14 +329,14 @@ void Planet::createBuffers ()
 								&indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
-	glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
+	glFunctions->glVertexAttribPointer (0, 3, GL_DOUBLE, GL_FALSE,
 										sizeof(Vertex), (void*) 0);
 	glFunctions->glEnableVertexAttribArray (1);
-	glFunctions->glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE,
+	glFunctions->glVertexAttribPointer (1, 3, GL_DOUBLE, GL_FALSE,
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, normal));
 	glFunctions->glEnableVertexAttribArray (2);
-	glFunctions->glVertexAttribPointer (2, 2, GL_FLOAT, GL_FALSE,
+	glFunctions->glVertexAttribPointer (2, 2, GL_DOUBLE, GL_FALSE,
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, texCoord));
 

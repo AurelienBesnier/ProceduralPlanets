@@ -31,7 +31,7 @@ protected:
 	void drawClippingPlane ();
 
 	void clear ();
-	void updateCamera (const qglviewer::Vec &center, float radius);
+	void updateCamera (const qglviewer::Vec &center);
 
 public slots:
 	void setPlateNumber (int _plateNum);

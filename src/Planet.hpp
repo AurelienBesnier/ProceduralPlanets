@@ -2,18 +2,22 @@
 #define PLANET_H
 
 #include <QString>
-#include <QVector2D>
-#include <QVector3D>
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
+#include <igl/readOFF.h>
+#include <Eigen/Dense>
 
 #include "Plate.hpp"
 
+
+using Eigen::Vector3d;
+using Eigen::Vector2d;
+
 struct Vertex {
-	QVector3D pos;
-	QVector3D normal;
-	QVector2D texCoord;
+	Vector3d pos;
+	Vector3d normal;
+	Vector2d texCoord;
 };
 
 class Planet {
@@ -55,6 +59,7 @@ public:
 
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
+	double getRadius ()const;
 	void setElems (int _elems);
 
 	void setOceanicThickness (double _t);

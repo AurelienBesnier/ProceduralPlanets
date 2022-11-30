@@ -1,6 +1,10 @@
 #ifndef PLATE_HPP_
 #define PLATE_HPP_
 
+#include <Eigen/Dense>
+
+using Eigen::Vector3d;
+
 enum PlateType {
 	OCEANIC, CONTINENTAL
 };
@@ -8,7 +12,7 @@ enum PlateType {
 struct Plate {
 	PlateType type;
 	std::vector<unsigned int> points;
-	QVector3D mouvement;
+	Vector3d mouvement;
 	double e;
 	double z;
 };

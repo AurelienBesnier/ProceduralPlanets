@@ -18,6 +18,7 @@ void PlanetViewer::draw ()
 	glEnable (GL_LIGHTING);
 
 	this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
+	updateCamera(qglviewer::Vec (0.,0.,0.));
 
 	glEnable (GL_DEPTH_TEST);
 
@@ -82,19 +83,25 @@ void PlanetViewer::clear ()
 
 void PlanetViewer::setPlateNumber (int _plateNum)
 {
+	planet.clear ();
 	planet.setPlateNumber (_plateNum);
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setPlanetRadius (QString _r)
 {
+	planet.clear ();
 	planet.setRadius (_r.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setPlanetElem (int _elems)
 {
+	planet.clear ();
 	planet.setElems (_elems);
+	planet.initPlanet();
 	update ();
 }
 
@@ -114,33 +121,39 @@ void PlanetViewer::clearPlanet ()
 
 void PlanetViewer::setOceanicThickness (QString _t)
 {
-
+	planet.clear ();
 	planet.setOceanicThickness (_t.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setOceanicElevation (QString _e)
 {
 	planet.setOceanicElevation (_e.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setContinentThickness (QString _t)
 {
+	planet.clear ();
 	planet.setContinentalThickness (_t.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setContinentElevation (QString _e)
 {
+	planet.clear ();
 	planet.setContinentalElevation (_e.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
-void PlanetViewer::updateCamera (const qglviewer::Vec &center, float radius)
+void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 {
 	camera ()->setSceneCenter (center);
-	camera ()->setSceneRadius (radius);
+	camera ()->setSceneRadius (planet.getRadius());
 
 	camera ()->showEntireScene ();
 }
