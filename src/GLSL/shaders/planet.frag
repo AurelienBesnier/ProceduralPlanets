@@ -41,7 +41,6 @@ void main() {
 
     //fragColor = texture(Mask,textCoord);
 
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+    vec3 result = (ambient + diffuse /*+ specular*/) * objectColor;
     fragColor = vec4(result,0);
-    // fragColor = vec4(random(position.x),random(position.y),random(position.z),0);
 }

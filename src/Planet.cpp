@@ -81,10 +81,16 @@ void Planet::initGLSL ()
 	checkOpenGLError ();
 }
 
+void Planet::triangulate()
+{
+
+}
+
 void Planet::initPlanet ()
 {
 	makeSphere (this->radius, elems, elems);
 	makePlates ();
+  triangulate();
 
 	planetCreated = true;
 }
@@ -356,6 +362,11 @@ void Planet::draw (const qglviewer::Camera *camera)
 		createBuffers ();
 	}
 
+	glLightfv (GL_LIGHT1, GL_POSITION, camera->position());
+  glLightfv (GL_LIGHT1, GL_SPOT_DIRECTION, camera->viewDirection());
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHTING);
+
 	if (wireframe)
 		glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE);
 	else
@@ -376,8 +387,8 @@ void Planet::draw (const qglviewer::Camera *camera)
 			GL_FALSE,
 			mvMatrix);
 	
-	float color[3] = {0.5,0.1,0.5};
-	float lightColor[3] = {1,1,1};
+    float color[3] = {0.5,0.2,0.5};
+    float lightColor[3] = {1,0.9,0.8};
 	glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "objectColor"), 1,
 			color
@@ -385,12 +396,12 @@ void Planet::draw (const qglviewer::Camera *camera)
 
 	glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "viewPos"), 1,
-			camera->position()
+      camera->position()
 			);
 
 	glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "lightPos"), 1,
-			camera->position()
+      camera->position()
 			);
 	
 	glFunctions->glUniform3fv(

@@ -48,6 +48,7 @@ public:
 	void makeSphere (float radius, int slices, int stacks);
 	void makePlates ();
 	void initPlanet ();
+    void triangulate();
 	void createBuffers ();
 
 	void draw (const qglviewer::Camera *camera);

@@ -10,39 +10,18 @@ PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
 }
 
-void initLights () {
-    GLfloat light_position1[4] = {22.0f, 16.0f, 50.0f, 0.0f};
-    GLfloat direction1[3] = {-52.0f,-16.0f,-50.0f};
-    GLfloat color1[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    GLfloat ambient[4] = {0.3f, 0.3f, 0.3f, 0.5f};
-
-    glLightfv (GL_LIGHT1, GL_POSITION, light_position1);
-    glLightfv (GL_LIGHT1, GL_SPOT_DIRECTION, direction1);
-    glLightfv (GL_LIGHT1, GL_DIFFUSE, color1);
-    glLightfv (GL_LIGHT1, GL_SPECULAR, color1);
-    glLightModelfv (GL_LIGHT_MODEL_AMBIENT, ambient);
-    glEnable (GL_LIGHT1);
-    glEnable (GL_LIGHTING);
-}
-
 void PlanetViewer::draw ()
 {
-	initLights();
 
-	drawClippingPlane ();
-	glEnable (GL_LIGHTING);
+    drawClippingPlane ();
 
-	this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
-	glLightfv(GL_LIGHT1, GL_POSITION, cam);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, camera()->viewDirection());
-	updateCamera(qglviewer::Vec (0.,0.,0.));
+    this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
+    //updateCamera(qglviewer::Vec (0.,0.,0.));
 
 	glEnable (GL_DEPTH_TEST);
-
-	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	glDisable (GL_BLEND);
 
-	planet.draw (camera ());
+    planet.draw (camera ());
 
 }
 
@@ -59,7 +38,7 @@ void PlanetViewer::drawClippingPlane ()
 
 	qreal p[] = { 0., -equation[3] / equation[1], 0. };
 	qreal projP[3];
-	camera ()->getWorldCoordinatesOf (p, projP);
+    camera ()->getWorldCoordinatesOf (p, projP);
 
 	qreal norm[] =
 			{ equation[0] + p[0], equation[1] + p[1], equation[2] + p[2] };
@@ -72,8 +51,7 @@ void PlanetViewer::drawClippingPlane ()
 
 void PlanetViewer::init ()
 {
-
-	planet = Planet (QOpenGLContext::currentContext ());
+    planet = Planet (QOpenGLContext::currentContext ());
 
 	// The ManipulatedFrame will be used as the clipping plane
 	setManipulatedFrame (new ManipulatedFrame ());
@@ -167,10 +145,11 @@ void PlanetViewer::setContinentElevation (QString _e)
 
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 {
-	camera ()->setSceneCenter (center);
-	camera ()->setSceneRadius (planet.getRadius());
+    camera ()->setSceneCenter (center);
+    camera ()->setSceneRadius (planet.getRadius());
 
-	camera ()->showEntireScene ();
+    camera ()->showEntireScene ();
+    update();
 }
 
 void PlanetViewer::savePlanetOff () const
@@ -206,6 +185,9 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
 		case Qt::Key_W:
 			changeViewMode ();
 			break;
+        case Qt::Key_C:
+            updateCamera(qglviewer::Vec (0.,0.,0.));
+            break;
 		default:
 			QGLViewer::keyPressEvent (e);
 	}

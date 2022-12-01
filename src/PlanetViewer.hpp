@@ -19,7 +19,7 @@ public:
 
 protected:
 
-	Planet planet;
+    Planet planet;
 	qglviewer::Vec cam;
 
 	virtual void draw ();
@@ -30,7 +30,7 @@ protected:
 
 	void drawClippingPlane ();
 
-	void clear ();
+    void clear ();
 	void updateCamera (const qglviewer::Vec &center);
 
 public slots:

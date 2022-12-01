@@ -1,4 +1,4 @@
-QT += opengl xml widgets gui
+QT += opengl widgets gui xml
 TEMPLATE = app
 TARGET = ProceduralPlanet
 MOC_DIR = ./moc
@@ -15,7 +15,6 @@ HEADERS += \
     PlanetDockWidget.hpp \
     PlanetViewer.hpp \
     Window.hpp
-INCLUDEPATH = ./GLSL
 LIBS = -lQGLViewer-qt5 \
     -lglut \
     -lGLU \
