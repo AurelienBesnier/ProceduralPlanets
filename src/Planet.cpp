@@ -95,8 +95,7 @@ void Planet::initPlanet ()
 
 void Planet::makeSphere (float radius, int slices, int stacks)
 {
-	// Calc The Vertices
-	std::vector<Point> positions;
+    // Calc The Vertices
 	std::vector<Point> normals;
 	std::vector<Vector2d> texCoords;
 
@@ -117,10 +116,10 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 			float z = sinf (theta) * sinf (phi);
 
 			// Push Back Vertex Data
-			Point position = Point (x, y, z) * radius;
-			Point normal = position.normalized ();
+            Point position = Point (x * radius, y * radius, z * radius) ;
+            Point normal = position;
 			Vector2d texCoord = Vector2d ((float )j / slices, (float)i / stacks);
-			positions.push_back(position);
+            pos.push_back(position);
 		 	normals.push_back(normal);
 		 	texCoords.push_back(texCoord);
 		}
@@ -138,12 +137,13 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 		indices.push_back (i + 1);
 	}
 
-	for(size_t i = 0; i < positions.size(); i++)
+    for(size_t i = 0; i < pos.size(); i++)
 	{
-			Vertex newVertex = { .pos = positions[i], .normal = normals[i], .texCoord =
+            Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
 					texCoords[i] };
 			vertices.push_back (newVertex);
-	}
+    }
+
 }
 
 int fib(int n)
@@ -166,40 +166,22 @@ void Planet::makePlates ()
 		std::vector<unsigned int> tmp_init;
 		tmp_init.resize (plateNum);
 
-		float goldenRatio = (1 + 5* expf(0.5))/2;
+        //float goldenRatio = (1 + 5* expf(0.5))/2;
 	}
 }
 
 void Planet::triangulate()
 {
-  // construction from a list of points :
-  Triangulation T(vertices.positions.begin(), vertices.positions.end());
-  Triangulation::size_type n = T.number_of_vertices();
-  int li, lj;
-  Point p(0,0,0);
-  Cell_handle c = T.locate(p, lt, li, lj);
-  // p is the vertex of c of index li :
-  assert( lt == Triangulation::VERTEX );
-  assert( c->vertex(li)->point() == p );
-  Vertex_handle v = c->vertex( (li+1)&3 );
-  // v is another vertex of c
-  Cell_handle nc = c->neighbor(li);
-  // nc = neighbor of c opposite to the vertex associated with p
-  // nc must have vertex v :
-  int nli;
-  assert( nc->has_vertex( v, nli ) );
-  // nli is the index of v in nc
-  std::ofstream oFileT("output",std::ios::out);
-  // writing file output;
-  oFileT << T;
-  Triangulation T1;
-  std::ifstream iFileT("output",std::ios::in);
-  // reading file output;
-  iFileT >> T1;
-  assert( T1.is_valid() );
-  assert( T1.number_of_vertices() == T.number_of_vertices() );
-  assert( T1.number_of_cells() == T.number_of_cells() );	
-
+    // construction from a list of points :
+    Triangulation T(pos.begin(), pos.end());
+    Triangulation::size_type n = T.number_of_vertices();
+    //std::cout<<T<<std::endl;
+    assert(T.is_valid());
+    std::cout<<n<<" "<<pos.size()<<std::endl;
+    //assert(n==pos.size());
+    std::ofstream oFileT("output",std::ios::out);
+    // writing file output;
+    oFileT << T;
 
 }
 
@@ -451,8 +433,9 @@ void Planet::draw (const qglviewer::Camera *camera)
 			lightColor
 			);
 
+    glPointSize(4);
 	glFunctions->glBindVertexArray (VAO);
-	glDrawElements (GL_TRIANGLES, indices.size (), GL_UNSIGNED_INT, 0);
+    glDrawElements (GL_TRIANGLES, indices.size (), GL_UNSIGNED_INT, 0);
 
 }
 

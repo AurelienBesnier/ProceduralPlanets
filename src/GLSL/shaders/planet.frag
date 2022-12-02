@@ -31,16 +31,15 @@ void main() {
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
-
-    float specularStrength = 0.5;
+    float specularStrength = 0.1;
     vec3 viewDir = normalize(viewPos - position);
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;  
 
-
     //fragColor = texture(Mask,textCoord);
 
-    vec3 result = (ambient + diffuse /*+ specular*/) * objectColor;
+    vec3 result = (ambient + diffuse + specular) * objectColor;
     fragColor = vec4(result,0);
+    //fragColor = vec4(objectColor,0);
 }

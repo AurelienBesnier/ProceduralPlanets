@@ -8,17 +8,17 @@
 #include <Eigen/Dense>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/draw_triangulation_3.h>
 #include "Plate.hpp"
 
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Delaunay_triangulation_3<K>      Triangulation;
+typedef CGAL::Triangulation_3<K>      Triangulation;
 typedef Triangulation::Cell_handle    Cell_handle;
 typedef Triangulation::Vertex_handle  Vertex_handle;
 typedef Triangulation::Locate_type    Locate_type;
 typedef Triangulation::Point          Point;
 
-using Eigen::Vector3d;
 using Eigen::Vector2d;
 
 struct Vertex {
@@ -35,6 +35,7 @@ private:
 	int elems;
 
 	std::vector<Vertex> vertices;
+    std::vector<Point> pos;
 	std::vector<Plate> plates;
 	std::vector<int> indices;
 

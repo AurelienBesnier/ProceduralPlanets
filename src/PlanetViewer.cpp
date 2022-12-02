@@ -93,7 +93,7 @@ void PlanetViewer::setPlanetElem (int _elems)
 {
 	planet.clear ();
 	planet.setElems (_elems);
-	planet.initPlanet();
+    //planet.initPlanet();
 	update ();
 }
 
