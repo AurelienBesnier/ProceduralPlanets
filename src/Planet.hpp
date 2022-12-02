@@ -17,7 +17,7 @@ typedef CGAL::Triangulation_3<K>      Triangulation;
 typedef Triangulation::Cell_handle    Cell_handle;
 typedef Triangulation::Vertex_handle  Vertex_handle;
 typedef Triangulation::Locate_type    Locate_type;
-typedef Triangulation::Point          Point;
+typedef Triangulation::Point_3        Point;
 
 using Eigen::Vector2d;
 

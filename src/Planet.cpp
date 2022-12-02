@@ -21,6 +21,7 @@ Planet::~Planet ()
 {
 	vertices.clear ();
 	indices.clear ();
+    pos.clear();
 	glFunctions->glDeleteVertexArrays (1, &VAO);
 	glFunctions->glDeleteBuffers (1, &VBO);
 	glFunctions->glDeleteBuffers (1, &EBO);
@@ -88,7 +89,7 @@ void Planet::initPlanet ()
 {
 	makeSphere (this->radius, elems, elems);
 	makePlates ();
-  triangulate();
+    triangulate();
 
 	planetCreated = true;
 }
@@ -117,7 +118,9 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 
 			// Push Back Vertex Data
             Point position = Point (x * radius, y * radius, z * radius) ;
-            Point normal = position;
+            float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
+            float length = sqrt(squareLength);
+            Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
 			Vector2d texCoord = Vector2d ((float )j / slices, (float)i / stacks);
             pos.push_back(position);
 		 	normals.push_back(normal);
@@ -175,7 +178,6 @@ void Planet::triangulate()
     // construction from a list of points :
     Triangulation T(pos.begin(), pos.end());
     Triangulation::size_type n = T.number_of_vertices();
-    //std::cout<<T<<std::endl;
     assert(T.is_valid());
     std::cout<<n<<" "<<pos.size()<<std::endl;
     //assert(n==pos.size());
@@ -445,6 +447,7 @@ void Planet::clear ()
 	{
 		vertices.clear ();
 		indices.clear ();
+        pos.clear();
 
 		glFunctions->glDeleteVertexArrays (1, &VAO);
 		glFunctions->glDeleteBuffers (1, &VBO);
