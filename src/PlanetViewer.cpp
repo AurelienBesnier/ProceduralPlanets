@@ -16,7 +16,6 @@ void PlanetViewer::draw ()
     drawClippingPlane ();
 
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
-    //updateCamera(qglviewer::Vec (0.,0.,0.));
 
 	glEnable (GL_DEPTH_TEST);
 	glDisable (GL_BLEND);

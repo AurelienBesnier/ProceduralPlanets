@@ -6,16 +6,24 @@
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
 #include <Eigen/Dense>
-
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
 #include "Plate.hpp"
 
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Delaunay_triangulation_3<K>      Triangulation;
+typedef Triangulation::Cell_handle    Cell_handle;
+typedef Triangulation::Vertex_handle  Vertex_handle;
+typedef Triangulation::Locate_type    Locate_type;
+typedef Triangulation::Point          Point;
 
 using Eigen::Vector3d;
 using Eigen::Vector2d;
 
 struct Vertex {
-	Vector3d pos;
-	Vector3d normal;
+	Point pos;
+	Point normal;
 	Vector2d texCoord;
 };
 

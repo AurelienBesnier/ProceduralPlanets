@@ -2,6 +2,9 @@
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
+#include <cassert>
+#include <list>
+#include <vector>
 #include <QFile>
 #include <QTextStream>
 
@@ -43,10 +46,9 @@ void Planet::initGLSL ()
 	glEnable ( GL_DEBUG_OUTPUT);
 	glFunctions->glDebugMessageCallback (&Planet::MessageCallback, 0);
 
-	glFunctions->glEnable (GL_LIGHT0);
+	glFunctions->glDisable (GL_LIGHT0);
 	glFunctions->glEnable (GL_LIGHT1);
 	glFunctions->glEnable (GL_LIGHTING);
-	glFunctions->glEnable (GL_DEPTH_TEST);
 	glFunctions->glEnable (GL_COLOR_MATERIAL);
 	glFunctions->glEnable (GL_BLEND);
 	glFunctions->glEnable (GL_TEXTURE_2D);
@@ -81,10 +83,6 @@ void Planet::initGLSL ()
 	checkOpenGLError ();
 }
 
-void Planet::triangulate()
-{
-
-}
 
 void Planet::initPlanet ()
 {
@@ -95,6 +93,71 @@ void Planet::initPlanet ()
 	planetCreated = true;
 }
 
+void Planet::makeSphere (float radius, int slices, int stacks)
+{
+	// Calc The Vertices
+	std::vector<Point> positions;
+	std::vector<Point> normals;
+	std::vector<Vector2d> texCoords;
+
+	for (int i = 0; i <= stacks; ++i)
+	{
+		float V = i / (float) stacks;
+		float phi = V * 3.14159265;
+
+		// Loop Through Slices
+		for (int j = 0; j <= slices; ++j)
+		{
+			float U = j / (float) slices;
+			float theta = U * (3.14159265 * 2);
+
+			// Calc The Vertex Positions
+			float x = cosf (theta) * sinf (phi);
+			float y = cosf (phi);
+			float z = sinf (theta) * sinf (phi);
+
+			// Push Back Vertex Data
+			Point position = Point (x, y, z) * radius;
+			Point normal = position.normalized ();
+			Vector2d texCoord = Vector2d ((float )j / slices, (float)i / stacks);
+			positions.push_back(position);
+		 	normals.push_back(normal);
+		 	texCoords.push_back(texCoord);
+		}
+	}
+
+	// Calc The Index Positions
+	for (int i = 0; i < slices * stacks + slices; ++i)
+	{
+		indices.push_back (i);
+		indices.push_back (i + slices + 1);
+		indices.push_back (i + slices);
+
+		indices.push_back (i + slices + 1);
+		indices.push_back (i);
+		indices.push_back (i + 1);
+	}
+
+	for(size_t i = 0; i < positions.size(); i++)
+	{
+			Vertex newVertex = { .pos = positions[i], .normal = normals[i], .texCoord =
+					texCoords[i] };
+			vertices.push_back (newVertex);
+	}
+}
+
+int fib(int n)
+{
+    int a = 0;
+    int b = 1;
+    while (n-- > 1) {
+        int t = a;
+        a = b;
+        b += t;
+    }
+    return b;
+}
+
 void Planet::makePlates ()
 {
 	if (plates.size () > 1)
@@ -102,7 +165,42 @@ void Planet::makePlates ()
 		plates.clear ();
 		std::vector<unsigned int> tmp_init;
 		tmp_init.resize (plateNum);
+
+		float goldenRatio = (1 + 5* expf(0.5))/2;
 	}
+}
+
+void Planet::triangulate()
+{
+  // construction from a list of points :
+  Triangulation T(vertices.positions.begin(), vertices.positions.end());
+  Triangulation::size_type n = T.number_of_vertices();
+  int li, lj;
+  Point p(0,0,0);
+  Cell_handle c = T.locate(p, lt, li, lj);
+  // p is the vertex of c of index li :
+  assert( lt == Triangulation::VERTEX );
+  assert( c->vertex(li)->point() == p );
+  Vertex_handle v = c->vertex( (li+1)&3 );
+  // v is another vertex of c
+  Cell_handle nc = c->neighbor(li);
+  // nc = neighbor of c opposite to the vertex associated with p
+  // nc must have vertex v :
+  int nli;
+  assert( nc->has_vertex( v, nli ) );
+  // nli is the index of v in nc
+  std::ofstream oFileT("output",std::ios::out);
+  // writing file output;
+  oFileT << T;
+  Triangulation T1;
+  std::ifstream iFileT("output",std::ios::in);
+  // reading file output;
+  iFileT >> T1;
+  assert( T1.is_valid() );
+  assert( T1.number_of_vertices() == T.number_of_vertices() );
+  assert( T1.number_of_cells() == T.number_of_cells() );	
+
+
 }
 
 void Planet::setOceanicThickness (double _t)
@@ -159,62 +257,6 @@ void Planet::setElems (int _elems)
 	std::cout << "planet elems set to " << this->elems << std::endl;
 }
 
-void Planet::makeSphere (float radius, int slices, int stacks)
-{
-	// Calc The Vertices
-	std::vector<Vector3d> positions;
-	std::vector<Vector3d> normals;
-	std::vector<Vector2d> texCoords;
-
-	for (int i = 0; i <= stacks; ++i)
-	{
-		float V = i / (float) stacks;
-		float phi = V * 3.14159265;
-
-		// Loop Through Slices
-		for (int j = 0; j <= slices; ++j)
-		{
-			float U = j / (float) slices;
-			float goldenRatio = (1 + 5* expf(0.5))/2;
-			float theta = U * (3.14159265 * 2);
-			// float theta = theta = 2 * 3.14159265 * j / goldenRatio;
-
-			// Calc The Vertex Positions
-			float x = cosf (theta) * sinf (phi);
-			float y = cosf (phi);
-			float z = sinf (theta) * sinf (phi);
-
-			// Push Back Vertex Data
-			Vector3d position = Vector3d (x, y, z) * radius;
-			Vector3d normal = position.normalized ();
-			Vector2d texCoord = Vector2d ((float )j / slices, (float)i / stacks);
-			positions.push_back(position);
-		 	normals.push_back(normal);
-		 	texCoords.push_back(texCoord);
-		}
-	}
-
-	// Calc The Index Positions
-	for (int i = 0; i < slices * stacks + slices; ++i)
-	{
-		indices.push_back (i);
-		indices.push_back (i + slices + 1);
-		indices.push_back (i + slices);
-
-		indices.push_back (i + slices + 1);
-		indices.push_back (i);
-		indices.push_back (i + 1);
-	}
-
-
-	for(size_t i = 0; i < positions.size(); i++)
-	{
-			Vertex newVertex = { .pos = positions[i], .normal = normals[i], .texCoord =
-					texCoords[i] };
-			vertices.push_back (newVertex);
-	}
-
-}
 
 void /*GLAPIENTRY */Planet::MessageCallback (GLenum source, GLenum type,
 												GLuint id, GLenum severity,
@@ -387,8 +429,8 @@ void Planet::draw (const qglviewer::Camera *camera)
 			GL_FALSE,
 			mvMatrix);
 	
-    float color[3] = {0.5,0.2,0.5};
-    float lightColor[3] = {1,0.9,0.8};
+  float color[3] = {0.5,0.2,0.5};
+  float lightColor[3] = {1,0.9,0.8};
 	glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "objectColor"), 1,
 			color
