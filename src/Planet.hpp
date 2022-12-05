@@ -13,7 +13,7 @@
 
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Triangulation_3<K>      Triangulation;
+typedef CGAL::Delaunay_triangulation_3<K>      Triangulation;
 typedef Triangulation::Cell_handle    Cell_handle;
 typedef Triangulation::Vertex_handle  Vertex_handle;
 typedef Triangulation::Locate_type    Locate_type;
@@ -23,8 +23,10 @@ using Eigen::Vector2d;
 
 struct Vertex {
 	Point pos;
-	Point normal;
+    Point normal;
 	Vector2d texCoord;
+    Point color;
+    unsigned int plate_id;
 };
 
 class Planet {

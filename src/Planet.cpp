@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <cassert>
-#include <list>
 #include <vector>
 #include <QFile>
 #include <QTextStream>
+#include <QRandomGenerator>
 
 #include "Planet.hpp"
 
@@ -146,7 +146,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 					texCoords[i] };
 			vertices.push_back (newVertex);
     }
-
+    std::cout<<pos.size()<<std::endl;
 }
 
 int fib(int n)
@@ -171,18 +171,23 @@ void Planet::makePlates ()
 
         //float goldenRatio = (1 + 5* expf(0.5))/2;
 	}
+    QRandomGenerator prng;
+    for(size_t i = 0; i<vertices.size(); i++)
+    {
+        vertices[i].color=Point(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
+
+    }
 }
 
 void Planet::triangulate()
 {
     // construction from a list of points :
-    Triangulation T(pos.begin(), pos.end());
+    Triangulation T(this->pos.begin(), this->pos.end());
     Triangulation::size_type n = T.number_of_vertices();
     assert(T.is_valid());
     std::cout<<n<<" "<<pos.size()<<std::endl;
     //assert(n==pos.size());
     std::ofstream oFileT("output",std::ios::out);
-    // writing file output;
     oFileT << T;
 
 }
@@ -371,6 +376,11 @@ void Planet::createBuffers ()
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, texCoord));
 
+    glFunctions->glEnableVertexAttribArray (3);
+    glFunctions->glVertexAttribPointer (3, 3, GL_DOUBLE, GL_FALSE,
+                                        sizeof(Vertex),
+                                        (void*) offsetof(Vertex, color));
+
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
 
 	glFunctions->glBindVertexArray (0);
@@ -389,7 +399,7 @@ void Planet::draw (const qglviewer::Camera *camera)
 	}
 
 	glLightfv (GL_LIGHT1, GL_POSITION, camera->position());
-  glLightfv (GL_LIGHT1, GL_SPOT_DIRECTION, camera->viewDirection());
+    glLightfv (GL_LIGHT1, GL_SPOT_DIRECTION, camera->viewDirection());
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 
@@ -413,12 +423,12 @@ void Planet::draw (const qglviewer::Camera *camera)
 			GL_FALSE,
 			mvMatrix);
 	
-  float color[3] = {0.5,0.2,0.5};
+  //float color[3] = {0.5,0.2,0.5};
   float lightColor[3] = {1,0.9,0.8};
-	glFunctions->glUniform3fv(
+    /*glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "objectColor"), 1,
 			color
-			);
+            );*/
 
 	glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "viewPos"), 1,
@@ -437,7 +447,7 @@ void Planet::draw (const qglviewer::Camera *camera)
 
     glPointSize(4);
 	glFunctions->glBindVertexArray (VAO);
-    glDrawElements (GL_TRIANGLES, indices.size (), GL_UNSIGNED_INT, 0);
+    glDrawElements (GL_POINTS, indices.size (), GL_UNSIGNED_INT, 0);
 
 }
 

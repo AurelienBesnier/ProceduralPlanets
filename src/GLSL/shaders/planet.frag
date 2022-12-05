@@ -14,6 +14,7 @@ uniform vec3 objectColor;
 in vec3 position;
 in vec3 normal;
 in vec2 textCoord;
+in vec3 color;
 
 out vec4 fragColor;
 
@@ -23,7 +24,7 @@ out vec4 fragColor;
 // --------------------------------------------------
 
 void main() {
-    float ambientStrength = 0.1;
+    /*float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * lightColor;
 
     vec3 norm = normalize(normal);
@@ -39,7 +40,7 @@ void main() {
 
     //fragColor = texture(Mask,textCoord);
 
-    vec3 result = (ambient + diffuse + specular) * objectColor;
-    fragColor = vec4(result,0);
-    //fragColor = vec4(objectColor,0);
+    vec3 result = (ambient + diffuse + specular) * objectColor;*/
+    //fragColor = vec4(result,0);
+    fragColor = vec4(color,0);
 }
