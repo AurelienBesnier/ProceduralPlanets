@@ -5,26 +5,21 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
-#include <Eigen/Dense>
+#include <QVector2D>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/draw_triangulation_3.h>
 #include "Plate.hpp"
 
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Delaunay_triangulation_3<K>      Triangulation;
-typedef Triangulation::Cell_handle    Cell_handle;
-typedef Triangulation::Vertex_handle  Vertex_handle;
-typedef Triangulation::Locate_type    Locate_type;
-typedef Triangulation::Point_3        Point;
+typedef Triangulation::Point        Point;
 
-using Eigen::Vector2d;
 
 struct Vertex {
 	Point pos;
     Point normal;
-	Vector2d texCoord;
+    QVector2D texCoord;
     Point color;
     unsigned int plate_id;
 };
@@ -39,7 +34,7 @@ private:
 	std::vector<Vertex> vertices;
     std::vector<Point> pos;
 	std::vector<Plate> plates;
-	std::vector<int> indices;
+    std::vector<unsigned int> indices;
 
 	bool wireframe = false;
 
@@ -57,6 +52,7 @@ public:
 	void init ();
 	void initGLSL ();
 	void makeSphere (float radius, int slices, int stacks);
+    void makeSphere (float radius, int elems);
 	void makePlates ();
 	void initPlanet ();
     void triangulate();

@@ -65,6 +65,8 @@ void PlanetViewer::init ()
 	//Set blend parameters
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    updateCamera(qglviewer::Vec (0.,0.,0.));
+
 }
 
 void PlanetViewer::clear ()

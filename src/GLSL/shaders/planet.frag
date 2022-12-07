@@ -9,7 +9,6 @@ uniform sampler2D Mask;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform vec3 lightColor;
-uniform vec3 objectColor;
 
 in vec3 position;
 in vec3 normal;
@@ -40,7 +39,7 @@ void main() {
 
     //fragColor = texture(Mask,textCoord);
 
-    vec3 result = (ambient + diffuse + specular) * objectColor;*/
-    //fragColor = vec4(result,0);
+    vec3 result = (ambient + diffuse + specular) * color;
+    fragColor = vec4(result,0);*/
     fragColor = vec4(color,0);
 }

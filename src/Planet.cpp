@@ -10,6 +10,8 @@
 
 #include "Planet.hpp"
 
+#define PI 3.14159265
+
 Planet::Planet (QOpenGLContext *context)
 {
 	glContext = context;
@@ -31,9 +33,9 @@ Planet::~Planet ()
 void Planet::init ()
 {
 	planetCreated = false;
-	this->plateNum = 1;
-	this->radius = 1;
-	this->elems = 3;
+    this->plateNum = 4;
+    this->radius = 6370;
+    this->elems = 1000;
 }
 
 void Planet::initGLSL ()
@@ -87,7 +89,7 @@ void Planet::initGLSL ()
 
 void Planet::initPlanet ()
 {
-	makeSphere (this->radius, elems, elems);
+    makeSphere (this->radius, elems);
 	makePlates ();
     triangulate();
 
@@ -98,18 +100,18 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 {
     // Calc The Vertices
 	std::vector<Point> normals;
-	std::vector<Vector2d> texCoords;
+    std::vector<QVector2D> texCoords;
 
 	for (int i = 0; i <= stacks; ++i)
 	{
 		float V = i / (float) stacks;
-		float phi = V * 3.14159265;
+        float phi = V * PI;
 
 		// Loop Through Slices
 		for (int j = 0; j <= slices; ++j)
 		{
 			float U = j / (float) slices;
-			float theta = U * (3.14159265 * 2);
+            float theta = U * (PI * 2);
 
 			// Calc The Vertex Positions
 			float x = cosf (theta) * sinf (phi);
@@ -121,7 +123,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
             float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
             float length = sqrt(squareLength);
             Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
-			Vector2d texCoord = Vector2d ((float )j / slices, (float)i / stacks);
+            QVector2D texCoord = QVector2D ((float )j / slices, (float)i / stacks);
             pos.push_back(position);
 		 	normals.push_back(normal);
 		 	texCoords.push_back(texCoord);
@@ -129,7 +131,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 	}
 
 	// Calc The Index Positions
-	for (int i = 0; i < slices * stacks + slices; ++i)
+    for (int i = 0; i < slices * stacks + slices; ++i)
 	{
 		indices.push_back (i);
 		indices.push_back (i + slices + 1);
@@ -138,13 +140,50 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 		indices.push_back (i + slices + 1);
 		indices.push_back (i);
 		indices.push_back (i + 1);
-	}
+    }
 
     for(size_t i = 0; i < pos.size(); i++)
 	{
             Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
 					texCoords[i] };
 			vertices.push_back (newVertex);
+    }
+    std::cout<<pos.size()<<std::endl;
+}
+
+
+void Planet::makeSphere (float radius, int elems)
+{
+    // Calc The Vertices
+    std::vector<Point> normals;
+    std::vector<QVector2D> texCoords;
+    //float goldenRatio = (1 + 5* expf(0.5))/2;
+    float phi = PI * (3.0 - sqrt(5.0));
+
+    for (int i = 0; i < elems; ++i)
+    {
+        float y = 1 - (i / float(elems - 1)) * 2;
+        float rad = sqrt(1 - y*y);
+        float theta = phi * i;
+
+        float x = cosf(theta) * rad;
+        float z = sinf(theta) * rad;
+
+        Point position = Point (x * radius, y * radius, z * radius) ;
+        float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
+        float length = sqrt(squareLength);
+        Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
+        QVector2D texCoord = QVector2D ((float )i / elems, (float)i / elems);
+        pos.push_back(position);
+        normals.push_back(normal);
+        texCoords.push_back(texCoord);
+    }
+
+    for(size_t i = 0; i < pos.size(); i++)
+    {
+            Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
+                    texCoords[i]};
+            vertices.push_back (newVertex);
     }
     std::cout<<pos.size()<<std::endl;
 }
@@ -166,12 +205,17 @@ void Planet::makePlates ()
 	if (plates.size () > 1)
 	{
 		plates.clear ();
-		std::vector<unsigned int> tmp_init;
-		tmp_init.resize (plateNum);
+        std::vector<unsigned int> tmp_init(plateNum);
+        std::vector<Point> colors(plateNum);
+        QRandomGenerator prng;
+        prng.seed(time(NULL));
 
-        //float goldenRatio = (1 + 5* expf(0.5))/2;
+        for(Point c : colors)
+            c = Point(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
+
 	}
     QRandomGenerator prng;
+    prng.seed(time(NULL));
     for(size_t i = 0; i<vertices.size(); i++)
     {
         vertices[i].color=Point(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
@@ -186,10 +230,14 @@ void Planet::triangulate()
     Triangulation::size_type n = T.number_of_vertices();
     assert(T.is_valid());
     std::cout<<n<<" "<<pos.size()<<std::endl;
-    //assert(n==pos.size());
-    std::ofstream oFileT("output",std::ios::out);
+    assert(n==pos.size());
+    std::ofstream oFileT("output.trig",std::ios::out);
     oFileT << T;
 
+    for(const auto &e: T.all_vertex_handles())
+    {
+
+    }
 }
 
 void Planet::setOceanicThickness (double _t)
@@ -361,8 +409,8 @@ void Planet::createBuffers ()
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
-								indices.size () * sizeof(int),
-								&indices[0], GL_STATIC_DRAW);
+                                indices.size () * sizeof(int),
+                                &indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
 	glFunctions->glVertexAttribPointer (0, 3, GL_DOUBLE, GL_FALSE,
@@ -422,14 +470,8 @@ void Planet::draw (const qglviewer::Camera *camera)
 			glFunctions->glGetUniformLocation (programID, "mv_matrix"), 1,
 			GL_FALSE,
 			mvMatrix);
-	
-  //float color[3] = {0.5,0.2,0.5};
-  float lightColor[3] = {1,0.9,0.8};
-    /*glFunctions->glUniform3fv(
-			glFunctions->glGetUniformLocation(programID, "objectColor"), 1,
-			color
-            );*/
 
+  float lightColor[3] = {1,0.9,0.8};
 	glFunctions->glUniform3fv(
 			glFunctions->glGetUniformLocation(programID, "viewPos"), 1,
       camera->position()
@@ -447,7 +489,7 @@ void Planet::draw (const qglviewer::Camera *camera)
 
     glPointSize(4);
 	glFunctions->glBindVertexArray (VAO);
-    glDrawElements (GL_POINTS, indices.size (), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 }
 
