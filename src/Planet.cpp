@@ -90,7 +90,7 @@ void Planet::initGLSL ()
 void Planet::initPlanet ()
 {
     makeSphere (this->radius, elems);
-	makePlates ();
+    makePlates ();
     triangulate();
 
 	planetCreated = true;
@@ -157,7 +157,7 @@ void Planet::makeSphere (float radius, int elems)
     // Calc The Vertices
     std::vector<Point> normals;
     std::vector<QVector2D> texCoords;
-    //float goldenRatio = (1 + 5* expf(0.5))/2;
+
     float phi = PI * (3.0 - sqrt(5.0));
 
     for (int i = 0; i < elems; ++i)
@@ -179,6 +179,11 @@ void Planet::makeSphere (float radius, int elems)
         texCoords.push_back(texCoord);
     }
 
+    for (int i = 0; i < elems; ++i)
+    {
+        indices.push_back (i);
+    }
+
     for(size_t i = 0; i < pos.size(); i++)
     {
             Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
@@ -188,21 +193,9 @@ void Planet::makeSphere (float radius, int elems)
     std::cout<<pos.size()<<std::endl;
 }
 
-int fib(int n)
-{
-    int a = 0;
-    int b = 1;
-    while (n-- > 1) {
-        int t = a;
-        a = b;
-        b += t;
-    }
-    return b;
-}
-
 void Planet::makePlates ()
 {
-	if (plates.size () > 1)
+    if (plates.size () > 1)
 	{
 		plates.clear ();
         std::vector<unsigned int> tmp_init(plateNum);
@@ -219,7 +212,6 @@ void Planet::makePlates ()
     for(size_t i = 0; i<vertices.size(); i++)
     {
         vertices[i].color=Point(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
-
     }
 }
 
@@ -231,13 +223,6 @@ void Planet::triangulate()
     assert(T.is_valid());
     std::cout<<n<<" "<<pos.size()<<std::endl;
     assert(n==pos.size());
-    std::ofstream oFileT("output.trig",std::ios::out);
-    oFileT << T;
-
-    for(const auto &e: T.all_vertex_handles())
-    {
-
-    }
 }
 
 void Planet::setOceanicThickness (double _t)
