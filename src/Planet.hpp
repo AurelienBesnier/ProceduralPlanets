@@ -7,20 +7,23 @@
 #include <QGLViewer/camera.h>
 #include <QVector2D>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include "Plate.hpp"
 
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Delaunay_triangulation_3<K>      Triangulation;
-typedef Triangulation::Cell_handle    Cell_handle;
-typedef Triangulation::Vertex_handle  Vertex_handle;
-typedef Triangulation::Locate_type    Locate_type;
-typedef Triangulation::Point        Point;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel          K;
+typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned int, K> Vb;
+typedef CGAL::Triangulation_data_structure_3<Vb>                     Tds;
+typedef CGAL::Delaunay_triangulation_3<K, Tds>                       Delaunay;
+typedef Delaunay::Cell_handle                                        Cell_handle;
+typedef Delaunay::Vertex_handle                                      Vertex_handle;
+typedef Delaunay::Locate_type                                        Locate_type;
+typedef Delaunay::Point                                              Point;
+typedef Delaunay::Facet                                              Facet;
 
 
 struct Vertex {
-	Point pos;
+    Point pos;
     Point normal;
     QVector2D texCoord;
     Point color;
@@ -35,11 +38,12 @@ private:
 	int elems;
 
 	std::vector<Vertex> vertices;
-    std::vector<Point> pos;
+    std::vector<std::pair<Point,unsigned int>> pos;
 	std::vector<Plate> plates;
     std::vector<unsigned int> indices;
 
 	bool wireframe = false;
+    void triangulate();
 
 public:
 	GLuint VBO, VAO, EBO;
@@ -57,8 +61,7 @@ public:
 	void makeSphere (float radius, int slices, int stacks);
     void makeSphere (float radius, int elems);
 	void makePlates ();
-	void initPlanet ();
-    void triangulate();
+    void initPlanet ();
 	void createBuffers ();
 
 	void draw (const qglviewer::Camera *camera);

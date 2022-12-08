@@ -90,8 +90,8 @@ void Planet::initGLSL ()
 void Planet::initPlanet ()
 {
     makeSphere (this->radius, elems);
-    makePlates ();
     triangulate();
+    makePlates ();
 
 	planetCreated = true;
 }
@@ -99,7 +99,7 @@ void Planet::initPlanet ()
 void Planet::makeSphere (float radius, int slices, int stacks)
 {
     // Calc The Vertices
-	std::vector<Point> normals;
+    std::vector<Point> normals;
     std::vector<QVector2D> texCoords;
 
 	for (int i = 0; i <= stacks; ++i)
@@ -124,7 +124,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
             float length = sqrt(squareLength);
             Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
             QVector2D texCoord = QVector2D ((float )j / slices, (float)i / stacks);
-            pos.push_back(position);
+            pos.push_back( std::make_pair(position, i) );
 		 	normals.push_back(normal);
 		 	texCoords.push_back(texCoord);
 		}
@@ -144,7 +144,7 @@ void Planet::makeSphere (float radius, int slices, int stacks)
 
     for(size_t i = 0; i < pos.size(); i++)
 	{
-            Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
+            Vertex newVertex = { .pos = pos[i].first, .normal = normals[i], .texCoord =
 					texCoords[i] };
 			vertices.push_back (newVertex);
     }
@@ -160,33 +160,46 @@ void Planet::makeSphere (float radius, int elems)
 
     float phi = PI * (3.0 - sqrt(5.0));
 
+    float epsilon=0.33;
+    if(elems >= 600000) epsilon = 214;
+    else if(elems>= 400000) epsilon = 75;
+    else if(elems>=11000) epsilon = 27;
+    else if(elems>=890) epsilon = 10;
+    else if(elems>=177) epsilon = 3.33;
+    else if(elems>=24) epsilon = 1.33;
+
+    float goldenRatio = (1 + pow(5,0.5))/2;
+
     for (int i = 0; i < elems; ++i)
     {
-        float y = 1 - (i / float(elems - 1)) * 2;
+        /*float y = 1 - (i / float(elems - 1)) * 2;
         float rad = sqrt(1 - y*y);
         float theta = phi * i;
 
         float x = cosf(theta) * rad;
-        float z = sinf(theta) * rad;
+        float z = sinf(theta) * rad;*/
+        float theta = 2 * PI * i / goldenRatio;
+        phi = acosf(1 - 2 * (i+0.5f) / elems);
+        float x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
 
         Point position = Point (x * radius, y * radius, z * radius) ;
         float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
         float length = sqrt(squareLength);
         Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
         QVector2D texCoord = QVector2D ((float )i / elems, (float)i / elems);
-        pos.push_back(position);
+        pos.push_back( std::make_pair(position, i) );
         normals.push_back(normal);
         texCoords.push_back(texCoord);
     }
 
-    for (int i = 0; i < elems; ++i)
+    /*for (int i = 0; i < elems; ++i)
     {
         indices.push_back (i);
-    }
+    }*/
 
     for(size_t i = 0; i < pos.size(); i++)
     {
-            Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
+            Vertex newVertex = { .pos = pos[i].first, .normal = normals[i], .texCoord =
                     texCoords[i]};
             vertices.push_back (newVertex);
     }
@@ -217,12 +230,27 @@ void Planet::makePlates ()
 
 void Planet::triangulate()
 {
-    // construction from a list of points :
-    Triangulation T(this->pos.begin(), this->pos.end());
-    Triangulation::size_type n = T.number_of_vertices();
+    Delaunay T(this->pos.begin(), this->pos.end());
+    Delaunay::size_type n = T.number_of_vertices();
     assert(T.is_valid());
     std::cout<<n<<" "<<pos.size()<<std::endl;
     assert(n==pos.size());
+
+    Delaunay::Finite_facets_iterator fit;
+    for (fit = T.finite_facets_begin(); fit != T.finite_facets_end(); ++fit)
+    {
+        Facet facet = *fit;
+        Delaunay::Vertex_handle vh0 = facet.first->vertex( T.vertex_triple_index(facet.second, 0) );
+        Delaunay::Vertex_handle vh1 = facet.first->vertex( T.vertex_triple_index(facet.second, 1) );
+        Delaunay::Vertex_handle vh2 = facet.first->vertex( T.vertex_triple_index(facet.second, 2) );
+        /*std::cout<<vh0->info()<<std::endl;
+        std::cout<<vh1->info()<<std::endl;
+        std::cout<<vh2->info()<<std::endl;*/
+
+        indices.push_back(vh0->info());
+        indices.push_back(vh1->info());
+        indices.push_back(vh2->info());
+    }
 }
 
 void Planet::setOceanicThickness (double _t)
@@ -394,18 +422,18 @@ void Planet::createBuffers ()
 
 	glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
-                                indices.size () * sizeof(int),
+                                indices.size () * sizeof(unsigned int),
                                 &indices[0], GL_STATIC_DRAW);
 
 	glFunctions->glEnableVertexAttribArray (0);
-	glFunctions->glVertexAttribPointer (0, 3, GL_DOUBLE, GL_FALSE,
+    glFunctions->glVertexAttribPointer (0, 3, GL_DOUBLE, GL_FALSE,
 										sizeof(Vertex), (void*) 0);
 	glFunctions->glEnableVertexAttribArray (1);
-	glFunctions->glVertexAttribPointer (1, 3, GL_DOUBLE, GL_FALSE,
+    glFunctions->glVertexAttribPointer (1, 3, GL_DOUBLE, GL_FALSE,
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, normal));
 	glFunctions->glEnableVertexAttribArray (2);
-	glFunctions->glVertexAttribPointer (2, 2, GL_DOUBLE, GL_FALSE,
+    glFunctions->glVertexAttribPointer (2, 2, GL_FLOAT, GL_FALSE,
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, texCoord));
 

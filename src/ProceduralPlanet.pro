@@ -19,7 +19,7 @@ LIBS = -lQGLViewer-qt5 \
     -lglut \
     -lGLU \
     -lmpfr \
-    -lgmp
+    -lgmp \
     -lm
 
 OTHER_FILES = ./GLSL/shaders/*
