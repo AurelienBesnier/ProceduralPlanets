@@ -5,6 +5,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 #include <QGLViewer/camera.h>
+#include <QVector3D>
 #include <QVector2D>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Triangulation_vertex_base_with_info_3.h>
@@ -13,20 +14,22 @@
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel          K;
 typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned int, K> Vb;
-typedef CGAL::Triangulation_data_structure_3<Vb>                     Tds;
-typedef CGAL::Delaunay_triangulation_3<K, Tds>                       Delaunay;
-typedef Delaunay::Cell_handle                                        Cell_handle;
+typedef CGAL::Delaunay_triangulation_cell_base_3<K>                  Cb;
+typedef CGAL::Triangulation_data_structure_3<Vb, Cb>                 Tds;
+typedef CGAL::Delaunay_triangulation_3<K, Tds, CGAL::Fast_location>  Delaunay;
 typedef Delaunay::Vertex_handle                                      Vertex_handle;
-typedef Delaunay::Locate_type                                        Locate_type;
 typedef Delaunay::Point                                              Point;
 typedef Delaunay::Facet                                              Facet;
+typedef Delaunay::Cell                                               Cell;
+typedef Delaunay::Finite_facets_iterator                             Finite_facets_iterator;
+typedef Delaunay::Finite_cells_iterator                              Finite_cells_iterator;
 
 
 struct Vertex {
     Point pos;
-    Point normal;
+    QVector3D normal;
     QVector2D texCoord;
-    Point color;
+    QVector3D color;
     unsigned int plate_id;
 };
 
@@ -43,6 +46,7 @@ private:
     std::vector<unsigned int> indices;
 
 	bool wireframe = false;
+    bool shaderLigth = false;
     void triangulate();
 
 public:
@@ -57,8 +61,7 @@ public:
 	~Planet ();
 
 	void init ();
-	void initGLSL ();
-	void makeSphere (float radius, int slices, int stacks);
+    void initGLSL ();
     void makeSphere (float radius, int elems);
 	void makePlates ();
     void initPlanet ();
@@ -66,6 +69,7 @@ public:
 
 	void draw (const qglviewer::Camera *camera);
 	void changeViewMode ();
+    void shaderLighting ();
 	void clear ();
 	void save () const;
 	void saveOFF () const;

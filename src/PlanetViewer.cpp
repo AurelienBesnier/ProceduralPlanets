@@ -176,6 +176,12 @@ void PlanetViewer::changeViewMode ()
 	update ();
 }
 
+void PlanetViewer::shaderLighting()
+{
+    this->planet.shaderLighting();
+    update();
+}
+
 void PlanetViewer::keyPressEvent (QKeyEvent *e)
 {
 	switch (e->key ())
@@ -185,7 +191,10 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
 			break;
 		case Qt::Key_W:
 			changeViewMode ();
-			break;
+            break;
+        case Qt::Key_S:
+            shaderLighting();
+            break;
         case Qt::Key_C:
             updateCamera(qglviewer::Vec (0.,0.,0.));
             break;

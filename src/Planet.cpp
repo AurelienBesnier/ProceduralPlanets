@@ -96,67 +96,14 @@ void Planet::initPlanet ()
 	planetCreated = true;
 }
 
-void Planet::makeSphere (float radius, int slices, int stacks)
-{
-    // Calc The Vertices
-    std::vector<Point> normals;
-    std::vector<QVector2D> texCoords;
-
-	for (int i = 0; i <= stacks; ++i)
-	{
-		float V = i / (float) stacks;
-        float phi = V * PI;
-
-		// Loop Through Slices
-		for (int j = 0; j <= slices; ++j)
-		{
-			float U = j / (float) slices;
-            float theta = U * (PI * 2);
-
-			// Calc The Vertex Positions
-			float x = cosf (theta) * sinf (phi);
-			float y = cosf (phi);
-			float z = sinf (theta) * sinf (phi);
-
-			// Push Back Vertex Data
-            Point position = Point (x * radius, y * radius, z * radius) ;
-            float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
-            float length = sqrt(squareLength);
-            Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
-            QVector2D texCoord = QVector2D ((float )j / slices, (float)i / stacks);
-            pos.push_back( std::make_pair(position, i) );
-		 	normals.push_back(normal);
-		 	texCoords.push_back(texCoord);
-		}
-	}
-
-	// Calc The Index Positions
-    for (int i = 0; i < slices * stacks + slices; ++i)
-	{
-		indices.push_back (i);
-		indices.push_back (i + slices + 1);
-		indices.push_back (i + slices);
-
-		indices.push_back (i + slices + 1);
-		indices.push_back (i);
-		indices.push_back (i + 1);
-    }
-
-    for(size_t i = 0; i < pos.size(); i++)
-	{
-            Vertex newVertex = { .pos = pos[i].first, .normal = normals[i], .texCoord =
-					texCoords[i] };
-			vertices.push_back (newVertex);
-    }
-    std::cout<<pos.size()<<std::endl;
-}
-
-
 void Planet::makeSphere (float radius, int elems)
 {
     // Calc The Vertices
-    std::vector<Point> normals;
+    pos.reserve(elems);
+    std::vector<QVector3D> normals;
+    normals.reserve(elems);
     std::vector<QVector2D> texCoords;
+    texCoords.reserve(elems);
 
     float phi = PI * (3.0 - sqrt(5.0));
 
@@ -180,12 +127,12 @@ void Planet::makeSphere (float radius, int elems)
         float z = sinf(theta) * rad;*/
         float theta = 2 * PI * i / goldenRatio;
         phi = acosf(1 - 2 * (i+0.5f) / elems);
-        float x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
+        double x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
 
         Point position = Point (x * radius, y * radius, z * radius) ;
         float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
         float length = sqrt(squareLength);
-        Point normal = Point(position.x()/length,position.y()/length,position.z()/length);
+        QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
         QVector2D texCoord = QVector2D ((float )i / elems, (float)i / elems);
         pos.push_back( std::make_pair(position, i) );
         normals.push_back(normal);
@@ -208,23 +155,28 @@ void Planet::makeSphere (float radius, int elems)
 
 void Planet::makePlates ()
 {
-    if (plates.size () > 1)
+    if (plateNum > 1)
 	{
 		plates.clear ();
         std::vector<unsigned int> tmp_init(plateNum);
-        std::vector<Point> colors(plateNum);
+        std::vector<QVector3D> colors(plateNum);
         QRandomGenerator prng;
         prng.seed(time(NULL));
 
-        for(Point c : colors)
-            c = Point(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
+        for(QVector3D &c : colors)
+            c = QVector3D(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
 
-	}
-    QRandomGenerator prng;
-    prng.seed(time(NULL));
-    for(size_t i = 0; i<vertices.size(); i++)
-    {
-        vertices[i].color=Point(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
+        unsigned int cpt = 0, color_idx=0;
+        for(size_t i = 0; i<vertices.size(); i++)
+        {
+            if(cpt++ >= vertices.size()/plateNum)
+            {
+                color_idx++;
+                cpt = 0;
+            }
+
+            vertices[i].color = colors[color_idx];
+        }
     }
 }
 
@@ -236,77 +188,17 @@ void Planet::triangulate()
     std::cout<<n<<" "<<pos.size()<<std::endl;
     assert(n==pos.size());
 
-    Delaunay::Finite_facets_iterator fit;
+    Finite_facets_iterator fit;
     for (fit = T.finite_facets_begin(); fit != T.finite_facets_end(); ++fit)
     {
         Facet facet = *fit;
-        Delaunay::Vertex_handle vh0 = facet.first->vertex( T.vertex_triple_index(facet.second, 0) );
-        Delaunay::Vertex_handle vh1 = facet.first->vertex( T.vertex_triple_index(facet.second, 1) );
-        Delaunay::Vertex_handle vh2 = facet.first->vertex( T.vertex_triple_index(facet.second, 2) );
-        /*std::cout<<vh0->info()<<std::endl;
-        std::cout<<vh1->info()<<std::endl;
-        std::cout<<vh2->info()<<std::endl;*/
-
-        indices.push_back(vh0->info());
-        indices.push_back(vh1->info());
-        indices.push_back(vh2->info());
+        for(char i = 0; i<3; i++)
+        {
+            Vertex_handle vh = facet.first->vertex(T.vertex_triple_index(facet.second, i));
+            indices.push_back(vh->info());
+        }
     }
 }
-
-void Planet::setOceanicThickness (double _t)
-{
-	plateParams.oceanicThickness = _t;
-	std::cout << "Oceanic thickness: " << this->plateParams.oceanicThickness
-			<< std::endl;
-}
-
-void Planet::setOceanicElevation (double _e)
-{
-	plateParams.oceanicEleavation = _e;
-	std::cout << "Oceanic elevation: " << this->plateParams.oceanicEleavation
-			<< std::endl;
-}
-
-void Planet::setContinentalThickness (double _t)
-{
-	plateParams.continentalThickness = _t;
-	std::cout << "Continental thickness: "
-			<< this->plateParams.continentalThickness << std::endl;
-}
-
-void Planet::setContinentalElevation (double _e)
-{
-	plateParams.continentalElevation = _e;
-	std::cout << "Continental elevation: "
-			<< this->plateParams.continentalElevation << std::endl;
-}
-
-void Planet::setPlateNumber (int _plateNum)
-{
-	this->plateNum = _plateNum;
-
-	std::cout << "planet plate number: " << this->plateNum << std::endl;
-}
-
-void Planet::setRadius (double _r)
-{
-	this->radius = _r;
-
-	std::cout << "planet radius set to " << this->radius << std::endl;
-}
-
-double Planet::getRadius() const
-{
-	return this->radius;
-}
-
-void Planet::setElems (int _elems)
-{
-	this->elems = _elems;
-
-	std::cout << "planet elems set to " << this->elems << std::endl;
-}
-
 
 void /*GLAPIENTRY */Planet::MessageCallback (GLenum source, GLenum type,
 												GLuint id, GLenum severity,
@@ -427,23 +319,24 @@ void Planet::createBuffers ()
 
 	glFunctions->glEnableVertexAttribArray (0);
     glFunctions->glVertexAttribPointer (0, 3, GL_DOUBLE, GL_FALSE,
-										sizeof(Vertex), (void*) 0);
+                                        sizeof(Vertex), (void*) 0);
+
 	glFunctions->glEnableVertexAttribArray (1);
-    glFunctions->glVertexAttribPointer (1, 3, GL_DOUBLE, GL_FALSE,
+    glFunctions->glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE,
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, normal));
+
 	glFunctions->glEnableVertexAttribArray (2);
     glFunctions->glVertexAttribPointer (2, 2, GL_FLOAT, GL_FALSE,
 										sizeof(Vertex),
 										(void*) offsetof(Vertex, texCoord));
 
     glFunctions->glEnableVertexAttribArray (3);
-    glFunctions->glVertexAttribPointer (3, 3, GL_DOUBLE, GL_FALSE,
+    glFunctions->glVertexAttribPointer (3, 3, GL_FLOAT, GL_FALSE,
                                         sizeof(Vertex),
                                         (void*) offsetof(Vertex, color));
 
 	glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
-
 	glFunctions->glBindVertexArray (0);
 }
 
@@ -500,6 +393,11 @@ void Planet::draw (const qglviewer::Camera *camera)
 			lightColor
 			);
 
+    glFunctions->glUniform1i(
+            glFunctions->glGetUniformLocation(programID, "lighting"),
+            this->shaderLigth
+            );
+
     glPointSize(4);
 	glFunctions->glBindVertexArray (VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -554,9 +452,9 @@ void Planet::save () const
 
 	for (size_t i = 0; i < indices.size (); i += 3)
 	{
-		Vertex v1 = vertices[indices[i]];
+        /*Vertex v1 = vertices[indices[i]];
 		Vertex v2 = vertices[indices[i + 1]];
-		Vertex v3 = vertices[indices[i + 2]];
+        Vertex v3 = vertices[indices[i + 2]];*/
 		ostream << "f " << indices[i] << " " << indices[i + 1] << " "
 				<< indices[i + 2] << std::endl;
 	}
@@ -593,4 +491,63 @@ void Planet::saveOFF () const
 	ostream.close ();
 
 	std::cout << "Wrote to file " << filename << std::endl;
+}
+
+void Planet::setOceanicThickness (double _t)
+{
+    plateParams.oceanicThickness = _t;
+    std::cout << "Oceanic thickness: " << this->plateParams.oceanicThickness
+            << std::endl;
+}
+
+void Planet::setOceanicElevation (double _e)
+{
+    plateParams.oceanicEleavation = _e;
+    std::cout << "Oceanic elevation: " << this->plateParams.oceanicEleavation
+            << std::endl;
+}
+
+void Planet::setContinentalThickness (double _t)
+{
+    plateParams.continentalThickness = _t;
+    std::cout << "Continental thickness: "
+            << this->plateParams.continentalThickness << std::endl;
+}
+
+void Planet::setContinentalElevation (double _e)
+{
+    plateParams.continentalElevation = _e;
+    std::cout << "Continental elevation: "
+            << this->plateParams.continentalElevation << std::endl;
+}
+
+void Planet::setPlateNumber (int _plateNum)
+{
+    this->plateNum = _plateNum;
+
+    std::cout << "planet plate number: " << this->plateNum << std::endl;
+}
+
+void Planet::setRadius (double _r)
+{
+    this->radius = _r;
+
+    std::cout << "planet radius set to " << this->radius << std::endl;
+}
+
+double Planet::getRadius() const
+{
+    return this->radius;
+}
+
+void Planet::setElems (int _elems)
+{
+    this->elems = _elems;
+
+    std::cout << "planet elems set to " << this->elems << std::endl;
+}
+
+void Planet::shaderLighting ()
+{
+    this->shaderLigth = !this->shaderLigth;
 }

@@ -24,6 +24,7 @@ protected:
 
 	virtual void draw ();
 	virtual void changeViewMode ();
+    virtual void shaderLighting ();
 	virtual void init ();
 	virtual QString helpString () const;
 	virtual void keyPressEvent (QKeyEvent *e);

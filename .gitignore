@@ -94,3 +94,6 @@ src/build/
 
 .qmake.stash
 ProceduralPlanet
+
+*.off
+*.obj
