@@ -11,7 +11,7 @@
 #include "Planet.hpp"
 #include "Plate.hpp"
 
-#define PI 3.14159265
+#define PI 3.14159265358979323846
 
 Planet::Planet (QOpenGLContext *context)
 {
