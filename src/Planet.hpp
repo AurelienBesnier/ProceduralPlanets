@@ -10,19 +10,15 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Triangulation_vertex_base_with_info_3.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Point_set_3.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/Advancing_front_surface_reconstruction.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include "Plate.hpp"
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel          K;
-typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned int, K> Vb;
-typedef CGAL::Delaunay_triangulation_cell_base_3<K>                  Cb;
-typedef CGAL::Triangulation_data_structure_3<Vb, Cb>                 Tds;
-typedef CGAL::Delaunay_triangulation_3<K, Tds, CGAL::Fast_location>  Delaunay;
-typedef Delaunay::Vertex_handle                                      Vertex_handle;
-typedef Delaunay::Point                                              Point;
-typedef Delaunay::Facet                                              Facet;
-typedef Delaunay::Cell                                               Cell;
-typedef Delaunay::Finite_facets_iterator                             Finite_facets_iterator;
-typedef Delaunay::Finite_cells_iterator                              Finite_cells_iterator;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel     K;
+typedef K::Point_3                                              Point;
+typedef CGAL::Point_set_3<Point>                                Point_set;
 
 
 struct Vertex {
@@ -41,7 +37,7 @@ private:
 	int elems;
 
 	std::vector<Vertex> vertices;
-    std::vector<std::pair<Point,unsigned int>> pos;
+    std::vector<Point> pos;
 	std::vector<Plate> plates;
     std::vector<unsigned int> indices;
 

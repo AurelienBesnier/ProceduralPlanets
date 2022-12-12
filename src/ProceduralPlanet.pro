@@ -15,6 +15,7 @@ HEADERS += \
     Planet.hpp \
     PlanetDockWidget.hpp \
     PlanetViewer.hpp \
+    Plate.hpp \
     Window.hpp
 LIBS = -lQGLViewer-qt5 \
     -lglut \
