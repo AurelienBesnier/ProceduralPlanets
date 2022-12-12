@@ -9,6 +9,7 @@
 #include <QRandomGenerator>
 
 #include "Planet.hpp"
+#include "Plate.hpp"
 
 #define PI 3.14159265
 
@@ -105,7 +106,7 @@ void Planet::makeSphere (float radius, int elems)
     std::vector<QVector2D> texCoords;
     texCoords.reserve(elems);
 
-    float phi = PI * (3.0 - sqrt(5.0));
+    /*float phi = PI * (3.0 - sqrt(5.0));
 
     float epsilon=0.33;
     if(elems >= 600000) epsilon = 214;
@@ -113,7 +114,7 @@ void Planet::makeSphere (float radius, int elems)
     else if(elems>=11000) epsilon = 27;
     else if(elems>=890) epsilon = 10;
     else if(elems>=177) epsilon = 3.33;
-    else if(elems>=24) epsilon = 1.33;
+    else if(elems>=24) epsilon = 1.33;*/
 
     float goldenRatio = (1 + pow(5,0.5))/2;
 
@@ -126,7 +127,7 @@ void Planet::makeSphere (float radius, int elems)
         float x = cosf(theta) * rad;
         float z = sinf(theta) * rad;*/
         float theta = 2 * PI * i / goldenRatio;
-        phi = acosf(1 - 2 * (i+0.5f) / elems);
+        float phi = acosf(1 - 2 * (i+0.5f) / elems);
         double x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
 
         Point position = Point (x * radius, y * radius, z * radius) ;
@@ -138,11 +139,6 @@ void Planet::makeSphere (float radius, int elems)
         normals.push_back(normal);
         texCoords.push_back(texCoord);
     }
-
-    /*for (int i = 0; i < elems; ++i)
-    {
-        indices.push_back (i);
-    }*/
 
     for(size_t i = 0; i < pos.size(); i++)
     {
@@ -158,10 +154,16 @@ void Planet::makePlates ()
     if (plateNum > 1)
 	{
 		plates.clear ();
-        std::vector<unsigned int> tmp_init(plateNum);
-        std::vector<QVector3D> colors(plateNum);
+        plates.resize (plateNum);
+        plates[0].type=PlateType.OCEANIC;
+        plates[1].type=PlateType.CONTINENTAL;
         QRandomGenerator prng;
         prng.seed(time(NULL));
+        for(char i = 0; c < plateNum; i++)
+            plates[1].type = prng.generateDouble() > 0.5 ? PlateType.OCEANIC : PlateType.CONTINENTAL;
+
+        std::vector<unsigned int> tmp_init(plateNum);
+        std::vector<QVector3D> colors(plateNum);
 
         for(QVector3D &c : colors)
             c = QVector3D(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
@@ -176,6 +178,8 @@ void Planet::makePlates ()
             }
 
             vertices[i].color = colors[color_idx];
+            vertices[i].plate_id = color_idx;
+            plates[color_idx].points.push_back(i);
         }
     }
 }

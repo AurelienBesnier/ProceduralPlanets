@@ -8,12 +8,9 @@
 #include <QVector3D>
 #include <QVector2D>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Triangulation_vertex_base_with_info_3.h>
-#include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Point_set_3.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Advancing_front_surface_reconstruction.h>
-#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include "Plate.hpp"
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel     K;
