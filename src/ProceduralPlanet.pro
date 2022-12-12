@@ -1,4 +1,5 @@
 QT += opengl widgets gui xml
+QMAKE_CXXFLAGS = -O3 -std=c++20
 TEMPLATE = app
 TARGET = ProceduralPlanet
 MOC_DIR = ./moc
