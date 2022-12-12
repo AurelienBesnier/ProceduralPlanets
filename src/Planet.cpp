@@ -155,12 +155,12 @@ void Planet::makePlates ()
 	{
 		plates.clear ();
         plates.resize (plateNum);
-        plates[0].type=PlateType.OCEANIC;
-        plates[1].type=PlateType.CONTINENTAL;
+        plates[0].type=OCEANIC;
+        plates[1].type=CONTINENTAL;
         QRandomGenerator prng;
         prng.seed(time(NULL));
-        for(char i = 0; c < plateNum; i++)
-            plates[1].type = prng.generateDouble() > 0.5 ? PlateType.OCEANIC : PlateType.CONTINENTAL;
+        for(char i = 0; i < plateNum; i++)
+            plates[1].type = prng.generateDouble() > 0.5 ? OCEANIC : CONTINENTAL;
 
         std::vector<unsigned int> tmp_init(plateNum);
         std::vector<QVector3D> colors(plateNum);

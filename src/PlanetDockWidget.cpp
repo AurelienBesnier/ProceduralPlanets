@@ -21,7 +21,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 
 	numPlateSlider = new QSlider (groupBox);
 	numPlateSlider->setOrientation (Qt::Horizontal);
-	numPlateSlider->setMinimum (1);
+    numPlateSlider->setMinimum (2);
 	numPlateSlider->setMaximum (10);
     numPlateSlider->setValue(4);
 
@@ -50,7 +50,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	planetElements->setMinimum (10);
     planetElements->setMaximum (60000);
     planetElements->setValue(1000);
-    planetElements->setTickInterval(10);
+    planetElements->setTickInterval(100);
 
 	planetElementLabel = new QLabel (
 			QString ("Planet Slices/Stacks:%1").arg (planetElements->value ()),
@@ -119,7 +119,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 				SLOT(setContinentElevation(QString)));
 
 	//Make lineedits accept numbers only
-	QDoubleValidator *validator = new QDoubleValidator (-10000000.0, 10000000.0, 6,
+    QDoubleValidator *validator = new QDoubleValidator (-10000.0, 10000.0, 6,
 														this);
 	validator->setLocale (QLocale::C);
 	validator->setNotation (QDoubleValidator::StandardNotation);
