@@ -24,6 +24,7 @@ Planet::~Planet ()
 {
 	vertices.clear ();
 	indices.clear ();
+    plates.clear();
     pos.clear();
 	glFunctions->glDeleteVertexArrays (1, &VAO);
 	glFunctions->glDeleteBuffers (1, &VBO);
@@ -151,36 +152,33 @@ void Planet::makeSphere (float radius, int elems)
 
 void Planet::makePlates ()
 {
-    if (plateNum > 1)
-	{
-		plates.clear ();
-        plates.resize (plateNum);
-        plates[0].type=OCEANIC;
-        plates[1].type=CONTINENTAL;
-        QRandomGenerator prng;
-        prng.seed(time(NULL));
-        for(char i = 0; i < plateNum; i++)
-            plates[1].type = prng.generateDouble() > 0.5 ? OCEANIC : CONTINENTAL;
+    plates.clear ();
+    plates.resize (plateNum);
+    plates[0].type=OCEANIC;
+    plates[1].type=CONTINENTAL;
+    QRandomGenerator prng;
+    prng.seed(time(NULL));
+    for(char i = 0; i < plateNum; i++)
+        plates[1].type = prng.generateDouble() > 0.5 ? OCEANIC : CONTINENTAL;
 
-        std::vector<unsigned int> tmp_init(plateNum);
-        std::vector<QVector3D> colors(plateNum);
+    std::vector<unsigned int> tmp_init(plateNum);
+    std::vector<QVector3D> colors(plateNum);
 
-        for(QVector3D &c : colors)
-            c = QVector3D(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
+    for(QVector3D &c : colors)
+        c = QVector3D(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
 
-        unsigned int cpt = 0, color_idx=0;
-        for(size_t i = 0; i<vertices.size(); i++)
+    unsigned int cpt = 0, color_idx=0;
+    for(size_t i = 0; i<vertices.size(); i++)
+    {
+        if(cpt++ >= vertices.size()/plateNum)
         {
-            if(cpt++ >= vertices.size()/plateNum)
-            {
-                color_idx++;
-                cpt = 0;
-            }
-
-            vertices[i].color = colors[color_idx];
-            vertices[i].plate_id = color_idx;
-            plates[color_idx].points.push_back(i);
+            color_idx++;
+            cpt = 0;
         }
+
+        vertices[i].color = colors[color_idx];
+        vertices[i].plate_id = color_idx;
+        plates[color_idx].points.push_back(i);
     }
 }
 
@@ -219,7 +217,7 @@ void /*GLAPIENTRY */Planet::MessageCallback (GLenum source, GLenum type,
 		std::string s_severity = (
 				severity == GL_DEBUG_SEVERITY_HIGH ? "High" :
 				severity == GL_DEBUG_SEVERITY_MEDIUM ? "Medium" : "Low");
-		std::cout << "Error " << id << " [severity=" << s_severity << "]: "
+        std::cout << "Error " << id <<", Type: "<< type << " [severity=" << s_severity << "]: "
 				<< message << std::endl;
 	}
 }
@@ -348,7 +346,6 @@ void Planet::createBuffers ()
 
 void Planet::draw (const qglviewer::Camera *camera)
 {
-
 	if (!planetCreated)
 		return;
 
@@ -416,6 +413,7 @@ void Planet::clear ()
 	{
 		vertices.clear ();
 		indices.clear ();
+        plates.clear();
         pos.clear();
 
 		glFunctions->glDeleteVertexArrays (1, &VAO);
