@@ -117,7 +117,7 @@ void Planet::makeSphere (float radius, int elems)
     else if(elems>=177) epsilon = 3.33;
     else if(elems>=24) epsilon = 1.33;*/
 
-    float goldenRatio = (1 + pow(5,0.5))/2;
+    double goldenRatio = (1 + pow(5,0.5))/2;
 
     for (int i = 0; i < elems; ++i)
     {
@@ -127,13 +127,13 @@ void Planet::makeSphere (float radius, int elems)
 
         float x = cosf(theta) * rad;
         float z = sinf(theta) * rad;*/
-        float theta = 2 * PI * i / goldenRatio;
-        float phi = acosf(1 - 2 * (i+0.5f) / elems);
+        double theta = 2 * PI * i / goldenRatio;
+        double phi = acosf(1 - 2 * (i+0.5f) / elems);
         double x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
 
         Point position = Point (x * radius, y * radius, z * radius) ;
-        float squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
-        float length = sqrt(squareLength);
+        double squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
+        double length = sqrt(squareLength);
         QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
         QVector2D texCoord = QVector2D ((float )i / elems, (float)i / elems);
         pos.push_back( position );
@@ -143,9 +143,9 @@ void Planet::makeSphere (float radius, int elems)
 
     for(size_t i = 0; i < pos.size(); i++)
     {
-            Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
-                    texCoords[i]};
-            vertices.push_back (newVertex);
+        Vertex newVertex = { .pos = pos[i], .normal = normals[i], .texCoord =
+                texCoords[i]};
+        vertices.push_back (newVertex);
     }
     std::cout<<pos.size()<<std::endl;
 }
