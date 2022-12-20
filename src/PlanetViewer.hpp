@@ -11,19 +11,21 @@
 #include <algorithm>
 #include "Planet.hpp"
 
+enum DisplayMode{ WIRE=0, SOLID=1};
+
 class PlanetViewer : public QGLViewer {
 Q_OBJECT
 
 public:
-	PlanetViewer (QWidget *parent);
-
+    PlanetViewer (QWidget *parent);
 protected:
 
     Planet planet;
-	qglviewer::Vec cam;
+    qglviewer::Vec cam;
 
-	virtual void draw ();
-	virtual void changeViewMode ();
+    DisplayMode displayMode;
+
+    virtual void draw ();
     virtual void shaderLighting ();
 	virtual void init ();
 	virtual QString helpString () const;
@@ -31,8 +33,15 @@ protected:
 
 	void drawClippingPlane ();
 
+    void changeDisplayMode(){
+        if(displayMode == WIRE)
+            displayMode = SOLID;
+        else if(displayMode == SOLID)
+            displayMode = WIRE;
+    }
+
     void clear ();
-	void updateCamera (const qglviewer::Vec &center);
+    void updateCamera (const qglviewer::Vec &center);
 
 public slots:
 	void setPlateNumber (int _plateNum);

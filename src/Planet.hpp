@@ -7,15 +7,23 @@
 #include <QGLViewer/camera.h>
 #include <QVector3D>
 #include <QVector2D>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/mesh_segmentation.h>
 #include <CGAL/Point_set_3.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Advancing_front_surface_reconstruction.h>
+#include <CGAL/jet_estimate_normals.h>
+#include <CGAL/mst_orient_normals.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+
 #include "Plate.hpp"
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel     K;
-typedef K::Point_3                                              Point;
-typedef CGAL::Point_set_3<Point>                                Point_set;
+typedef CGAL::Simple_cartesian<double>                  K;
+typedef K::Point_3                                      Point;
+typedef CGAL::Point_set_3<Point>                        Point_set;
+typedef CGAL::Surface_mesh<Point>                       Mesh;
+typedef boost::graph_traits<Mesh>::vertex_descriptor    vertex_descriptor;
+typedef boost::graph_traits<Mesh>::face_descriptor      face_descriptor;
+
 
 
 struct Vertex {
@@ -28,6 +36,7 @@ struct Vertex {
 
 class Planet {
 private:
+    Mesh mesh;
 	unsigned int plateNum;
 	PlateParameters plateParams;
 	double radius;

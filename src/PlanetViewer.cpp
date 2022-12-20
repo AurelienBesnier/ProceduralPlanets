@@ -10,26 +10,55 @@ PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
 }
 
+void PlanetViewer::init ()
+{
+    planet = Planet (QOpenGLContext::currentContext ());
+
+    // The ManipulatedFrame will be used as the clipping plane
+    setManipulatedFrame (new ManipulatedFrame ());
+
+    // Enable plane clipping
+    glEnable (GL_CLIP_PLANE0);
+
+    //Set background color
+    setBackgroundColor (QColor (20, 20, 20));
+    displayMode = SOLID;
+
+    //Set blend parameters
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    updateCamera(qglviewer::Vec (0.,0.,0.));
+
+}
+
 void PlanetViewer::draw ()
 {
-
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawClippingPlane ();
 
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
 
+    glEnable(GL_LIGHTING);
 	glEnable (GL_DEPTH_TEST);
-	glDisable (GL_BLEND);
+    glDisable (GL_BLEND);
+
+    if(displayMode == WIRE){
+       glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+    }  else if(displayMode == SOLID ){
+       glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     planet.draw (camera ());
 
+    glDisable(GL_LIGHTING);
+    update();
 }
 
 void PlanetViewer::drawClippingPlane ()
 {
-
 	glEnable (GL_LIGHTING);
 
-	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
 
 	GLdouble equation[4];
@@ -45,27 +74,6 @@ void PlanetViewer::drawClippingPlane ()
 	qglviewer::Vec normal (normResult[0] - projP[0], normResult[1] - projP[1],
 							normResult[2] - projP[2]);
 	qglviewer::Vec point (projP[0], projP[1], projP[2]);
-
-}
-
-void PlanetViewer::init ()
-{
-    planet = Planet (QOpenGLContext::currentContext ());
-
-	// The ManipulatedFrame will be used as the clipping plane
-	setManipulatedFrame (new ManipulatedFrame ());
-
-	// Enable plane clipping
-	glEnable (GL_CLIP_PLANE0);
-
-	//Set background color
-	setBackgroundColor (QColor (20, 20, 20));
-	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-
-	//Set blend parameters
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    updateCamera(qglviewer::Vec (0.,0.,0.));
 
 }
 
@@ -94,7 +102,7 @@ void PlanetViewer::setPlanetRadius (QString _r)
 void PlanetViewer::setPlanetElem (int _elems)
 {
 	planet.clear ();
-	planet.setElems (_elems);
+    planet.setElems (_elems);
     //planet.initPlanet();
 	update ();
 }
@@ -170,12 +178,6 @@ std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)
 	return stream;
 }
 
-void PlanetViewer::changeViewMode ()
-{
-	this->planet.changeViewMode ();
-	update ();
-}
-
 void PlanetViewer::shaderLighting()
 {
     this->planet.shaderLighting();
@@ -190,7 +192,7 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
 			update ();
 			break;
 		case Qt::Key_W:
-			changeViewMode ();
+            changeDisplayMode();
             break;
         case Qt::Key_S:
             shaderLighting();

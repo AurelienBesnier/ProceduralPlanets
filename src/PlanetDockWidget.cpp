@@ -48,7 +48,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	planetElements = new QSlider ();
 	planetElements->setOrientation (Qt::Horizontal);
 	planetElements->setMinimum (10);
-    planetElements->setMaximum (60000);
+    planetElements->setMaximum (350000);
     planetElements->setValue(1000);
     planetElements->setTickInterval(100);
 

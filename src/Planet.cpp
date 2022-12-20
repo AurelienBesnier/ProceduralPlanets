@@ -37,7 +37,7 @@ void Planet::init ()
 	planetCreated = false;
     this->plateNum = 4;
     this->radius = 6370;
-    this->elems = 1000;
+    this->elems = 600;
 }
 
 void Planet::initGLSL ()
@@ -107,26 +107,10 @@ void Planet::makeSphere (float radius, int elems)
     std::vector<QVector2D> texCoords;
     texCoords.reserve(elems);
 
-    /*float phi = PI * (3.0 - sqrt(5.0));
-
-    float epsilon=0.33;
-    if(elems >= 600000) epsilon = 214;
-    else if(elems>= 400000) epsilon = 75;
-    else if(elems>=11000) epsilon = 27;
-    else if(elems>=890) epsilon = 10;
-    else if(elems>=177) epsilon = 3.33;
-    else if(elems>=24) epsilon = 1.33;*/
-
     double goldenRatio = (1 + pow(5,0.5))/2;
 
     for (int i = 0; i < elems; ++i)
     {
-        /*float y = 1 - (i / float(elems - 1)) * 2;
-        float rad = sqrt(1 - y*y);
-        float theta = phi * i;
-
-        float x = cosf(theta) * rad;
-        float z = sinf(theta) * rad;*/
         double theta = 2 * PI * i / goldenRatio;
         double phi = acosf(1 - 2 * (i+0.5f) / elems);
         double x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
@@ -150,35 +134,88 @@ void Planet::makeSphere (float radius, int elems)
     std::cout<<pos.size()<<std::endl;
 }
 
+void collect_one_ring (std::vector<Point> const & i_vertices,
+                       std::vector< unsigned int > const & i_triangles,
+                       std::vector<std::vector<unsigned int> > & o_one_ring) {
+    o_one_ring.clear();
+    o_one_ring.resize(i_vertices.size());
+    size_t i, j, y, size=i_triangles.size();
+    for(i = 0; i<size; i+=3)
+    {
+        for(j = 0; j<3; j++) //sommet courant
+        {
+            for(y = 0; y<3 ;y++) // sommets voisins
+            {
+                if(j!=y)
+                {
+                    if(std::find(o_one_ring.begin(), o_one_ring.end(),
+                     o_one_ring[i_triangles[i]]) != o_one_ring.end()){
+                        o_one_ring[i_triangles[i+j]].push_back(i_triangles[i+y]);
+                        /*o_one_ring[i_triangles[i]].push_back(i_triangles[i+y+1]);
+                        o_one_ring[i_triangles[i]].push_back(i_triangles[i+y+2]);*/
+                    }
+                }
+
+            }
+        }
+    }
+}
+
 void Planet::makePlates ()
 {
+    std::vector<std::vector<unsigned int> >  one_ring;
+    collect_one_ring(pos,indices,one_ring);
+
     plates.clear ();
     plates.resize (plateNum);
-    plates[0].type=OCEANIC;
-    plates[1].type=CONTINENTAL;
     QRandomGenerator prng;
     prng.seed(time(NULL));
-    for(char i = 0; i < plateNum; i++)
-        plates[1].type = prng.generateDouble() > 0.5 ? OCEANIC : CONTINENTAL;
-
-    std::vector<unsigned int> tmp_init(plateNum);
+    std::vector<unsigned int> tmp_init;
     std::vector<QVector3D> colors(plateNum);
-
+    std::vector<std::vector<unsigned int>> last_ids;
+    last_ids.resize(plateNum);
     for(QVector3D &c : colors)
         c = QVector3D(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
 
-    unsigned int cpt = 0, color_idx=0;
-    for(size_t i = 0; i<vertices.size(); i++)
-    {
-        if(cpt++ >= vertices.size()/plateNum)
-        {
-            color_idx++;
-            cpt = 0;
-        }
+    plates[0].type=OCEANIC;
+    plates[1].type=CONTINENTAL;
+    for(unsigned short i = 2; i < plateNum; i++)
+        plates[i].type = prng.generateDouble() > 0.5 ? OCEANIC : CONTINENTAL;
 
-        vertices[i].color = colors[color_idx];
-        vertices[i].plate_id = color_idx;
-        plates[color_idx].points.push_back(i);
+    for(unsigned short i = 0; i< plateNum; i++)
+    {
+        unsigned int first_point_of_plate = prng.bounded((unsigned int)pos.size());
+        while(std::find(tmp_init.begin(), tmp_init.end(), first_point_of_plate) != tmp_init.end())
+        { first_point_of_plate = prng.bounded((unsigned int)pos.size()); }
+        tmp_init.push_back(first_point_of_plate);
+
+        vertices[first_point_of_plate].color = colors[i];
+        plates[i].points.push_back(first_point_of_plate);
+        last_ids[i].push_back(first_point_of_plate);
+    }
+    while(tmp_init.size() < 100)
+    {
+        std::cout<<pos.size()<<" | "<<tmp_init.size()<<std::endl;
+        for(unsigned short i = 0; i<plateNum; i++)
+        {
+            if(!last_ids[i].empty())
+            {
+                unsigned int current_vertex = last_ids[i].back();
+                std::cout<<current_vertex<<std::endl;
+                std::vector<unsigned int> neighbours = one_ring[current_vertex];
+                for(size_t n = 0; n < neighbours.size(); n++)
+                {
+                    //std::cout<<"current vertex: "<<current_vertex<<"\n neighbour: "<<neighbours[n]<<std::endl;
+                    if(std::find(tmp_init.begin(), tmp_init.end(), neighbours[n]) == tmp_init.end())
+                    {
+                        tmp_init.push_back(neighbours[n]);
+                        plates[i].points.push_back(neighbours[n]);
+                        vertices[neighbours[n]].color=colors[i];
+                        last_ids[i].push_back(neighbours[n]);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -195,6 +232,7 @@ void Planet::triangulate()
     CGAL::advancing_front_surface_reconstruction(points.points().begin(),
                                                  points.points().end(),
                                                  std::back_inserter(facets));
+
     std::cout << facets.size ()
               << " facet(s) generated by reconstruction." << std::endl;
     for(size_t i = 0; i<facets.size(); i++)
@@ -202,6 +240,8 @@ void Planet::triangulate()
         for(size_t j = 0; j<3; j++)
             indices.push_back(facets[i][j]);
     }
+
+    //CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh (pos, facets, mesh);
 }
 
 void /*GLAPIENTRY */Planet::MessageCallback (GLenum source, GLenum type,
@@ -355,16 +395,6 @@ void Planet::draw (const qglviewer::Camera *camera)
 		createBuffers ();
 	}
 
-	glLightfv (GL_LIGHT1, GL_POSITION, camera->position());
-    glLightfv (GL_LIGHT1, GL_SPOT_DIRECTION, camera->viewDirection());
-	glEnable(GL_LIGHT1);
-	glEnable(GL_LIGHTING);
-
-	if (wireframe)
-		glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE);
-	else
-		glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-
 	//GPU start
 	// Récuperation des matrices de projection / vue-modèle
 	float pMatrix[16];
@@ -401,7 +431,6 @@ void Planet::draw (const qglviewer::Camera *camera)
             this->shaderLigth
             );
 
-    glPointSize(4);
 	glFunctions->glBindVertexArray (VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
