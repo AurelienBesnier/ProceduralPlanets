@@ -22,7 +22,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	numPlateSlider = new QSlider (groupBox);
 	numPlateSlider->setOrientation (Qt::Horizontal);
     numPlateSlider->setMinimum (2);
-	numPlateSlider->setMaximum (10);
+    numPlateSlider->setMaximum (20);
     numPlateSlider->setValue(4);
 
 	planetParamLayout->addWidget (numPlateSlider, 0, 1, 1, 1);
@@ -37,6 +37,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 				SLOT(setPlateNumText()));
 
 	planetRadius = new QLineEdit ();
+  planetRadius->setText("6370");
 	planetParamLayout->addWidget (planetRadius, 1, 1, 1, 1);
 
 	planetRadiusLabel = new QLabel (QString ("Planet Radius:"));
@@ -45,24 +46,16 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	connect (planetRadius, SIGNAL(textChanged(QString)), viewer,
 				SLOT(setPlanetRadius(QString)));
 
-	planetElements = new QSlider ();
-	planetElements->setOrientation (Qt::Horizontal);
-	planetElements->setMinimum (10);
-    planetElements->setMaximum (350000);
-    planetElements->setValue(1000);
-    planetElements->setTickInterval(100);
+  planetElements = new QLineEdit ();
+  planetElements->setText("60000");
 
-	planetElementLabel = new QLabel (
-			QString ("Planet Slices/Stacks:%1").arg (planetElements->value ()),
-			groupBox);
+	planetElementLabel = new QLabel (QString ("Planet Elements: "));
 	planetParamLayout->addWidget (planetElementLabel, 2, 0, 1, 1);
 
 	planetParamLayout->addWidget (planetElements, 2, 1, 1, 1);
 
-	connect (planetElements, SIGNAL(valueChanged(int)), viewer,
-				SLOT(setPlanetElem(int)));
-	connect (planetElements, SIGNAL(valueChanged(int)), this,
-				SLOT(setPlanetElemsText()));
+	connect (planetElements, SIGNAL(textChanged(QString)), viewer,
+                SLOT(setPlanetElem(QString)));
 
 	confirmButton = new QPushButton ("Generate", groupBox);
 	planetParamLayout->addWidget (confirmButton, 4, 1, 1, 1);
@@ -137,12 +130,5 @@ void PlanetDockWidget::setPlateNumText ()
 {
 	platenumLabel->setText (
 			QString ("Plate Number:%1").arg (numPlateSlider->value ()));
-	update ();
-}
-
-void PlanetDockWidget::setPlanetElemsText ()
-{
-	planetElementLabel->setText (
-			QString ("Planet Slices/Stacks:%1").arg (planetElements->value ()));
 	update ();
 }

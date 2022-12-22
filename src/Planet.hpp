@@ -36,7 +36,6 @@ struct Vertex {
 
 class Planet {
 private:
-    Mesh mesh;
 	unsigned int plateNum;
 	PlateParameters plateParams;
 	double radius;

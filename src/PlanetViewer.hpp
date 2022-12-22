@@ -11,7 +11,7 @@
 #include <algorithm>
 #include "Planet.hpp"
 
-enum DisplayMode{ WIRE=0, SOLID=1};
+enum DisplayMode{WIRE=0, SOLID=1};
 
 class PlanetViewer : public QGLViewer {
 Q_OBJECT
@@ -19,7 +19,6 @@ Q_OBJECT
 public:
     PlanetViewer (QWidget *parent);
 protected:
-
     Planet planet;
     qglviewer::Vec cam;
 
@@ -48,7 +47,7 @@ public slots:
 	void generatePlanet ();
 	void clearPlanet ();
 	void setPlanetRadius (QString _r);
-	void setPlanetElem (int _elems);
+	void setPlanetElem (QString _elems);
 	void savePlanetOff () const;
 	void savePlanetObj () const;
 	void setOceanicThickness (QString _t);

@@ -86,24 +86,21 @@ void PlanetViewer::clear ()
 void PlanetViewer::setPlateNumber (int _plateNum)
 {
 	planet.clear ();
-	planet.setPlateNumber (_plateNum);
-	planet.initPlanet();
+    planet.setPlateNumber (_plateNum);
 	update ();
 }
 
 void PlanetViewer::setPlanetRadius (QString _r)
 {
 	planet.clear ();
-	planet.setRadius (_r.toDouble ());
-	planet.initPlanet();
+    planet.setRadius (_r.toDouble ());
 	update ();
 }
 
-void PlanetViewer::setPlanetElem (int _elems)
+void PlanetViewer::setPlanetElem (QString _elems)
 {
 	planet.clear ();
-    planet.setElems (_elems);
-    //planet.initPlanet();
+    planet.setElems (_elems.toInt());
 	update ();
 }
 

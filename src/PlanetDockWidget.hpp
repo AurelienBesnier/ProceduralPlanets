@@ -30,10 +30,10 @@ public:
 	PlanetViewer *viewer;
 
 	//General planet parameters
-	QSlider *numPlateSlider, *planetElements;
+    QSlider *numPlateSlider;
 	QPushButton *confirmButton, *clearButton;
 	QLabel *platenumLabel, *planetRadiusLabel, *planetElementLabel;
-	QLineEdit *planetRadius;
+    QLineEdit *planetRadius, *planetElements;
 
 	//Plate type parameters
 	QLabel *oThicknessLabel, *oElevationLabel;
@@ -43,7 +43,6 @@ public:
 
 public slots:
 	void setPlateNumText ();
-	void setPlanetElemsText ();
 
 };
 

@@ -1,5 +1,8 @@
 QT += opengl widgets gui xml
-QMAKE_CXXFLAGS = -O3 -std=c++20 -g
+QMAKE_CXXFLAGS = -O3 -std=c++20 -march=znver3
+QMAKE_CXXFLAGS_DEBUG -= -O2
+QMAKE_CXXFLAGS_RELEASE -= -O2
+CCFLAG -= -02
 TEMPLATE = app
 TARGET = ProceduralPlanet
 MOC_DIR = ./moc
@@ -22,6 +25,7 @@ LIBS = -lQGLViewer-qt5 \
     -lGLU \
     -lmpfr \
     -lgmp \
-    -lm
+    -lm \
+    -ltcmalloc
 
 OTHER_FILES = ./GLSL/shaders/*
