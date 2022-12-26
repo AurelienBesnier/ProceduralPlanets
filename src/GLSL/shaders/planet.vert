@@ -27,7 +27,7 @@ out vec3 color;
 void main()
 {
     position = i_position.xyz;
-    normal = mat3(mv_matrix) * i_normals;
+    normal = mat3(proj_matrix * mv_matrix) * i_normals;
     color = i_color;
     gl_Position = proj_matrix * mv_matrix * vec4(position, 1.0);
 }

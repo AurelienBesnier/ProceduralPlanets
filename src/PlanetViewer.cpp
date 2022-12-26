@@ -11,11 +11,6 @@ void PlanetViewer::init ()
 {
     glContext = QOpenGLContext::currentContext() ;
     glFunctions = glContext->extraFunctions();
-    glFunctions->glGenFramebuffers(1,&fbo);
-    glFunctions->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    if(glFunctions->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
-        std::cout<<"Success"<<std::endl;
-
 
     planet = Planet(glContext);
     // The ManipulatedFrame will be used as the clipping plane
@@ -26,7 +21,6 @@ void PlanetViewer::init ()
 
     //Set background color
     setBackgroundColor (QColor (20, 20, 20));
-    glClearColor(0.1, 0.1, 0.1, 1.0);
     displayMode = SOLID;
 
     //Set blend parameters
@@ -38,7 +32,9 @@ void PlanetViewer::init ()
 
 void PlanetViewer::draw ()
 {
+    glClearColor(0.1, 0.1, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
 

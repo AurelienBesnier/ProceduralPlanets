@@ -4,6 +4,8 @@
 
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
+#include <QFile>
+#include <QTextStream>
 
 #include <string>
 #include <fstream>
@@ -16,6 +18,7 @@ class Shader
 {
 public:
     unsigned int ID;
+    unsigned int vertex, fragment, geometry;
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
 
@@ -39,63 +42,34 @@ public:
         std::string vertexCode;
         std::string fragmentCode;
         std::string geometryCode;
-        std::ifstream vShaderFile;
-        std::ifstream fShaderFile;
-        std::ifstream gShaderFile;
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        try
+
+        vertexCode = readShaderSource(vertexPath);
+        fragmentCode = readShaderSource(fragmentPath);
+        // if geometry shader path is present, also load a geometry shader
+        if(geometryPath != nullptr)
         {
-            // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
-            std::stringstream vShaderStream, fShaderStream;
-            // read file's buffer contents into streams
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();
-            // close file handlers
-            vShaderFile.close();
-            fShaderFile.close();
-            // convert stream into string
-            vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();
-            // if geometry shader path is present, also load a geometry shader
-            if(geometryPath != nullptr)
-            {
-                gShaderFile.open(geometryPath);
-                std::stringstream gShaderStream;
-                gShaderStream << gShaderFile.rdbuf();
-                gShaderFile.close();
-                geometryCode = gShaderStream.str();
-            }
+            geometryCode = readShaderSource(geometryPath);
         }
-        catch (std::ifstream::failure& e)
-        {
-            std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
-        }
+
         const char* vShaderCode = vertexCode.c_str();
         const char* fShaderCode = fragmentCode.c_str();
         // 2. compile shaders
-        unsigned int vertex, fragment;
         // vertex shader
         vertex = glFunctions->glCreateShader(GL_VERTEX_SHADER);
-        glFunctions->glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glFunctions->glShaderSource(vertex, 1, &vShaderCode, nullptr);
         glFunctions->glCompileShader(vertex);
         checkCompileErrors(vertex, "VERTEX");
         // fragment Shader
         fragment = glFunctions->glCreateShader(GL_FRAGMENT_SHADER);
-        glFunctions->glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glFunctions->glShaderSource(fragment, 1, &fShaderCode, nullptr);
         glFunctions->glCompileShader(fragment);
         checkCompileErrors(fragment, "FRAGMENT");
         // if geometry shader is given, compile geometry shader
-        unsigned int geometry=0;
         if(geometryPath != nullptr)
         {
             const char * gShaderCode = geometryCode.c_str();
             geometry = glFunctions->glCreateShader(GL_GEOMETRY_SHADER);
-            glFunctions->glShaderSource(geometry, 1, &gShaderCode, NULL);
+            glFunctions->glShaderSource(geometry, 1, &gShaderCode, nullptr);
             glFunctions->glCompileShader(geometry);
             checkCompileErrors(geometry, "GEOMETRY");
         }
@@ -186,44 +160,29 @@ private:
         }
     }
 
-
-    bool printShaderErrors (GLuint shader) const
+    std::string readShaderSource (std::string filename)
     {
-        int state = 0;
-        glFunctions->glGetShaderiv (shader, GL_COMPILE_STATUS, &state);
-        if (state == 1)
-            return true;
-        int len = 0;
-        int chWritten = 0;
-        char *log;
-        glFunctions->glGetShaderiv (shader, GL_INFO_LOG_LENGTH, &len);
-        if (len > 0)
+        std::string content = "";
+        QString qFilename = QString::fromStdString (filename);
+        if (!QFile::exists (qFilename))
+            qFilename = ":" + qFilename;
+        if (!QFile::exists (qFilename))
         {
-            log = (char*) malloc (len);
-            glFunctions->glGetShaderInfoLog (shader, len, &chWritten, log);
-            std::cerr << "[OpenGL] Shader error: " << log << std::endl;
-            free (log);
+            std::cerr << "The shader " << filename << " doesn't exist!"
+                << std::endl;
+            return "";
         }
-        return false;
-    }
-    bool printProgramErrors (int program) const
-    {
-        int state = 0;
-        glFunctions->glGetProgramiv (program, GL_LINK_STATUS, &state);
-        if (state == 1)
-            return true;
-        int len = 0;
-        int chWritten = 0;
-        char *log;
-        glFunctions->glGetProgramiv (program, GL_INFO_LOG_LENGTH, &len);
-        if (len > 0)
+        QFile file (qFilename);
+        file.open (QIODevice::ReadOnly | QIODevice::Text);
+        std::string line;
+        QTextStream in (&file);
+        while (!in.atEnd ())
         {
-            log = (char*) malloc (len);
-            glFunctions->glGetProgramInfoLog (program, len, &chWritten, log);
-            std::cerr << "[OpenGL] Program error: " << log << std::endl;
-            free (log);
+            line = in.readLine ().toStdString ();
+            content += line + " \n";
         }
-        return false;
+        file.close ();
+        return content;
     }
 
     static void MessageCallback (GLenum source, GLenum type,

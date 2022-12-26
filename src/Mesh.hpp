@@ -7,7 +7,7 @@
 #include <QVector3D>
 #include <vector>
 
-#include <Shader.h>
+#include "Shader.h"
 
 struct Vertex {
     QVector3D pos;
@@ -41,10 +41,12 @@ public:
     {
         shader.use();
         glFunctions->glBindVertexArray(VAO);
+        glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
         glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
         glPointSize(5);
         glDrawElements(GL_POINT, indices.size(), GL_UNSIGNED_INT, (void*)0);
         glFunctions->glBindVertexArray(0);
+        glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
         glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 

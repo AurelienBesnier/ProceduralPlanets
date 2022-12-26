@@ -4,10 +4,7 @@
 #include <filesystem>
 #include <cassert>
 #include <vector>
-#include <QFile>
-#include <QTextStream>
 #include <QRandomGenerator>
-#include <chrono>
 
 #include "Planet.hpp"
 #include "Plate.hpp"
@@ -235,6 +232,7 @@ void Planet::drawPlanet(const qglviewer::Camera *camera)
     shader.setVec3("lightColor", lightColor);
     shader.setBool("lighting", this->shaderLight);
 
+
     mesh.Draw(shader);
 }
 
@@ -273,12 +271,6 @@ void Planet::save () const
             << std::fixed << mesh.vertices[i].pos.y () << " " << std::fixed
             << mesh.vertices[i].pos.z () << std::endl;
 	}
-
-    /*for (size_t i = 0; i < mesh.vertices.size (); ++i)
-	{
-        ostream << "vt " << mesh.vertices[i].texCoord.x () << " "
-            << mesh.vertices[i].texCoord.y () << std::endl;
-    }*/
 
     for (size_t i = 0; i < mesh.vertices.size (); ++i)
 	{

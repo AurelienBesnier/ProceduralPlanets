@@ -12,7 +12,6 @@
 #include <algorithm>
 #include "Planet.hpp"
 
-#include "Shader.h"
 
 enum DisplayMode{WIRE=0, SOLID=1};
 
@@ -23,7 +22,6 @@ public:
     PlanetViewer (QWidget *parent);
 protected:
     Planet planet;
-    GLuint fbo,depthRenderbuffer;
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
     qglviewer::Vec cam;
