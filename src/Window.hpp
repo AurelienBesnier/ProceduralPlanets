@@ -23,6 +23,8 @@ private:
 	QStatusBar *statusbar;
 
 public slots:
+    void printMessage(QString);
+
 };
 
 #endif // MAINWINDOW_H

@@ -8,8 +8,8 @@ Window::Window ()
 
 	viewer = new PlanetViewer (this);
 
-	QWidget *tectureWidget = new QWidget (this);
-	QGridLayout *gridLayout = new QGridLayout (tectureWidget);
+    QWidget *planetWidget = new QWidget (this);
+    QGridLayout *gridLayout = new QGridLayout (planetWidget);
 
 	gridLayout->addWidget (viewer, 0, 1, 1, 1);
 
@@ -26,7 +26,7 @@ Window::Window ()
 
 	QGroupBox *viewerGroupBox = new QGroupBox ("Planet Generator", this);
 	QHBoxLayout *viewerLayout = new QHBoxLayout (viewerGroupBox);
-	viewerLayout->addWidget (tectureWidget);
+    viewerLayout->addWidget (planetWidget);
 
 	madDockWidget = new PlanetDockWidget (viewer, this);
 
@@ -45,5 +45,11 @@ Window::Window ()
 	this->setStatusBar (statusbar);
 
 	this->setWindowTitle ("Planet Generator");
+
+    statusbar->showMessage(tr("Application Ready"), 5000);
 }
 
+void Window::printMessage(QString)
+{
+
+}

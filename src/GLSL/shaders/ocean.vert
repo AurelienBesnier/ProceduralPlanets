@@ -5,7 +5,6 @@
 
 layout (location=0) in vec3 i_position;
 layout (location=1) in vec3 i_normals;
-layout (location=2) in vec3 i_color;
 
 // --------------------------------------------------
 // Uniform variables:
@@ -28,6 +27,6 @@ void main()
 {
     position = i_position.xyz;
     normal = mat3(mv_matrix) * i_normals;
-    color = i_color;
+    color = vec3(0,0,1);
     gl_Position = proj_matrix * mv_matrix * vec4(position, 1.0);
 }

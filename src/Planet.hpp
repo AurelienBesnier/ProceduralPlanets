@@ -9,30 +9,14 @@
 #include <QVector2D>
 #include <CGAL/mesh_segmentation.h>
 #include <CGAL/Point_set_3.h>
-#include <CGAL/Surface_mesh.h>
 #include <CGAL/Advancing_front_surface_reconstruction.h>
-#include <CGAL/jet_estimate_normals.h>
-#include <CGAL/mst_orient_normals.h>
-#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 
 #include "Plate.hpp"
+#include "Mesh.hpp"
 
 typedef CGAL::Simple_cartesian<double>                  K;
 typedef K::Point_3                                      Point;
 typedef CGAL::Point_set_3<Point>                        Point_set;
-typedef CGAL::Surface_mesh<Point>                       Mesh;
-typedef boost::graph_traits<Mesh>::vertex_descriptor    vertex_descriptor;
-typedef boost::graph_traits<Mesh>::face_descriptor      face_descriptor;
-
-
-
-struct Vertex {
-    Point pos;
-    QVector3D normal;
-    QVector2D texCoord;
-    QVector3D color;
-    unsigned int plate_id;
-};
 
 class Planet {
 private:
@@ -41,21 +25,21 @@ private:
 	double radius;
 	int elems;
 
-	std::vector<Vertex> vertices;
-    std::vector<Point> pos;
-	std::vector<Plate> plates;
-    std::vector<unsigned int> indices;
+    Mesh mesh;
+    std::vector<QVector3D> pos;
+    std::vector<Plate> plates;
+    std::vector<std::vector<unsigned int> >  one_ring;
 
 	bool wireframe = false;
-    bool shaderLigth = false;
+    bool shaderLight = false;
     void triangulate();
+    void drawPlanet(const qglviewer::Camera *camera);
 
 public:
-	GLuint VBO, VAO, EBO;
-	bool planetCreated;
-	bool buffersCreated = false;
+    Shader shader;
+    bool planetCreated;
 
-	Planet () // @suppress("Class members should be properly initialized")
+    Planet ()
 	{
 	}
 	Planet (QOpenGLContext *context);
@@ -64,11 +48,12 @@ public:
 	void init ();
     void initGLSL ();
     void makeSphere (float radius, int elems);
-	void makePlates ();
+    void makePlates ();
+    void initElevations();
     void initPlanet ();
-	void createBuffers ();
 
-	void draw (const qglviewer::Camera *camera);
+    void draw (const qglviewer::Camera *camera);
+
 	void changeViewMode ();
     void shaderLighting ();
 	void clear ();
@@ -77,7 +62,7 @@ public:
 
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
-	double getRadius ()const;
+    double getRadius () const;
 	void setElems (int _elems);
 
 	void setOceanicThickness (double _t);
@@ -85,20 +70,8 @@ public:
 	void setContinentalThickness (double _t);
 	void setContinentalElevation (double _e);
 
-	bool printShaderErrors (GLuint shader);
-	bool printProgramErrors (int program);
-	bool checkOpenGLError ();
-	std::string readShaderSource (std::string filename);
-
-	GLuint vShader, gShader, fShader, programID;
 	QOpenGLContext *glContext;
 	QOpenGLExtraFunctions *glFunctions;
-
-	static void /*GLAPIENTRY */MessageCallback (GLenum source, GLenum type,
-												GLuint id, GLenum severity,
-												GLsizei length,
-												const GLchar *message,
-												const void *userParam);
 };
 
 #endif // PLANET_H
