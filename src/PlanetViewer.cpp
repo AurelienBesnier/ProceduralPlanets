@@ -9,7 +9,7 @@ PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 
 void PlanetViewer::init ()
 {
-    glContext = QOpenGLContext::currentContext() ;
+    glContext = QOpenGLContext::currentContext();
     glFunctions = glContext->extraFunctions();
 
     planet = Planet(glContext);

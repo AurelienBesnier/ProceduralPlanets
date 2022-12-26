@@ -36,7 +36,8 @@ public:
         glFunctions->glEnable (GL_BLEND);
         glFunctions->glEnable (GL_TEXTURE_2D);
         glFunctions->glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glFunctions->glDebugMessageCallback (&this->MessageCallback, 0);
+        glEnable ( GL_DEBUG_OUTPUT);
+        glFunctions->glDebugMessageCallback (Shader::MessageCallback, 0);
 
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
@@ -185,22 +186,22 @@ private:
         return content;
     }
 
-    static void MessageCallback (GLenum source, GLenum type,
+    static void /*GLAPIENTRY */ MessageCallback (GLenum source, GLenum type,
                           GLuint id, GLenum severity,
                           GLsizei length,
                           const GLchar *message,
                           const void *userParam)
     {
-      if (severity == GL_DEBUG_SEVERITY_HIGH
+        if (severity == GL_DEBUG_SEVERITY_HIGH
               || severity == GL_DEBUG_SEVERITY_MEDIUM
               || severity == GL_DEBUG_SEVERITY_LOW)
-      {
-          std::string s_severity = (
+        {
+            std::string s_severity = (
                   severity == GL_DEBUG_SEVERITY_HIGH ? "High" :
                   severity == GL_DEBUG_SEVERITY_MEDIUM ? "Medium" : "Low");
-      std::cerr << "Error " << id <<", Source: "<<source<<",  Type: "<< type << ", Length: "<<length<<" [severity=" << s_severity << "]: "
+            std::cerr << "Error " << id <<", Source: "<<source<<",  Type: "<< type << ", Length: "<<length<<" [severity=" << s_severity << "]: "
               << message << std::endl;
-      }
+        }
     }
 };
 #endif

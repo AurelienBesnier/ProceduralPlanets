@@ -70,8 +70,8 @@ public:
 	void setContinentalThickness (double _t);
 	void setContinentalElevation (double _e);
 
-	QOpenGLContext *glContext;
-	QOpenGLExtraFunctions *glFunctions;
+    QOpenGLContext *glContext;
+    QOpenGLExtraFunctions *glFunctions;
 };
 
 #endif // PLANET_H

@@ -39,12 +39,9 @@ void Planet::initGLSL ()
 	std::filesystem::path fs = std::filesystem::current_path ();
 	std::string path = fs.string () + "/GLSL/shaders/";
 	std::string vShaderPath = path + "planet.vert";
-	std::string fShaderPath = path + "planet.frag";
-    /*std::string vShaderPathOcean = path + "ocean.vert";
-    std::string fShaderPathOcean = path + "ocean.frag";*/
+    std::string fShaderPath = path + "planet.frag";
     mesh.setContext(glContext);
     shader = Shader(glContext,vShaderPath.c_str(),fShaderPath.c_str());
-    shader.use();
 }
 
 
@@ -54,8 +51,7 @@ void Planet::initPlanet ()
     triangulate();
     makePlates ();
     initElevations();
-    shader.use();
-    mesh.setupMesh();
+    mesh.setupMesh(shader);
 
     planetCreated = true;
 }
@@ -231,7 +227,6 @@ void Planet::drawPlanet(const qglviewer::Camera *camera)
     shader.setVec3("lightPos",(float)camera->position().x,(float)camera->position().y,(float)camera->position().z);
     shader.setVec3("lightColor", lightColor);
     shader.setBool("lighting", this->shaderLight);
-
 
     mesh.Draw(shader);
 }

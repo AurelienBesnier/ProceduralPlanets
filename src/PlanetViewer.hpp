@@ -28,11 +28,11 @@ protected:
 
     DisplayMode displayMode;
 
-    virtual void draw ();
-    virtual void shaderLighting ();
-	virtual void init ();
-	virtual QString helpString () const;
-	virtual void keyPressEvent (QKeyEvent *e);
+    void draw ();
+    void shaderLighting ();
+    void init ();
+    QString helpString () const;
+    void keyPressEvent (QKeyEvent *e);
 
     void changeDisplayMode(){
         if(displayMode == WIRE)
