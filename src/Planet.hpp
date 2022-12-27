@@ -13,6 +13,7 @@
 
 #include "Plate.hpp"
 #include "Mesh.hpp"
+#include "Shader.h"
 
 typedef CGAL::Simple_cartesian<double>                  K;
 typedef K::Point_3                                      Point;

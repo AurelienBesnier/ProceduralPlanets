@@ -55,15 +55,13 @@ public:
     {
         vertices.clear();
         indices.clear();
-        shader.use();
         glFunctions->glDeleteVertexArrays(1,&VAO);
         glFunctions->glDeleteBuffers(1,&VBO);
         glFunctions->glDeleteBuffers(1,&EBO);
     }
 
-    void setupMesh(Shader &shader)
+    void setupMesh()
     {
-        shader.use();
         glFunctions->glGenVertexArrays (1, &VAO);
         glFunctions->glGenBuffers (1, &VBO);
         glFunctions->glGenBuffers (1, &EBO);
@@ -91,6 +89,8 @@ public:
         glFunctions->glVertexAttribPointer (3, 3, GL_FLOAT, GL_FALSE,
           sizeof(Vertex),
           (void*) offsetof(Vertex, color));
+
+        glFunctions->glBindVertexArray (0);
     }
 };
 

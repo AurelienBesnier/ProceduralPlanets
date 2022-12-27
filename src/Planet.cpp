@@ -51,7 +51,7 @@ void Planet::initPlanet ()
     triangulate();
     makePlates ();
     initElevations();
-    mesh.setupMesh(shader);
+    mesh.setupMesh();
 
     planetCreated = true;
 }
@@ -81,7 +81,7 @@ void Planet::makeSphere (float radius, int elems)
 
     for(long i = 0; i < elems ; ++i)
     {
-        Vertex newVertex = { .pos = pos[i], .normal = normals[i]};
+        Vertex newVertex = { .pos = pos[i], .normal = normals[i], .color=QVector3D(0,0,0)};
         mesh.vertices.push_back (newVertex);
     }
     pos.shrink_to_fit();
