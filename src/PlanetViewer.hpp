@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QGLViewer/qglviewer.h>
 #include <QOpenGLExtraFunctions>
+#include <QOpenGLShaderProgram>
 
 #include <iostream>
 #include <fstream>
@@ -20,19 +21,38 @@ Q_OBJECT
 
 public:
     PlanetViewer (QWidget *parent);
+
+    static void /*GLAPIENTRY */ MessageCallback (GLenum source, GLenum type,
+                          GLuint id, GLenum severity,
+                          GLsizei length,
+                          const GLchar *message,
+                          const void *userParam)
+    {
+        if (severity == GL_DEBUG_SEVERITY_HIGH
+              || severity == GL_DEBUG_SEVERITY_MEDIUM
+              || severity == GL_DEBUG_SEVERITY_LOW)
+        {
+            std::string s_severity = (
+                  severity == GL_DEBUG_SEVERITY_HIGH ? "High" :
+                  severity == GL_DEBUG_SEVERITY_MEDIUM ? "Medium" : "Low");
+            std::cerr << "Error " << id <<", Source: "<<source<<",  Type: "<< type << ", Length: "<<length<<" [severity=" << s_severity << "]: "
+              << message << std::endl;
+        }
+    }
 protected:
     Planet planet;
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
+    QOpenGLShaderProgram shader;
     qglviewer::Vec cam;
 
     DisplayMode displayMode;
 
-    void draw ();
-    void shaderLighting ();
-    void init ();
-    QString helpString () const;
-    void keyPressEvent (QKeyEvent *e);
+    virtual void draw ();
+    virtual void shaderLighting ();
+    virtual void init ();
+    virtual QString helpString () const;
+    virtual void keyPressEvent (QKeyEvent *e);
 
     void changeDisplayMode(){
         if(displayMode == WIRE)

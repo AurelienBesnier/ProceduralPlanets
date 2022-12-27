@@ -11,17 +11,14 @@
 
 #define PI 3.14159265358979323846
 
-Planet::Planet (QOpenGLContext *context)
+Planet::Planet ()
 {
-	glContext = context;
-	init ();
-	initGLSL ();
+    init ();
 }
 
 Planet::~Planet ()
 {
     plates.clear();
-    pos.clear();
     mesh.clear();
     one_ring.clear();
 }
@@ -29,39 +26,29 @@ Planet::~Planet ()
 void Planet::init ()
 {
     planetCreated = false;
+    needInitBuffers = true;
     this->plateNum = 5;
     this->radius = 6370;
     this->elems = 6000;
 }
 
-void Planet::initGLSL ()
-{
-	std::filesystem::path fs = std::filesystem::current_path ();
-	std::string path = fs.string () + "/GLSL/shaders/";
-	std::string vShaderPath = path + "planet.vert";
-    std::string fShaderPath = path + "planet.frag";
-    mesh.setContext(glContext);
-    shader = Shader(glContext,vShaderPath.c_str(),fShaderPath.c_str());
-}
-
-
 void Planet::initPlanet ()
 {
-    makeSphere (this->radius, elems);
+    makeSphere (this->radius);
     triangulate();
     makePlates ();
     initElevations();
-    mesh.setupMesh();
 
     planetCreated = true;
 }
 
-void Planet::makeSphere (float radius, int elems)
+void Planet::makeSphere (float radius)
 {
+    std::cout<<"Making the points of the sphere..."<<std::endl;
     // Calc The Vertices
-    pos.reserve(elems);
+    mesh.vertices.resize(elems);
     std::vector<QVector3D> normals;
-    normals.reserve(elems);
+    mesh.normals.resize(elems);
 
     double goldenRatio = (1 + pow(5,0.5))/2;
 
@@ -75,23 +62,19 @@ void Planet::makeSphere (float radius, int elems)
         double squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
         double length = sqrt(squareLength);
         QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
-        pos.push_back( position );
-        normals.push_back(normal);
+        mesh.vertices[i]=position;
+        mesh.normals[i]=normal;
     }
-
-    for(long i = 0; i < elems ; ++i)
-    {
-        Vertex newVertex = { .pos = pos[i], .normal = normals[i], .color=QVector3D(0,0,0)};
-        mesh.vertices.push_back (newVertex);
-    }
-    pos.shrink_to_fit();
+    mesh.colors.resize(mesh.vertices.size());
+    std::cout<<"Done!"<<std::endl;
 }
 
 
 void Planet::triangulate()
 {
+    std::cout<<"triangulation started..."<<std::endl;
     Point_set points;
-    for(const QVector3D &po: pos)
+    for(const QVector3D &po: mesh.vertices)
         points.insert(Point(po.x(),po.y(),po.z()));
 
     typedef std::array<std::size_t, 3> Facet; // Triple of indices
@@ -108,6 +91,7 @@ void Planet::triangulate()
         for(size_t j = 0; j<3; ++j)
             mesh.indices.push_back(facets[i][j]);
     }
+    std::cout<<"triangulation finished!"<<std::endl;
 }
 
 void collect_one_ring (std::vector<QVector3D> const & i_vertices,
@@ -136,7 +120,8 @@ void collect_one_ring (std::vector<QVector3D> const & i_vertices,
 
 void Planet::makePlates ()
 {
-    collect_one_ring(pos,mesh.indices,one_ring);
+    std::cout<<"Segmentation started..."<<std::endl;
+    collect_one_ring(mesh.vertices,mesh.indices,one_ring);
     one_ring.shrink_to_fit();
 
     plates.clear ();
@@ -159,12 +144,12 @@ void Planet::makePlates ()
 
     for(unsigned short i = 0; i < plateNum; ++i)
     {
-        unsigned int first_point_of_plate = prng.bounded((unsigned int)pos.size()-1);
+        unsigned int first_point_of_plate = prng.bounded((unsigned int)mesh.vertices.size()-1);
         while(std::find(tmp_init.begin(), tmp_init.end(), first_point_of_plate) != tmp_init.end())
-        { first_point_of_plate = prng.bounded((unsigned int)pos.size()-1); }
+        { first_point_of_plate = prng.bounded((unsigned int)mesh.vertices.size()-1); }
         tmp_init.insert(first_point_of_plate);
 
-        mesh.vertices[first_point_of_plate].color = colors[i];
+        mesh.colors[first_point_of_plate] = colors[i];
         plates[i].points.push_back(first_point_of_plate);
         last_ids[i] = one_ring[first_point_of_plate];
     }
@@ -172,7 +157,7 @@ void Planet::makePlates ()
     std::vector<std::vector<unsigned int>> next_ids;
     next_ids.resize(plateNum);
 
-    while(pos.size() != tmp_init.size())
+    while(mesh.vertices.size() != tmp_init.size())
     {
         for(unsigned short i = 0; i<plateNum; ++i)
         {
@@ -187,7 +172,7 @@ void Planet::makePlates ()
                     {
                         tmp_init.insert(neighbours[n]);
                         plates[i].points.push_back(neighbours[n]);
-                        mesh.vertices[neighbours[n]].color=colors[i];
+                        mesh.colors[neighbours[n]]=colors[i];
                         next_ids[i].push_back(neighbours[n]);
                     }
                 }
@@ -196,6 +181,7 @@ void Planet::makePlates ()
             next_ids[i].clear();
         }
     }
+    std::cout<<"Segmentation finished!"<<std::endl;
 }
 
 void Planet::initElevations()
@@ -203,40 +189,24 @@ void Planet::initElevations()
 
 }
 
-void Planet::changeViewMode ()
+
+
+void Planet::drawPlanet(const qglviewer::Camera *camera, QOpenGLShaderProgram *shader)
 {
-	this->wireframe = !wireframe;
+    mesh.Draw();
 }
 
-
-void Planet::drawPlanet(const qglviewer::Camera *camera)
-{
-    //GPU start
-    // Récuperation des matrices de projection / vue-modèle
-    float pMatrix[16];
-    float mvMatrix[16];
-    camera->getProjectionMatrix (pMatrix);
-    camera->getModelViewMatrix (mvMatrix);
-    float lightColor[3] = {1,1,1};
-
-    shader.use();
-    shader.setMat4("proj_matrix",pMatrix);
-    shader.setMat4("mv_matrix",mvMatrix);
-
-    shader.setVec3("viewPos", (float)camera->position().x,(float)camera->position().y,(float)camera->position().z);
-    shader.setVec3("lightPos",(float)camera->position().x,(float)camera->position().y,(float)camera->position().z);
-    shader.setVec3("lightColor", lightColor);
-    shader.setBool("lighting", this->shaderLight);
-
-    mesh.Draw(shader);
-}
-
-void Planet::draw (const qglviewer::Camera *camera)
+void Planet::draw (const qglviewer::Camera *camera, QOpenGLShaderProgram *shader)
 {
 	if (!planetCreated)
 		return;
 
-    drawPlanet(camera);
+    if(needInitBuffers && planetCreated){
+        mesh.setupMesh(shader);
+        needInitBuffers = false;
+    } else {
+        drawPlanet(camera, shader);
+    }
 }
 
 void Planet::clear ()
@@ -244,17 +214,17 @@ void Planet::clear ()
 	if (planetCreated)
     {
         plates.clear();
-        pos.clear();
         mesh.clear();
         one_ring.clear();
 
 		planetCreated = false;
+        needInitBuffers = true;
 	}
 }
 
 void Planet::save () const
 {
-	std::string filename = "planet.obj";
+/*	std::string filename = "planet.obj";
 	std::ofstream ostream;
 	ostream.precision (4);
 
@@ -281,12 +251,12 @@ void Planet::save () const
 	}
 	ostream.close ();
 
-	std::cout << "Wrote to file " << filename << std::endl;
+    std::cout << "Wrote to file " << filename << std::endl;*/
 }
 
 void Planet::saveOFF () const
 {
-	std::string filename = "planet.off";
+    /*std::string filename = "planet.off";
 	std::ofstream ostream;
 	ostream.precision (4);
 
@@ -310,7 +280,7 @@ void Planet::saveOFF () const
 
 	ostream.close ();
 
-	std::cout << "Wrote to file " << filename << std::endl;
+    std::cout << "Wrote to file " << filename << std::endl;*/
 }
 
 void Planet::setOceanicThickness (double _t)
@@ -367,7 +337,3 @@ void Planet::setElems (int _elems)
   std::cout << "planet elems set to " << this->elems << std::endl;
 }
 
-void Planet::shaderLighting ()
-{
-  this->shaderLight = !this->shaderLight;
-}

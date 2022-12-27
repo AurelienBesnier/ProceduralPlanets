@@ -21,7 +21,6 @@ HEADERS += \
     PlanetViewer.hpp \
     Plate.hpp \
     Mesh.hpp \
-    Shader.h \
     Window.hpp
 LIBS = -lQGLViewer-qt5 \
     -lglut \
