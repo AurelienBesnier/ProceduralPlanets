@@ -1,6 +1,7 @@
 #include "PlanetViewer.hpp"
 #include <cfloat>
 #include <QFileDialog>
+#include <QSurfaceFormat>
 #include <filesystem>
 #include <QGLViewer/manipulatedCameraFrame.h>
 
@@ -13,10 +14,12 @@ void PlanetViewer::init ()
     glContext = QOpenGLContext::currentContext();
     glFunctions = glContext->extraFunctions();
 
+    std::cout<<"OpenGL Version: "<<glContext->format().majorVersion()<<"."<<glContext->format().minorVersion()<<std::endl;
+
     // The ManipulatedFrame will be used as the clipping plane
     setManipulatedFrame (new qglviewer::ManipulatedFrame ());
 
-    planet = Planet();
+    planet = Planet(glContext);
     // Enable plane clipping
     glEnable (GL_CLIP_PLANE0);
 
@@ -28,35 +31,16 @@ void PlanetViewer::init ()
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     updateCamera(qglviewer::Vec (0.,0.,0.));
-
-    glFunctions->glEnable (GL_LIGHT0);
-    glFunctions->glEnable (GL_LIGHT1);
-    glFunctions->glEnable (GL_LIGHTING);
-    glFunctions->glEnable (GL_COLOR_MATERIAL);
-    glFunctions->glEnable (GL_BLEND);
-    glFunctions->glEnable (GL_TEXTURE_2D);
-    glFunctions->glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable ( GL_DEBUG_OUTPUT);
-    glFunctions->glDebugMessageCallback (PlanetViewer::MessageCallback, 0);
-
-    std::filesystem::path fs = std::filesystem::current_path ();
-    std::string path = fs.string () + "/GLSL/shaders/";
-    QString vShaderPath = QString::fromStdString(path + "planet.vert");
-    QString fShaderPath = QString::fromStdString(path + "planet.frag");
-    shader.addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath);
-    shader.addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath);
-    shader.link();
-    shader.bind();
 }
 
 void PlanetViewer::draw ()
 {
     glClearColor(0.1, 0.1, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawClippingPlane();
     glEnable(GL_DEPTH_TEST);
 
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
-    QVector3D camPos(camera()->position().x,camera()->position().y,camera()->position().z);
 
     if(displayMode == WIRE){
        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
@@ -64,22 +48,31 @@ void PlanetViewer::draw ()
        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    /**Setting uniforms**/
-    float pMatrix[16];
-    float mvMatrix[16];
-    camera()->getProjectionMatrix (pMatrix);
-    camera()->getModelViewMatrix (mvMatrix);
-    QVector3D lightColor(1,1,1);
-    shader.bind();
-    shader.setUniformValue(shader.uniformLocation("proj_matrix"),QMatrix4x4(pMatrix));
-    shader.setUniformValue(shader.uniformLocation("mv_matrix"),QMatrix4x4(mvMatrix));
-    shader.setUniformValue(shader.uniformLocation("lightColor"), lightColor);
-    shader.setUniformValue(shader.uniformLocation("viewPos"), camPos);
-    shader.setUniformValue(shader.uniformLocation("lightPos"), camPos);
-
-    planet.draw (camera (), &shader);
+    planet.draw (camera ());
     update();
-    shader.release();
+}
+
+void PlanetViewer::drawClippingPlane ()
+{
+    glEnable (GL_LIGHTING);
+
+    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+
+
+    GLdouble equation[4];
+    glGetClipPlane (GL_CLIP_PLANE0, equation);
+
+    qreal p[] = { 0., -equation[3] / equation[1], 0. };
+    qreal projP[3];
+    camera ()->getWorldCoordinatesOf (p, projP);
+
+    qreal norm[] =
+            { equation[0] + p[0], equation[1] + p[1], equation[2] + p[2] };
+    qreal normResult[3];
+    qglviewer::Vec normal (normResult[0] - projP[0], normResult[1] - projP[1],
+                            normResult[2] - projP[2]);
+    qglviewer::Vec point (projP[0], projP[1], projP[2]);
+
 }
 
 
@@ -154,7 +147,7 @@ void PlanetViewer::setContinentElevation (QString _e)
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 {
     camera ()->setSceneCenter (center);
-    //camera ()->setSceneRadius (planet.getRadius());
+    camera ()->setSceneRadius (planet.getRadius());
 
     camera ()->showEntireScene ();
     update();

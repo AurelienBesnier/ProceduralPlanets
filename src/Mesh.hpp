@@ -12,26 +12,37 @@
 #include <iostream>
 
 
+struct Vertex {
+    QVector3D pos, normals, color;
+};
+
 class Mesh
 {
 private:
-    QOpenGLBuffer *verticesVBO, *normalsVBO, *colorVBO, *EBO;
+    GLuint VBO, VAO, EBO;
 
 public:
-    QOpenGLVertexArrayObject *VAO;
-    std::vector<QVector3D> vertices;
-    std::vector<QVector3D> normals;
-    std::vector<QVector3D> colors;
-    std::vector<unsigned int> indices;
+    QOpenGLContext* glContext;
+    QOpenGLExtraFunctions *glFunctions;
+    QVector<Vertex> vertices;
+    QVector<unsigned int> indices;
     Mesh(){}
 
-    void Draw()
+    void Draw(QOpenGLShaderProgram *shader)
     {
-        VAO->bind();
-        EBO->bind();
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
-        VAO->release();
-        EBO->release();
+        shader->bind();
+        glFunctions->glBindVertexArray (VAO);
+        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+        glFunctions->glBindVertexArray (0);
+        shader->release();
+    }
+
+    void setContext(QOpenGLContext* context)
+    {
+        glContext = context;
+        glFunctions = glContext->extraFunctions();
     }
 
     void clear()
@@ -44,42 +55,42 @@ public:
     {
         shader->bind();
         std::cout<<"Creating Mesh Buffers..."<<std::endl;
-        VAO = new QOpenGLVertexArrayObject();
-        verticesVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-        normalsVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-        colorVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-        EBO = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
-        VAO->create();
-        verticesVBO->create();
-        normalsVBO->create();
-        colorVBO->create();
-        EBO->create();
+        glFunctions->glGenVertexArrays (1, &VAO);
+        glFunctions->glGenBuffers (1, &VBO);
+        glFunctions->glGenBuffers (1, &EBO);
 
-        VAO->bind();
+        glFunctions->glBindVertexArray (VAO);
 
-        EBO->bind();
-        EBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
-        EBO->allocate(indices.data(),sizeof(unsigned int)*indices.size());
+        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
+          indices.size () * sizeof(unsigned int),
+          indices.data(), GL_STATIC_DRAW);
 
-        verticesVBO->bind();
-        verticesVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
-        verticesVBO->allocate(vertices.data(),sizeof(QVector3D)*vertices.size());
-        shader->enableAttributeArray(0);
-        shader->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(QVector3D));
+        glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
+        glFunctions->glBufferData (GL_ARRAY_BUFFER,
+                vertices.size () * sizeof(Vertex), vertices.data(),
+                GL_STATIC_DRAW);
 
-        normalsVBO->bind();
-        normalsVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
-        normalsVBO->allocate(normals.data(),sizeof(QVector3D)*normals.size());
-        shader->enableAttributeArray(1);
-        shader->setAttributeBuffer(1, GL_FLOAT, 0, 3, sizeof(QVector3D));
+        glFunctions->glEnableVertexAttribArray (0);
+        glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
+          sizeof(Vertex), (void*) 0);
 
-        colorVBO->bind();
-        colorVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
-        colorVBO->allocate(colors.data(),sizeof(QVector3D)*colors.size());
-        shader->enableAttributeArray(2);
-        shader->setAttributeBuffer(2, GL_FLOAT, 0, 3, sizeof(QVector3D));
+        glFunctions->glEnableVertexAttribArray (1);
+        glFunctions->glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE,
+                sizeof(Vertex),
+                (void*) offsetof(Vertex, normals));
 
-        VAO->release();
+        glFunctions->glEnableVertexAttribArray (2);
+        glFunctions->glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE,
+          sizeof(Vertex),
+          (void*) offsetof(Vertex, color));
+
+        glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
+        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+        glFunctions->glBindVertexArray (0);
+        shader->release();
+
+        vertices.clear();
         std::cout<<"Done!"<<std::endl;
     }
 };

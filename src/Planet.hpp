@@ -26,28 +26,32 @@ private:
 	double radius;
 	int elems;
 
-    Mesh mesh;
+    QVector<QVector3D> pos;
     std::vector<Plate> plates;
-    std::vector<std::vector<unsigned int> >  one_ring;
+    QVector<QVector<unsigned int> >  one_ring;
     bool needInitBuffers = true;
 
     void triangulate();
     void drawPlanet(const qglviewer::Camera *camera);
 
 public:
+    Mesh mesh;
+    QOpenGLShaderProgram *program=nullptr;
+    GLuint programID;
     bool planetCreated=false;
 
-    Planet ();
+    Planet (){}
+    Planet (QOpenGLContext *context);
 	~Planet ();
 
     void init ();
+    void initGLSL();
     void makeSphere (float radius);
     void makePlates ();
     void initElevations();
     void initPlanet ();
 
-    void draw (const qglviewer::Camera *camera, QOpenGLShaderProgram *shader);
-    void drawPlanet (const qglviewer::Camera *camera, QOpenGLShaderProgram *shader);
+    void draw (const qglviewer::Camera *camera);
 
 	void clear ();
 	void save () const;
@@ -62,6 +66,26 @@ public:
 	void setOceanicElevation (double _e);
 	void setContinentalThickness (double _t);
 	void setContinentalElevation (double _e);
+
+    QOpenGLContext *glContext;
+    QOpenGLExtraFunctions *glFunctions;
+    static void /*GLAPIENTRY */ MessageCallback (GLenum source, GLenum type,
+                          GLuint id, GLenum severity,
+                          GLsizei length,
+                          const GLchar *message,
+                          const void *userParam)
+    {
+        if (severity == GL_DEBUG_SEVERITY_HIGH
+              || severity == GL_DEBUG_SEVERITY_MEDIUM
+              || severity == GL_DEBUG_SEVERITY_LOW)
+        {
+            std::string s_severity = (
+                  severity == GL_DEBUG_SEVERITY_HIGH ? "High" :
+                  severity == GL_DEBUG_SEVERITY_MEDIUM ? "Medium" : "Low");
+            std::cerr << "Error " << id <<", Source: "<<source<<",  Type: "<< type << ", Length: "<<length<<" [severity=" << s_severity << "]: "
+              << message << std::endl;
+        }
+    }
 };
 
 #endif // PLANET_H

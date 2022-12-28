@@ -1,5 +1,5 @@
 QT += opengl widgets gui xml
-QMAKE_CXXFLAGS = -O3 -std=c++20 -march=x86-64 -pedantic
+QMAKE_CXXFLAGS = -O3 -std=c++20 -march=znver1 -pedantic
 QMAKE_CXXFLAGS_DEBUG -= -O2 -O1
 QMAKE_CXXFLAGS_RELEASE -= -O2 -O1
 CCFLAG -= -O2 -O1
@@ -36,4 +36,6 @@ DISTFILES += \
     GLSL/shaders/ocean.frag \
     GLSL/shaders/ocean.vert \
     GLSL/shaders/simple.frag \
-    GLSL/shaders/simple.vert
+    GLSL/shaders/simple.vert \
+    GLSL/shaders/planet.vert \
+    GLSL/shaders/planet.frag
