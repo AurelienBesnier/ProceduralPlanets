@@ -7,6 +7,7 @@
 #include <QGLViewer/camera.h>
 #include <QVector3D>
 #include <QVector2D>
+#include <chrono>
 #include <set>
 #include <CGAL/mesh_segmentation.h>
 #include <CGAL/Point_set_3.h>
@@ -39,6 +40,8 @@ public:
     QOpenGLShaderProgram *program=nullptr;
     GLuint programID;
     bool planetCreated=false;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::duration<double> elapsed_seconds;
 
     Planet (){}
     Planet (QOpenGLContext *context);
@@ -46,7 +49,7 @@ public:
 
     void init ();
     void initGLSL();
-    void makeSphere (float radius);
+    void makeSphere ();
     void makePlates ();
     void initElevations();
     void initPlanet ();
