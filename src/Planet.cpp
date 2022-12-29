@@ -231,6 +231,7 @@ void Planet::initElevations()
 
 }
 
+
 void Planet::drawPlanet(const qglviewer::Camera *camera)
 {
 
@@ -238,43 +239,23 @@ void Planet::drawPlanet(const qglviewer::Camera *camera)
     float mvMatrix[16];
     camera->getProjectionMatrix (pMatrix);
     camera->getModelViewMatrix (mvMatrix);
-    float lightColor[3] = {1,0.9,0.8};
-    program->bind();
-     /*shader.setUniformValue(shader.uniformLocation("proj_matrix"),QMatrix4x4(pMatrix));
-     shader.setUniformValue(shader.uniformLocation("mv_matrix"),QMatrix4x4(mvMatrix));
-     shader.setUniformValue(shader.uniformLocation("lightColor"), lightColor);
-     shader.setUniformValue(shader.uniformLocation("viewPos"), camPos);
-     shader.setUniformValue(shader.uniformLocation("lightPos"), camPos);
-     shader.setUniformValue(shader.uniformLocation("lighting"), int(false));*/
 
-     glFunctions->glUniformMatrix4fv (
+    QVector3D camPos(camera->position().x,camera->position().y,camera->position().z);
+    QVector3D lightColor(1,0.9,0.8);
+    program->bind();
+
+    glFunctions->glUniformMatrix4fv (
              glFunctions->glGetUniformLocation (programID, "proj_matrix"), 1,
              GL_FALSE,
              pMatrix);
-     glFunctions->glUniformMatrix4fv (
+    glFunctions->glUniformMatrix4fv (
              glFunctions->glGetUniformLocation (programID, "mv_matrix"), 1,
              GL_FALSE,
              mvMatrix);
-
-     glFunctions->glUniform3fv(
-             glFunctions->glGetUniformLocation(programID, "viewPos"), 1,
-             camera->position()
-             );
-
-     glFunctions->glUniform3fv(
-             glFunctions->glGetUniformLocation(programID, "lightPos"), 1,
-             camera->position()
-             );
-
-     glFunctions->glUniform3fv(
-             glFunctions->glGetUniformLocation(programID, "lightColor"), 1,
-             lightColor
-             );
-
-   glFunctions->glUniform1i(
-             glFunctions->glGetUniformLocation(programID, "lighting"),
-             (int)false
-             );
+    program->setUniformValue(program->uniformLocation("lightColor"), lightColor);
+    program->setUniformValue(program->uniformLocation("viewPos"), camPos);
+    program->setUniformValue(program->uniformLocation("lightPos"), camPos);
+    program->setUniformValue(program->uniformLocation("lighting"), int(false));
 
     mesh.Draw(program);
     program->release();
@@ -308,7 +289,7 @@ void Planet::clear ()
 
 void Planet::save () const
 {
-/*	std::string filename = "planet.obj";
+	std::string filename = "planet.obj";
 	std::ofstream ostream;
 	ostream.precision (4);
 
@@ -323,8 +304,8 @@ void Planet::save () const
 
     for (size_t i = 0; i < mesh.vertices.size (); ++i)
 	{
-        ostream << "vn " << mesh.vertices[i].normal.x () << " "
-            << mesh.vertices[i].normal.y () << " " << mesh.vertices[i].normal.z ()
+        ostream << "vn " << mesh.vertices[i].normals.x () << " "
+            << mesh.vertices[i].normals.y () << " " << mesh.vertices[i].normals.z ()
 			<< std::endl;
     }
 
@@ -335,12 +316,12 @@ void Planet::save () const
 	}
 	ostream.close ();
 
-    std::cout << "Wrote to file " << filename << std::endl;*/
+    std::cout << "Wrote to file " << filename << std::endl;
 }
 
 void Planet::saveOFF () const
 {
-    /*std::string filename = "planet.off";
+    std::string filename = "planet.off";
 	std::ofstream ostream;
 	ostream.precision (4);
 
@@ -364,7 +345,7 @@ void Planet::saveOFF () const
 
 	ostream.close ();
 
-    std::cout << "Wrote to file " << filename << std::endl;*/
+    std::cout << "Wrote to file " << filename << std::endl;
 }
 
 void Planet::setOceanicThickness (double _t)
