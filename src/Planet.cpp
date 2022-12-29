@@ -17,7 +17,7 @@ Planet::Planet (QOpenGLContext *context)
     glFunctions = glContext->extraFunctions();
     init ();
     initGLSL ();
-    mesh.setContext(context);
+    //mesh.setContext(context);
 }
 
 Planet::~Planet ()
@@ -105,7 +105,7 @@ void Planet::makeSphere (float radius)
         QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
         pos[i]=position;
         mesh.vertices[i].pos=position;
-        mesh.vertices[i].normals=normal;
+        mesh.vertices[i].normal=normal;
     }
 
     std::cout<<"Done!"<<std::endl;
@@ -304,8 +304,8 @@ void Planet::save () const
 
     for (size_t i = 0; i < mesh.vertices.size (); ++i)
 	{
-        ostream << "vn " << mesh.vertices[i].normals.x () << " "
-            << mesh.vertices[i].normals.y () << " " << mesh.vertices[i].normals.z ()
+        ostream << "vn " << mesh.vertices[i].normal.x () << " "
+            << mesh.vertices[i].normal.y () << " " << mesh.vertices[i].normal.z ()
 			<< std::endl;
     }
 

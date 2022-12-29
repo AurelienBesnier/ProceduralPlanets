@@ -13,36 +13,27 @@
 
 
 struct Vertex {
-    QVector3D pos, normals, color;
+    QVector3D pos, normal, color;
 };
 
 class Mesh
 {
 private:
-    GLuint VBO, VAO, EBO;
+    QOpenGLBuffer *VBO, *EBO;
 
 public:
-    QOpenGLContext* glContext;
-    QOpenGLExtraFunctions *glFunctions;
+    QOpenGLVertexArrayObject *VAO;
     QVector<Vertex> vertices;
     QVector<unsigned int> indices;
     Mesh(){}
 
     void Draw(QOpenGLShaderProgram *shader)
     {
-        shader->bind();
-        glFunctions->glBindVertexArray (VAO);
-        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
-        glFunctions->glBindVertexArray (0);
-        shader->release();
-    }
-
-    void setContext(QOpenGLContext* context)
-    {
-        glContext = context;
-        glFunctions = glContext->extraFunctions();
+        VAO->bind();
+        EBO->bind();
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+        VAO->release();
+        EBO->release();
     }
 
     void clear()
@@ -55,44 +46,37 @@ public:
     {
         shader->bind();
         std::cout<<"Creating Mesh Buffers..."<<std::endl;
-        glFunctions->glGenVertexArrays (1, &VAO);
-        glFunctions->glGenBuffers (1, &VBO);
-        glFunctions->glGenBuffers (1, &EBO);
+        VAO = new QOpenGLVertexArrayObject();
+        VBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        EBO = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+        VAO->create();
+        VBO->create();
+        EBO->create();
 
-        glFunctions->glBindVertexArray (VAO);
+        VAO->bind();
 
-        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glFunctions->glBufferData (GL_ELEMENT_ARRAY_BUFFER,
-          indices.size () * sizeof(unsigned int),
-          indices.data(), GL_STATIC_DRAW);
+        EBO->bind();
+        EBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        EBO->allocate(indices.data(),sizeof(unsigned int)*indices.size());
 
-        glFunctions->glBindBuffer (GL_ARRAY_BUFFER, VBO);
-        glFunctions->glBufferData (GL_ARRAY_BUFFER,
-                vertices.size () * sizeof(Vertex), vertices.data(),
-                GL_STATIC_DRAW);
+        VBO->bind();
+        VBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        VBO->allocate(vertices.data(),sizeof(Vertex)*vertices.size());
+        shader->enableAttributeArray(0);
+        shader->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(Vertex));
 
-        glFunctions->glEnableVertexAttribArray (0);
-        glFunctions->glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE,
-          sizeof(Vertex), (void*) 0);
+        shader->enableAttributeArray(1);
+        shader->setAttributeBuffer(1, GL_FLOAT, offsetof(Vertex, normal), 3, sizeof(Vertex));
 
-        glFunctions->glEnableVertexAttribArray (1);
-        glFunctions->glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE,
-                sizeof(Vertex),
-                (void*) offsetof(Vertex, normals));
+        shader->enableAttributeArray(2);
+        shader->setAttributeBuffer(2, GL_FLOAT, offsetof(Vertex, color), 3, sizeof(Vertex));
 
-        glFunctions->glEnableVertexAttribArray (2);
-        glFunctions->glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE,
-          sizeof(Vertex),
-          (void*) offsetof(Vertex, color));
+        VAO->release();
+        VBO->release();
+        EBO->release();
 
-        glFunctions->glBindBuffer (GL_ARRAY_BUFFER, 0);
-        glFunctions->glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
-        glFunctions->glBindVertexArray (0);
-        shader->release();
-
-        vertices.clear();
         std::cout<<"Done!"<<std::endl;
     }
 };
 
-#endif // MESH_H
+#endif
