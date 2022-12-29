@@ -1,28 +1,8 @@
-#version 420
-
-
-// --------------------------------------------------
-// shader definition
-// --------------------------------------------------
-
-uniform vec3 lightPos;
-uniform vec3 viewPos;
-uniform vec3 lightColor;
-uniform bool lighting;
-
-in vec3 position;
-in vec3 normal;
-in vec3 color;
-
+uniform vec4 color;
 out vec4 fragColor;
 
-
-// --------------------------------------------------
-// Fragment Shader:
-// --------------------------------------------------
-
-void main() {
-    if(lighting){
+void main(void)
+{    /*if(lighting){
         float ambientStrength = 0.1;
         vec3 ambient = ambientStrength * lightColor;
 
@@ -40,6 +20,6 @@ void main() {
         vec3 result = (ambient + diffuse + specular) * color;
         fragColor = vec4(result,0);
     }
-    else
-        fragColor = vec4(color,0);
+    else*/
+    fragColor = color;
 }

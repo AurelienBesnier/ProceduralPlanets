@@ -7,6 +7,7 @@
 #include <QGLViewer/camera.h>
 #include <QVector3D>
 #include <QVector2D>
+#include <chrono>
 #include <set>
 #include <CGAL/mesh_segmentation.h>
 #include <CGAL/Point_set_3.h>
@@ -19,6 +20,8 @@ typedef CGAL::Simple_cartesian<double>                  K;
 typedef K::Point_3                                      Point;
 typedef CGAL::Point_set_3<Point>                        Point_set;
 
+
+
 class Planet{
 private:
 	unsigned int plateNum;
@@ -26,19 +29,22 @@ private:
 	double radius;
 	int elems;
 
+    QVector<Vertex> vertices;
+    QVector<unsigned int> indices;
     QVector<QVector3D> pos;
     std::vector<Plate> plates;
     QVector<QVector<unsigned int> >  one_ring;
-    bool needInitBuffers = true;
+    bool buffersCreated = false;
 
     void triangulate();
     void drawPlanet(const qglviewer::Camera *camera);
 
 public:
-    Mesh mesh;
-    QOpenGLShaderProgram *program=nullptr;
-    GLuint programID;
+    GLuint programID, VAO, VBO, EBO;
+    GLuint vShader, fShader;
     bool planetCreated=false;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::duration<double> elapsed_seconds;
 
     Planet (){}
     Planet (QOpenGLContext *context);
@@ -50,6 +56,7 @@ public:
     void makePlates ();
     void initElevations();
     void initPlanet ();
+    void createBuffers();
 
     void draw (const qglviewer::Camera *camera);
 
@@ -69,23 +76,17 @@ public:
 
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
-    static void /*GLAPIENTRY */ MessageCallback (GLenum source, GLenum type,
-                          GLuint id, GLenum severity,
-                          GLsizei length,
-                          const GLchar *message,
-                          const void *userParam)
-    {
-        if (severity == GL_DEBUG_SEVERITY_HIGH
-              || severity == GL_DEBUG_SEVERITY_MEDIUM
-              || severity == GL_DEBUG_SEVERITY_LOW)
-        {
-            std::string s_severity = (
-                  severity == GL_DEBUG_SEVERITY_HIGH ? "High" :
-                  severity == GL_DEBUG_SEVERITY_MEDIUM ? "Medium" : "Low");
-            std::cerr << "Error " << id <<", Source: "<<source<<",  Type: "<< type << ", Length: "<<length<<" [severity=" << s_severity << "]: "
-              << message << std::endl;
-        }
-    }
+
+    bool printShaderErrors (GLuint shader);
+    bool printProgramErrors (int program);
+    bool checkOpenGLError ();
+    std::string readShaderSource (std::string filename);
+
+    static void /*GLAPIENTRY */MessageCallback (GLenum source, GLenum type,
+                                                GLuint id, GLenum severity,
+                                                GLsizei length,
+                                                const GLchar *message,
+                                                const void *userParam);
 };
 
 #endif // PLANET_H

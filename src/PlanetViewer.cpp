@@ -1,9 +1,8 @@
 #include "PlanetViewer.hpp"
 #include <cfloat>
 #include <QFileDialog>
-#include <QSurfaceFormat>
-#include <filesystem>
 #include <QGLViewer/manipulatedCameraFrame.h>
+
 
 PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
@@ -11,15 +10,11 @@ PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 
 void PlanetViewer::init ()
 {
-    glContext = QOpenGLContext::currentContext();
-    glFunctions = glContext->extraFunctions();
-
-    std::cout<<"OpenGL Version: "<<glContext->format().majorVersion()<<"."<<glContext->format().minorVersion()<<std::endl;
+    planet = Planet (QOpenGLContext::currentContext ());
 
     // The ManipulatedFrame will be used as the clipping plane
     setManipulatedFrame (new qglviewer::ManipulatedFrame ());
 
-    planet = Planet(glContext);
     // Enable plane clipping
     glEnable (GL_CLIP_PLANE0);
 
@@ -31,16 +26,19 @@ void PlanetViewer::init ()
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     updateCamera(qglviewer::Vec (0.,0.,0.));
+
 }
 
 void PlanetViewer::draw ()
 {
-    glClearColor(0.1, 0.1, 0.1, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    drawClippingPlane();
-    glEnable(GL_DEPTH_TEST);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawClippingPlane ();
 
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
+
+    glEnable(GL_LIGHTING);
+	glEnable (GL_DEPTH_TEST);
+    glDisable (GL_BLEND);
 
     if(displayMode == WIRE){
        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
@@ -49,98 +47,103 @@ void PlanetViewer::draw ()
     }
 
     planet.draw (camera ());
+
+    glDisable(GL_LIGHTING);
     update();
 }
 
 void PlanetViewer::drawClippingPlane ()
 {
-    glEnable (GL_LIGHTING);
+	glEnable (GL_LIGHTING);
 
     glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
 
-    GLdouble equation[4];
-    glGetClipPlane (GL_CLIP_PLANE0, equation);
+	GLdouble equation[4];
+	glGetClipPlane (GL_CLIP_PLANE0, equation);
 
-    qreal p[] = { 0., -equation[3] / equation[1], 0. };
-    qreal projP[3];
+	qreal p[] = { 0., -equation[3] / equation[1], 0. };
+	qreal projP[3];
     camera ()->getWorldCoordinatesOf (p, projP);
 
-    qreal norm[] =
-            { equation[0] + p[0], equation[1] + p[1], equation[2] + p[2] };
-    qreal normResult[3];
-    qglviewer::Vec normal (normResult[0] - projP[0], normResult[1] - projP[1],
-                            normResult[2] - projP[2]);
-    qglviewer::Vec point (projP[0], projP[1], projP[2]);
+	qreal norm[] =
+			{ equation[0] + p[0], equation[1] + p[1], equation[2] + p[2] };
+	qreal normResult[3];
+	qglviewer::Vec normal (normResult[0] - projP[0], normResult[1] - projP[1],
+							normResult[2] - projP[2]);
+	qglviewer::Vec point (projP[0], projP[1], projP[2]);
 
 }
 
-
 void PlanetViewer::clear ()
 {
-    planet.clear ();
+	planet.clear ();
 	update ();
 }
 
 void PlanetViewer::setPlateNumber (int _plateNum)
 {
-    planet.clear ();
+	planet.clear ();
     planet.setPlateNumber (_plateNum);
 	update ();
 }
 
 void PlanetViewer::setPlanetRadius (QString _r)
 {
-    planet.clear ();
+	planet.clear ();
     planet.setRadius (_r.toDouble ());
 	update ();
 }
 
 void PlanetViewer::setPlanetElem (QString _elems)
 {
-    planet.clear ();
+	planet.clear ();
     planet.setElems (_elems.toInt());
 	update ();
 }
 
 void PlanetViewer::generatePlanet ()
 {
-    if (planet.planetCreated)
-        planet.clear ();
-    planet.initPlanet ();
+	if (planet.planetCreated)
+		planet.clear ();
+	planet.initPlanet ();
 	update ();
 }
 
 void PlanetViewer::clearPlanet ()
 {
-    planet.clear ();
+	planet.clear ();
 	update ();
 }
 
 void PlanetViewer::setOceanicThickness (QString _t)
 {
-    planet.clear ();
-    planet.setOceanicThickness (_t.toDouble ());
+	planet.clear ();
+	planet.setOceanicThickness (_t.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setOceanicElevation (QString _e)
 {
-    planet.setOceanicElevation (_e.toDouble ());
+	planet.setOceanicElevation (_e.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setContinentThickness (QString _t)
 {
-    planet.clear ();
-    planet.setContinentalThickness (_t.toDouble ());
+	planet.clear ();
+	planet.setContinentalThickness (_t.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
 void PlanetViewer::setContinentElevation (QString _e)
 {
-    planet.clear ();
-    planet.setContinentalElevation (_e.toDouble ());
+	planet.clear ();
+	planet.setContinentalElevation (_e.toDouble ());
+	planet.initPlanet();
 	update ();
 }
 
@@ -155,12 +158,12 @@ void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 
 void PlanetViewer::savePlanetOff () const
 {
-    planet.saveOFF ();
+	planet.saveOFF ();
 }
 
 void PlanetViewer::savePlanetObj () const
 {
-    planet.save ();
+	planet.save ();
 }
 
 std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)
@@ -172,6 +175,7 @@ std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)
 
 void PlanetViewer::shaderLighting()
 {
+    //this->planet.shaderLighting();
     update();
 }
 

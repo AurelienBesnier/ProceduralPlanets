@@ -11,15 +11,14 @@
 #include <vector>
 #include <iostream>
 
-
 struct Vertex {
-    QVector3D pos, normals, color;
+    QVector3D pos, normal, color;
 };
 
 class Mesh
 {
 private:
-    GLuint VBO, VAO, EBO;
+    GLuint VAO, VBO, EBO;
 
 public:
     QOpenGLContext* glContext;
@@ -78,7 +77,7 @@ public:
         glFunctions->glEnableVertexAttribArray (1);
         glFunctions->glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE,
                 sizeof(Vertex),
-                (void*) offsetof(Vertex, normals));
+                (void*) offsetof(Vertex, normal));
 
         glFunctions->glEnableVertexAttribArray (2);
         glFunctions->glVertexAttribPointer (2, 3, GL_FLOAT, GL_FALSE,
@@ -95,4 +94,5 @@ public:
     }
 };
 
-#endif // MESH_H
+
+#endif

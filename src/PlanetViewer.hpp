@@ -3,8 +3,6 @@
 
 #include <QKeyEvent>
 #include <QGLViewer/qglviewer.h>
-#include <QOpenGLExtraFunctions>
-#include <QOpenGLShaderProgram>
 
 #include <iostream>
 #include <fstream>
@@ -12,7 +10,6 @@
 #include <math.h>
 #include <algorithm>
 #include "Planet.hpp"
-
 
 enum DisplayMode{WIRE=0, SOLID=1};
 
@@ -23,18 +20,17 @@ public:
     PlanetViewer (QWidget *parent);
 protected:
     Planet planet;
-    QOpenGLContext *glContext;
-    QOpenGLExtraFunctions *glFunctions;
     qglviewer::Vec cam;
 
     DisplayMode displayMode;
 
     virtual void draw ();
-    virtual void drawClippingPlane();
     virtual void shaderLighting ();
-    virtual void init ();
-    virtual QString helpString () const;
-    virtual void keyPressEvent (QKeyEvent *e);
+	virtual void init ();
+	virtual QString helpString () const;
+	virtual void keyPressEvent (QKeyEvent *e);
+
+	void drawClippingPlane ();
 
     void changeDisplayMode(){
         if(displayMode == WIRE)
