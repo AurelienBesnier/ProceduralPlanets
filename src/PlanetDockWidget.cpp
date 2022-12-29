@@ -2,7 +2,6 @@
 #include <QFileDialog>
 #include <QComboBox>
 
-using namespace std;
 PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QDockWidget (
 		parent)
 {
@@ -37,7 +36,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 				SLOT(setPlateNumText()));
 
 	planetRadius = new QLineEdit ();
-  planetRadius->setText("6370");
+    planetRadius->setText("6370");
 	planetParamLayout->addWidget (planetRadius, 1, 1, 1, 1);
 
 	planetRadiusLabel = new QLabel (QString ("Planet Radius:"));
@@ -46,8 +45,8 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	connect (planetRadius, SIGNAL(textChanged(QString)), viewer,
 				SLOT(setPlanetRadius(QString)));
 
-  planetElements = new QLineEdit ();
-  planetElements->setText("60000");
+    planetElements = new QLineEdit ();
+    planetElements->setText("6000");
 
 	planetElementLabel = new QLabel (QString ("Planet Elements: "));
 	planetParamLayout->addWidget (planetElementLabel, 2, 0, 1, 1);

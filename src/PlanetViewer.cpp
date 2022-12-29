@@ -3,8 +3,6 @@
 #include <QFileDialog>
 #include <QGLViewer/manipulatedCameraFrame.h>
 
-using namespace std;
-using namespace qglviewer;
 
 PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
@@ -15,7 +13,7 @@ void PlanetViewer::init ()
     planet = Planet (QOpenGLContext::currentContext ());
 
     // The ManipulatedFrame will be used as the clipping plane
-    setManipulatedFrame (new ManipulatedFrame ());
+    setManipulatedFrame (new qglviewer::ManipulatedFrame ());
 
     // Enable plane clipping
     glEnable (GL_CLIP_PLANE0);
@@ -177,7 +175,7 @@ std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)
 
 void PlanetViewer::shaderLighting()
 {
-    this->planet.shaderLighting();
+    //this->planet.shaderLighting();
     update();
 }
 

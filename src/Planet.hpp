@@ -7,77 +7,62 @@
 #include <QGLViewer/camera.h>
 #include <QVector3D>
 #include <QVector2D>
+#include <chrono>
+#include <set>
 #include <CGAL/mesh_segmentation.h>
 #include <CGAL/Point_set_3.h>
-#include <CGAL/Surface_mesh.h>
 #include <CGAL/Advancing_front_surface_reconstruction.h>
-#include <CGAL/jet_estimate_normals.h>
-#include <CGAL/mst_orient_normals.h>
-#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 
 #include "Plate.hpp"
+#include "Mesh.hpp"
 
 typedef CGAL::Simple_cartesian<double>                  K;
 typedef K::Point_3                                      Point;
 typedef CGAL::Point_set_3<Point>                        Point_set;
-typedef CGAL::Surface_mesh<Point>                       Mesh;
-typedef boost::graph_traits<Mesh>::vertex_descriptor    vertex_descriptor;
-typedef boost::graph_traits<Mesh>::face_descriptor      face_descriptor;
 
-
-
-struct Vertex {
-    Point pos;
-    QVector3D normal;
-    QVector2D texCoord;
-    QVector3D color;
-    unsigned int plate_id;
-};
-
-class Planet {
+class Planet{
 private:
 	unsigned int plateNum;
 	PlateParameters plateParams;
 	double radius;
 	int elems;
 
-	std::vector<Vertex> vertices;
-    std::vector<Point> pos;
-	std::vector<Plate> plates;
-    std::vector<unsigned int> indices;
+    QVector<QVector3D> pos;
+    std::vector<Plate> plates;
+    QVector<QVector<unsigned int> >  one_ring;
+    bool needInitBuffers = true;
 
-	bool wireframe = false;
-    bool shaderLigth = false;
     void triangulate();
+    void drawPlanet(const qglviewer::Camera *camera);
 
 public:
-	GLuint VBO, VAO, EBO;
-	bool planetCreated;
-	bool buffersCreated = false;
+    Mesh mesh;
+    QOpenGLShaderProgram *program=nullptr;
+    GLuint programID;
+    bool planetCreated=false;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::duration<double> elapsed_seconds;
 
-	Planet () // @suppress("Class members should be properly initialized")
-	{
-	}
-	Planet (QOpenGLContext *context);
+    Planet (){}
+    Planet (QOpenGLContext *context);
 	~Planet ();
 
-	void init ();
-    void initGLSL ();
-    void makeSphere (float radius, int elems);
-	void makePlates ();
+    void init ();
+    void initGLSL();
+    void makeSphere ();
+    void makePlates ();
+    void initElevations();
     void initPlanet ();
-	void createBuffers ();
 
-	void draw (const qglviewer::Camera *camera);
-	void changeViewMode ();
-    void shaderLighting ();
+    void draw (const qglviewer::Camera *camera);
+
 	void clear ();
 	void save () const;
 	void saveOFF () const;
 
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
-	double getRadius ()const;
+    double getRadius () const;
 	void setElems (int _elems);
 
 	void setOceanicThickness (double _t);
@@ -85,20 +70,25 @@ public:
 	void setContinentalThickness (double _t);
 	void setContinentalElevation (double _e);
 
-	bool printShaderErrors (GLuint shader);
-	bool printProgramErrors (int program);
-	bool checkOpenGLError ();
-	std::string readShaderSource (std::string filename);
-
-	GLuint vShader, gShader, fShader, programID;
-	QOpenGLContext *glContext;
-	QOpenGLExtraFunctions *glFunctions;
-
-	static void /*GLAPIENTRY */MessageCallback (GLenum source, GLenum type,
-												GLuint id, GLenum severity,
-												GLsizei length,
-												const GLchar *message,
-												const void *userParam);
+    QOpenGLContext *glContext;
+    QOpenGLExtraFunctions *glFunctions;
+    static void /*GLAPIENTRY */ MessageCallback (GLenum source, GLenum type,
+                          GLuint id, GLenum severity,
+                          GLsizei length,
+                          const GLchar *message,
+                          const void *userParam)
+    {
+        if (severity == GL_DEBUG_SEVERITY_HIGH
+              || severity == GL_DEBUG_SEVERITY_MEDIUM
+              || severity == GL_DEBUG_SEVERITY_LOW)
+        {
+            std::string s_severity = (
+                  severity == GL_DEBUG_SEVERITY_HIGH ? "High" :
+                  severity == GL_DEBUG_SEVERITY_MEDIUM ? "Medium" : "Low");
+            std::cerr << "Error " << id <<", Source: "<<source<<",  Type: "<< type << ", Length: "<<length<<" [severity=" << s_severity << "]: "
+              << message << std::endl;
+        }
+    }
 };
 
 #endif // PLANET_H
