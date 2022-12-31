@@ -23,7 +23,6 @@ private:
 	QStatusBar *statusbar;
 
 public slots:
-    void printMessage(const char*);
 
 };
 

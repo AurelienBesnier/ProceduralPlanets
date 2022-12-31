@@ -3,13 +3,21 @@
 
 #include <QKeyEvent>
 #include <QGLViewer/qglviewer.h>
+#include <QtConcurrent>
+#include <QFuture>
+#include <QThread>
 
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Planet.hpp"
+#include "Mesh.hpp"
 
 enum DisplayMode{WIRE=0, SOLID=1};
 
@@ -21,10 +29,69 @@ public:
 protected:
     Planet planet;
     qglviewer::Vec cam;
+	QFuture<void> generationFuture;
+
+    QOpenGLVertexArrayObject* skyboxVAO;
+    QOpenGLBuffer *skyboxVBO;
+    GLuint skyboxTextureID;
+    QOpenGLShaderProgram *skyboxShader;
+    std::vector<std::string> skyboxFaces{
+        "./res/skybox/right.jpg",
+        "./res/skybox/left.jpg",
+        "./res/skybox/top.jpg",
+        "./res/skybox/bottom.jpg",
+        "./res/skybox/front.jpg",
+        "./res/skybox/back.jpg"
+	};
+
+    std::vector<float> skyboxVertices{
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
 
     DisplayMode displayMode;
 
     virtual void draw ();
+    virtual void drawSkybox();
     virtual void shaderLighting ();
 	virtual void init ();
 	virtual QString helpString () const;
@@ -39,6 +106,8 @@ protected:
             displayMode = WIRE;
     }
 
+    unsigned int loadCubemap();
+
     void clear ();
     void updateCamera (const qglviewer::Vec &center);
 
@@ -48,11 +117,9 @@ public slots:
 	void clearPlanet ();
 	void setPlanetRadius (QString _r);
 	void setPlanetElem (QString _elems);
-	void savePlanetOff () const;
-	void savePlanetObj () const;
-	void setOceanicThickness (QString _t);
+    void savePlanetOff ();
+    void savePlanetObj ();
 	void setOceanicElevation (QString _e);
-	void setContinentThickness (QString _t);
 	void setContinentElevation (QString _e);
 signals:
 

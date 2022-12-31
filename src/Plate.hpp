@@ -16,8 +16,7 @@ struct Plate {
 };
 
 struct PlateParameters {
-	double oceanicThickness, continentalThickness, oceanicEleavation,
-			continentalElevation;
+	double oceanicElevation, continentalElevation;
 };
 
 #endif /* PLATE_HPP_ */

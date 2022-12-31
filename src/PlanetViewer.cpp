@@ -2,15 +2,85 @@
 #include <cfloat>
 #include <QFileDialog>
 #include <QGLViewer/manipulatedCameraFrame.h>
+#include <filesystem>
 
 
 PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
 }
 
+unsigned int PlanetViewer::loadCubemap()
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < skyboxFaces.size(); i++)
+	{
+        QImage texture = QImage(skyboxFaces[i].c_str());
+        texture = texture.convertToFormat(QImage::Format_RGB888);
+		unsigned char *data = texture.bits();
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path: " << skyboxFaces[i] << std::endl;
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}  
+
 void PlanetViewer::init ()
 {
     planet = Planet (QOpenGLContext::currentContext ());
+    skyboxShader = new QOpenGLShaderProgram();
+    std::filesystem::path fs = std::filesystem::current_path ();
+    std::string path = fs.string () + "/GLSL/shaders/";
+    QString  vShaderPath = QString::fromStdString(path + "skybox.vert");
+    QString  fShaderPath = QString::fromStdString(path + "skybox.frag");
+    if(!skyboxShader->addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath))
+    {
+        std::cerr<<skyboxShader->log().toStdString()<<std::endl;
+        std::cerr<<"Couldn't add VERTEX shader"<<std::endl;
+    }
+    if(!skyboxShader->addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath))
+    {
+        std::cerr<<skyboxShader->log().toStdString()<<std::endl;
+        std::cerr<<"Couldn't add FRAGMENT shader"<<std::endl;
+    }
+
+    if(!skyboxShader->link())
+    {
+        std::cerr<<skyboxShader->log().toStdString()<<std::endl;
+        std::cerr<<"Error linking program"<<std::endl;
+    }
+    skyboxShader->bind();
+
+    skyboxTextureID = loadCubemap();
+
+    skyboxVAO = new QOpenGLVertexArrayObject();
+    skyboxVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    skyboxVAO->create();
+    skyboxVBO->create();
+    skyboxVBO->bind();
+    skyboxVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skyboxVBO->allocate(skyboxVertices.data(),sizeof(float)*skyboxVertices.size());
+    skyboxShader->enableAttributeArray(0);
+    skyboxShader->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float));
+
+    skyboxVAO->release();
+    skyboxVBO->release();
 
     // The ManipulatedFrame will be used as the clipping plane
     setManipulatedFrame (new qglviewer::ManipulatedFrame ());
@@ -27,6 +97,41 @@ void PlanetViewer::init ()
 
     updateCamera(qglviewer::Vec (0.,0.,0.));
 
+    setFPSIsDisplayed(true);
+    displayMessage	("Viewer Initiliazed");
+
+    skyboxShader->release();
+
+}
+
+void PlanetViewer::drawSkybox()
+{
+    glDepthMask(GL_FALSE);
+    skyboxShader->bind();
+    float pMatrix[16];
+    float mvMatrix[16];
+    glm::mat4 view;
+    glm::vec3 cameraPos   = glm::vec3(camera()->position().x, camera()->position().y,  camera()->position().z);
+    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+    camera()->getProjectionMatrix (pMatrix);
+    QOpenGLContext::currentContext ()->extraFunctions()->glUniformMatrix4fv (
+             QOpenGLContext::currentContext ()->extraFunctions()->glGetUniformLocation (skyboxShader->programId(), "proj_matrix"), 1,
+             GL_FALSE,
+             pMatrix);
+    QOpenGLContext::currentContext ()->extraFunctions()->glUniformMatrix4fv (
+             QOpenGLContext::currentContext ()->extraFunctions()->glGetUniformLocation (skyboxShader->programId(), "view"), 1,
+             GL_FALSE,
+             &view[0][0]);
+    skyboxVAO->bind();
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    skyboxShader->release();
+    skyboxVAO->release();
+    glDepthMask(GL_TRUE);
 }
 
 void PlanetViewer::draw ()
@@ -37,7 +142,7 @@ void PlanetViewer::draw ()
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
 
     glEnable(GL_LIGHTING);
-	glEnable (GL_DEPTH_TEST);
+    glEnable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
 
     if(displayMode == WIRE){
@@ -46,6 +151,7 @@ void PlanetViewer::draw ()
        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
     }
 
+    drawSkybox();
     planet.draw (camera ());
 
     glDisable(GL_LIGHTING);
@@ -77,74 +183,72 @@ void PlanetViewer::drawClippingPlane ()
 
 void PlanetViewer::clear ()
 {
-	planet.clear ();
-	update ();
+	if(!generationFuture.isRunning()){
+		planet.clear ();
+		update ();
+	}
 }
 
 void PlanetViewer::setPlateNumber (int _plateNum)
 {
-	planet.clear ();
-    planet.setPlateNumber (_plateNum);
-	update ();
+	if(!generationFuture.isRunning()){
+		planet.clear ();
+    	planet.setPlateNumber (_plateNum);
+		update ();
+	}
 }
 
 void PlanetViewer::setPlanetRadius (QString _r)
 {
-	planet.clear ();
-    planet.setRadius (_r.toDouble ());
-	update ();
+	if(!generationFuture.isRunning()){
+		planet.clear ();
+    	planet.setRadius (_r.toDouble ());
+		update ();
+	}
 }
 
 void PlanetViewer::setPlanetElem (QString _elems)
 {
-	planet.clear ();
-    planet.setElems (_elems.toInt());
-	update ();
+	if(!generationFuture.isRunning()){
+		planet.clear ();
+    	planet.setElems (_elems.toInt());
+		update ();
+	}
 }
 
 void PlanetViewer::generatePlanet ()
 {
+    displayMessage	("Generating planet");
 	if (planet.planetCreated)
 		planet.clear ();
-	planet.initPlanet ();
-	update ();
+	if(!generationFuture.isRunning())
+		generationFuture = QtConcurrent::run( [this]{planet.initPlanet(); update ();});
 }
 
 void PlanetViewer::clearPlanet ()
 {
-	planet.clear ();
-	update ();
-}
-
-void PlanetViewer::setOceanicThickness (QString _t)
-{
-	planet.clear ();
-	planet.setOceanicThickness (_t.toDouble ());
-	planet.initPlanet();
-	update ();
+    displayMessage	("Planet cleared");
+	if(!generationFuture.isRunning()){
+		planet.clear ();
+		update ();
+	}
 }
 
 void PlanetViewer::setOceanicElevation (QString _e)
 {
-	planet.setOceanicElevation (_e.toDouble ());
-	planet.initPlanet();
-	update ();
-}
-
-void PlanetViewer::setContinentThickness (QString _t)
-{
-	planet.clear ();
-	planet.setContinentalThickness (_t.toDouble ());
-	planet.initPlanet();
-	update ();
+	if(!generationFuture.isRunning()){
+		planet.setOceanicElevation (_e.toDouble ());
+		update ();
+	}
 }
 
 void PlanetViewer::setContinentElevation (QString _e)
 {
-	planet.clear ();
-	planet.setContinentalElevation (_e.toDouble ());
-	planet.initPlanet();
-	update ();
+	if(!generationFuture.isRunning()){
+		planet.clear ();
+		planet.setContinentalElevation (_e.toDouble ());
+		update ();
+	}
 }
 
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)
@@ -156,13 +260,15 @@ void PlanetViewer::updateCamera (const qglviewer::Vec &center)
     update();
 }
 
-void PlanetViewer::savePlanetOff () const
+void PlanetViewer::savePlanetOff ()
 {
+    displayMessage	("Planet saved as planet.off");
 	planet.saveOFF ();
 }
 
-void PlanetViewer::savePlanetObj () const
+void PlanetViewer::savePlanetObj ()
 {
+    displayMessage	("Planet saved as planet.obj");
 	planet.save ();
 }
 
@@ -202,7 +308,7 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
 
 QString PlanetViewer::helpString () const
 {
-	QString text ("<h2>S i m p l e V i e w e r</h2>");
+	QString text ("<h2>Procedural Planets</h2>");
 	text += "Use the mouse to move the camera around the object. ";
 	text +=
 			"You can respectively revolve around, zoom and translate with the three mouse buttons. ";

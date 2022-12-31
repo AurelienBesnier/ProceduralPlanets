@@ -39,7 +39,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
     planetRadius->setText("6370");
 	planetParamLayout->addWidget (planetRadius, 1, 1, 1, 1);
 
-	planetRadiusLabel = new QLabel (QString ("Planet Radius:"));
+	planetRadiusLabel = new QLabel (QString ("Planet Radius (in km):"));
 	planetParamLayout->addWidget (planetRadiusLabel, 1, 0, 1, 1);
 
 	connect (planetRadius, SIGNAL(textChanged(QString)), viewer,
@@ -48,7 +48,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
     planetElements = new QLineEdit ();
     planetElements->setText("6000");
 
-	planetElementLabel = new QLabel (QString ("Planet Elements: "));
+	planetElementLabel = new QLabel (QString ("Planet Resolution: "));
 	planetParamLayout->addWidget (planetElementLabel, 2, 0, 1, 1);
 
 	planetParamLayout->addWidget (planetElements, 2, 1, 1, 1);
@@ -71,17 +71,10 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	QGridLayout *oceanParamLayout = new QGridLayout (oceanicPlateBox);
 	contentLayout->addWidget (oceanicPlateBox);
 
-	oThicknessLabel = new QLabel (QString ("Oceanic Thickness:"));
-	oceanParamLayout->addWidget (oThicknessLabel, 1, 0, 1, 1);
-	oceanicThickness = new QLineEdit ();
-	oceanParamLayout->addWidget (oceanicThickness, 1, 1, 1, 1);
-
-	connect (oceanicThickness, SIGNAL(textChanged(QString)), viewer,
-				SLOT(setOceanicThickness(QString)));
-
-	oElevationLabel = new QLabel (QString ("Oceanic Elevation:"));
+	oElevationLabel = new QLabel (QString ("Abyssal Plain Elevation (in km):"));
 	oceanParamLayout->addWidget (oElevationLabel, 2, 0, 1, 1);
 	oceanicElevation = new QLineEdit ();
+	oceanicElevation->setText("-10");
 	oceanParamLayout->addWidget (oceanicElevation, 2, 1, 1, 1);
 
 	connect (oceanicElevation, SIGNAL(textChanged(QString)), viewer,
@@ -94,17 +87,10 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	QGridLayout *contParamLayout = new QGridLayout (continentalPlateBox);
 	contentLayout->addWidget (continentalPlateBox);
 
-	cThicknessLabel = new QLabel (QString ("Continental Thickness:"));
-	contParamLayout->addWidget (cThicknessLabel, 1, 0, 1, 1);
-	continentalThickness = new QLineEdit ();
-	contParamLayout->addWidget (continentalThickness, 1, 1, 1, 1);
-
-	connect (continentalThickness, SIGNAL(textChanged(QString)), viewer,
-				SLOT(setContinentThickness(QString)));
-
-	cElevationLabel = new QLabel (QString ("Oceanic Elevation:"));
+	cElevationLabel = new QLabel (QString ("Max Continental Elevation (in km):"));
 	contParamLayout->addWidget (cElevationLabel, 2, 0, 1, 1);
 	continentalElevation = new QLineEdit ();
+	continentalElevation->setText("10");
 	contParamLayout->addWidget (continentalElevation, 2, 1, 1, 1);
 
 	connect (continentalElevation, SIGNAL(textChanged(QString)), viewer,
@@ -116,9 +102,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	validator->setLocale (QLocale::C);
 	validator->setNotation (QDoubleValidator::StandardNotation);
 	planetRadius->setValidator (validator);
-	oceanicThickness->setValidator (validator);
 	oceanicElevation->setValidator (validator);
-	continentalThickness->setValidator (validator);
 	continentalElevation->setValidator (validator);
 
 	contentLayout->addStretch (0);

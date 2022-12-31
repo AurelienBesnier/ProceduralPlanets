@@ -23,15 +23,17 @@ private:
 
 public:
     QOpenGLVertexArrayObject *VAO;
-    QVector<Vertex> vertices;
-    QVector<unsigned int> indices;
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
     Mesh(){}
 
     void Draw(QOpenGLShaderProgram *shader)
     {
+        shader->bind();
         VAO->bind();
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
         VAO->release();
+        shader->release();
     }
 
     void clear()

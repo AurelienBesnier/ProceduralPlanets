@@ -27,9 +27,9 @@ private:
 	double radius;
 	int elems;
 
-    QVector<QVector3D> pos;
+    std::vector<QVector3D> pos;
     std::vector<Plate> plates;
-    QVector<QVector<unsigned int> >  one_ring;
+    std::vector<std::vector<unsigned int> >  one_ring;
     bool needInitBuffers = true;
 
     void triangulate();
@@ -37,8 +37,8 @@ private:
 
 public:
     Mesh mesh;
-    QOpenGLShaderProgram *program=nullptr;
-    GLuint programID;
+    QOpenGLShaderProgram *program=nullptr, *oceanProgram = nullptr;
+    GLuint programID, oceanProgramID;
     bool planetCreated=false;
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
@@ -53,6 +53,9 @@ public:
     void makePlates ();
     void initElevations();
     void initPlanet ();
+    void collect_one_ring (std::vector<QVector3D> const & i_vertices,
+    std::vector< unsigned int > const & i_triangles,
+    std::vector<std::vector<unsigned int> > & o_one_ring);
 
     void draw (const qglviewer::Camera *camera);
 
@@ -65,9 +68,7 @@ public:
     double getRadius () const;
 	void setElems (int _elems);
 
-	void setOceanicThickness (double _t);
 	void setOceanicElevation (double _e);
-	void setContinentalThickness (double _t);
 	void setContinentalElevation (double _e);
 
     QOpenGLContext *glContext;

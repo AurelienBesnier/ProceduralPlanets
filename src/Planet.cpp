@@ -2,6 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
+#include <execution>
 #include <cassert>
 #include <vector>
 #include <QRandomGenerator>
@@ -31,6 +32,7 @@ void Planet::init ()
     planetCreated = false;
     needInitBuffers = true;
     program = new QOpenGLShaderProgram();
+    oceanProgram = new QOpenGLShaderProgram();
     this->plateNum = 5;
     this->radius = 6370;
     this->elems = 6000;
@@ -70,6 +72,28 @@ void Planet::initGLSL ()
     }
     program->bind();
     programID = program->programId();
+    program->release();
+
+    vShaderPath = QString::fromStdString(path + "ocean.vert");
+    fShaderPath = QString::fromStdString(path + "ocean.frag");
+    if(!oceanProgram->addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath))
+    {
+        std::cerr<<oceanProgram->log().toStdString()<<std::endl;
+        std::cerr<<"Couldn't add VERTEX shader"<<std::endl;
+    }
+    if(!oceanProgram->addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath))
+    {
+        std::cerr<<oceanProgram->log().toStdString()<<std::endl;
+        std::cerr<<"Couldn't add FRAGMENT shader"<<std::endl;
+    }
+
+    if(!oceanProgram->link())
+    {
+        std::cerr<<oceanProgram->log().toStdString()<<std::endl;
+        std::cerr<<"Error linking program"<<std::endl;
+    }
+    oceanProgram->bind();
+    oceanProgram->release();
 }
 
 void Planet::initPlanet ()
@@ -142,9 +166,9 @@ void Planet::triangulate()
     std::cout<<"triangulation finished!"<<std::endl;
 }
 
-void collect_one_ring (QVector<QVector3D> const & i_vertices,
-    QVector< unsigned int > const & i_triangles,
-    QVector<QVector<unsigned int> > & o_one_ring) {
+void Planet::collect_one_ring (std::vector<QVector3D> const & i_vertices,
+    std::vector< unsigned int > const & i_triangles,
+    std::vector<std::vector<unsigned int> > & o_one_ring) {
     o_one_ring.clear();
     o_one_ring.resize(i_vertices.size());
     size_t i, j, y, size=i_triangles.size();
@@ -156,7 +180,7 @@ void collect_one_ring (QVector<QVector3D> const & i_vertices,
             {
                 if(j!=y)
                 {
-                    if(std::find(o_one_ring.begin(), o_one_ring.end(),
+                    if(std::find(std::execution::par,o_one_ring.begin(), o_one_ring.end(),
                         o_one_ring[i_triangles[i]]) != o_one_ring.end()){
                         o_one_ring[i_triangles[i+j]].push_back(i_triangles[i+y]);
                     }
@@ -184,21 +208,21 @@ void Planet::makePlates ()
     prng.seed(time(nullptr));
     std::set<unsigned int> tmp_init;
     std::vector<QVector3D> colors(plateNum);
-    QVector<QVector<unsigned int>> last_ids;
+    std::vector<std::vector<unsigned int>> last_ids;
     last_ids.resize(plateNum);
 
-    for(QVector3D &c : colors)
-        c = QVector3D(prng.generateDouble()*1,prng.generateDouble()*1,prng.generateDouble()*1);
-
-    plates[0].type=OCEANIC;
-    plates[1].type=CONTINENTAL;
-    for(unsigned short i = 2; i < plateNum; ++i)
-        plates[i].type = prng.generateDouble() > 0.5 ? OCEANIC : CONTINENTAL;
+    plates[0].type=OCEANIC; colors[0] = QVector3D(0,0,1);
+    plates[1].type=CONTINENTAL; colors[1] = QVector3D(0,1,0);
+    for(unsigned short i = 2; i < plateNum; ++i){
+        double rng = prng.generateDouble();
+        plates[i].type = rng > 0.5 ? OCEANIC : CONTINENTAL;
+        colors[i] = rng > 0.5 ? QVector3D(0,0,1) : QVector3D(0,1,0);
+    }
 
     for(unsigned short i = 0; i < plateNum; ++i)
     {
         unsigned int first_point_of_plate = prng.bounded((unsigned int)mesh.vertices.size()-1);
-        while(std::find(tmp_init.begin(), tmp_init.end(), first_point_of_plate) != tmp_init.end())
+        while(std::find(std::execution::par,tmp_init.begin(), tmp_init.end(), first_point_of_plate) != tmp_init.end())
         { first_point_of_plate = prng.bounded((unsigned int)mesh.vertices.size()-1); }
         tmp_init.insert(first_point_of_plate);
 
@@ -207,10 +231,10 @@ void Planet::makePlates ()
         last_ids[i] = one_ring[first_point_of_plate];
     }
 
-    QVector<QVector<unsigned int>> next_ids;
+    std::vector<std::vector<unsigned int>> next_ids;
     next_ids.resize(plateNum);
 
-    while(mesh.vertices.size() != (int)tmp_init.size())
+    while(mesh.vertices.size() != tmp_init.size())
     {
         for(unsigned short i = 0; i<plateNum; ++i)
         {
@@ -218,8 +242,8 @@ void Planet::makePlates ()
             {
                 unsigned int current_vertex = last_ids[i].back();
                 last_ids[i].pop_back();
-                QVector<unsigned int> neighbours = one_ring[current_vertex];
-                for(long n = 0; n < neighbours.size(); ++n)
+                std::vector<unsigned int> neighbours = one_ring[current_vertex];
+                for(size_t n = 0; n < neighbours.size(); ++n)
                 {
                     if(!tmp_init.contains(neighbours[n]))
                     {
@@ -228,6 +252,9 @@ void Planet::makePlates ()
                         mesh.vertices[neighbours[n]].color=colors[i];
                         next_ids[i].push_back(neighbours[n]);
                     }
+                    /*else {
+                        mesh.vertices[neighbours[n]].color=QVector3D(0,0,0);
+                    }*/
                 }
             }
             last_ids[i] = next_ids[i];
@@ -239,7 +266,30 @@ void Planet::makePlates ()
 
 void Planet::initElevations()
 {
+    std::cout<<mesh.vertices[2].pos.x()<<"; "<<mesh.vertices[2].pos.y()<<"; "<<mesh.vertices[2].pos.z()<<std::endl;
+    std::cout<<"Initializing plate states..."<<std::endl;
+    start = std::chrono::system_clock::now();
+    for(Plate &plate: plates){
+        if(plate.type == OCEANIC) // intialize oceanic plate
+        {
+            for(unsigned int &point : plate.points)
+            {
+                mesh.vertices[point].pos = mesh.vertices[point].pos - ((plateParams.oceanicElevation*10000) * mesh.vertices[point].normal); // move the point along the normal's direction
+            }
 
+        } else { // intialize continental plate
+            for(unsigned int &point : plate.points)
+            {
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((plateParams.continentalElevation*10000) * mesh.vertices[point].normal);
+            }
+        }
+    }
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end - start;
+    std::cout << "Initialization time: " << elapsed_seconds.count() << "s\n";
+    std::cout<<"Initialization finished!"<<std::endl;
+
+    std::cout<<mesh.vertices[2].pos.x()<<"; "<<mesh.vertices[2].pos.y()<<"; "<<mesh.vertices[2].pos.z()<<std::endl;
 }
 
 
@@ -306,21 +356,21 @@ void Planet::save () const
 
 	ostream.open (filename, std::ios_base::out);
 	ostream << "o planet" << std::endl;
-    for (long i = 0; i < mesh.vertices.size (); ++i)
+    for (size_t i = 0; i < mesh.vertices.size (); ++i)
 	{
         ostream << "v " << std::fixed << mesh.vertices[i].pos.x () << " "
             << std::fixed << mesh.vertices[i].pos.y () << " " << std::fixed
             << mesh.vertices[i].pos.z () << std::endl;
 	}
 
-    for (long i = 0; i < mesh.vertices.size (); ++i)
+    for (size_t i = 0; i < mesh.vertices.size (); ++i)
 	{
         ostream << "vn " << mesh.vertices[i].normal.x () << " "
             << mesh.vertices[i].normal.y () << " " << mesh.vertices[i].normal.z ()
 			<< std::endl;
     }
 
-    for (long i = 0; i < mesh.indices.size (); i += 3)
+    for (size_t i = 0; i < mesh.indices.size (); i += 3)
     {
         ostream << "f " << mesh.indices[i] << " " << mesh.indices[i + 1] << " "
             << mesh.indices[i + 2] << std::endl;
@@ -342,13 +392,13 @@ void Planet::saveOFF () const
     ostream << (mesh.vertices.size ()) << " " << mesh.indices.size () << " 0"
 		<< std::endl;
 
-    for (long i = 0; i < mesh.vertices.size (); ++i)
+    for (size_t i = 0; i < mesh.vertices.size (); ++i)
 	{
         ostream << mesh.vertices[i].pos.x () << " " << mesh.vertices[i].pos.y () << " "
             << mesh.vertices[i].pos.z () << std::endl;
 	}
 
-    for (long t = 0; t < mesh.indices.size (); t += 3)
+    for (size_t t = 0; t < mesh.indices.size (); t += 3)
 	{
         ostream << "3 " << (mesh.indices[t]) << " " << (mesh.indices[t + 1]) << " "
             << (mesh.indices[t + 2]) << std::endl;
@@ -359,25 +409,11 @@ void Planet::saveOFF () const
     std::cout << "Wrote to file " << filename << std::endl;
 }
 
-void Planet::setOceanicThickness (double _t)
-{
-  plateParams.oceanicThickness = _t;
-  std::cout << "Oceanic thickness: " << this->plateParams.oceanicThickness
-    << std::endl;
-}
-
 void Planet::setOceanicElevation (double _e)
 {
-  plateParams.oceanicEleavation = _e;
-  std::cout << "Oceanic elevation: " << this->plateParams.oceanicEleavation
+  plateParams.oceanicElevation = _e;
+  std::cout << "Oceanic elevation: " << this->plateParams.oceanicElevation
     << std::endl;
-}
-
-void Planet::setContinentalThickness (double _t)
-{
-  plateParams.continentalThickness = _t;
-  std::cout << "Continental thickness: "
-    << this->plateParams.continentalThickness << std::endl;
 }
 
 void Planet::setContinentalElevation (double _e)

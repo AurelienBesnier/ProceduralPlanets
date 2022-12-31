@@ -55,11 +55,4 @@ Window::Window ()
 	this->setStatusBar (statusbar);
 
 	this->setWindowTitle ("Planet Generator");
-
-    statusbar->showMessage(tr("Application Ready"), 5000);
-}
-
-void Window::printMessage(const char* message)
-{
-    statusbar->showMessage(tr(message),10000);
 }
