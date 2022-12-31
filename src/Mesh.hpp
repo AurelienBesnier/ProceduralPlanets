@@ -14,6 +14,7 @@
 
 struct Vertex {
     QVector3D pos, normal, color;
+    unsigned int plate_id;
 };
 
 class Mesh

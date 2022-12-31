@@ -227,6 +227,7 @@ void Planet::makePlates ()
         tmp_init.insert(first_point_of_plate);
 
         mesh.vertices[first_point_of_plate].color = colors[i];
+        mesh.vertices[first_point_of_plate].plate_id = i;
         plates[i].points.push_back(first_point_of_plate);
         last_ids[i] = one_ring[first_point_of_plate];
     }
@@ -250,16 +251,25 @@ void Planet::makePlates ()
                         tmp_init.insert(neighbours[n]);
                         plates[i].points.push_back(neighbours[n]);
                         mesh.vertices[neighbours[n]].color=colors[i];
+                        mesh.vertices[neighbours[n]].plate_id=i;
                         next_ids[i].push_back(neighbours[n]);
                     }
-                    /*else {
-                        mesh.vertices[neighbours[n]].color=QVector3D(0,0,0);
-                    }*/
                 }
             }
             last_ids[i] = next_ids[i];
             next_ids[i].clear();
         }
+    }
+
+    for(size_t i = 0; i< mesh.vertices.size(); ++i){ 
+      std::vector<unsigned int> neighbours = one_ring[i];
+      for(size_t n = 0; n < neighbours.size(); ++n)
+      {
+        if(mesh.vertices[neighbours[n]].plate_id!= mesh.vertices[i].plate_id && mesh.vertices[neighbours[n]].color != QVector3D(0,0,0))
+        {
+          mesh.vertices[neighbours[n]].color=QVector3D(0,0,0);
+        }
+      }
     }
     std::cout<<"Segmentation finished!"<<std::endl;
 }
