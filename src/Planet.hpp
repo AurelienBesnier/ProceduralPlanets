@@ -23,7 +23,6 @@ typedef CGAL::Point_set_3<Point>                        Point_set;
 class Planet{
 private:
 	unsigned int plateNum;
-	PlateParameters plateParams;
 	double radius;
 	int elems;
 
@@ -37,6 +36,7 @@ private:
 
 public:
     Mesh mesh;
+    PlateParameters plateParams;
     QOpenGLShaderProgram *program=nullptr, *oceanProgram = nullptr;
     GLuint programID, oceanProgramID;
     bool planetCreated=false;

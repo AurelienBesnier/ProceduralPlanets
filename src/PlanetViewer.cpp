@@ -254,7 +254,7 @@ void PlanetViewer::setContinentElevation (QString _e)
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 {
     camera ()->setSceneCenter (center);
-    camera ()->setSceneRadius (planet.getRadius());
+    camera ()->setSceneRadius (planet.getRadius()+planet.plateParams.continentalElevation);
 
     camera ()->showEntireScene ();
     update();

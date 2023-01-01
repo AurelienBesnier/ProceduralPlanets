@@ -23,7 +23,6 @@ Planet::Planet (QOpenGLContext *context)
 Planet::~Planet ()
 {
     plates.clear();
-    mesh.clear();
     one_ring.clear();
 }
 
@@ -36,6 +35,8 @@ void Planet::init ()
     this->plateNum = 5;
     this->radius = 6370;
     this->elems = 6000;
+    this->plateParams.oceanicElevation=-10;
+    this->plateParams.continentalElevation=10;
 }
 
 void Planet::initGLSL ()
@@ -276,21 +277,38 @@ void Planet::makePlates ()
 
 void Planet::initElevations()
 {
-    std::cout<<mesh.vertices[2].pos.x()<<"; "<<mesh.vertices[2].pos.y()<<"; "<<mesh.vertices[2].pos.z()<<std::endl;
     std::cout<<"Initializing plate states..."<<std::endl;
     start = std::chrono::system_clock::now();
+    QRandomGenerator prng;
+    prng.seed(time(nullptr));
     for(Plate &plate: plates){
         if(plate.type == OCEANIC) // intialize oceanic plate
         {
             for(unsigned int &point : plate.points)
             {
-                mesh.vertices[point].pos = mesh.vertices[point].pos - ((plateParams.oceanicElevation*10000) * mesh.vertices[point].normal); // move the point along the normal's direction
+                double rng = prng.generateDouble();
+                if(rng < 0.2f)
+                    mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.2f);
+                if(rng >= 0.2f && rng < 0.8f)
+                    mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.5f);
+                if( rng >= 0.8f)
+                    mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.8f);
+                double elevation = (plateParams.oceanicElevation) * rng;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
             }
 
         } else { // intialize continental plate
             for(unsigned int &point : plate.points)
             {
-                mesh.vertices[point].pos = mesh.vertices[point].pos + ((plateParams.continentalElevation*10000) * mesh.vertices[point].normal);
+                double rng = prng.generateDouble();
+                if(rng < 0.2f)
+                    mesh.vertices[point].color = QVector3D(0.6f,0.5f,0.1f);
+                if(rng >= 0.2f && rng < 0.8f)
+                    mesh.vertices[point].color = QVector3D(0.1f,0.7f,0.1f);
+                if( rng >= 0.8f)
+                    mesh.vertices[point].color = QVector3D(1.0f,1.0f,1.0f);
+                double elevation = (plateParams.continentalElevation)* rng;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal);
             }
         }
     }
@@ -298,8 +316,6 @@ void Planet::initElevations()
     elapsed_seconds = end - start;
     std::cout << "Initialization time: " << elapsed_seconds.count() << "s\n";
     std::cout<<"Initialization finished!"<<std::endl;
-
-    std::cout<<mesh.vertices[2].pos.x()<<"; "<<mesh.vertices[2].pos.y()<<"; "<<mesh.vertices[2].pos.z()<<std::endl;
 }
 
 

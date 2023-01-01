@@ -41,6 +41,9 @@ public:
     {
         vertices.clear();
         indices.clear();
+        VAO->destroy();
+        VBO->destroy();
+        EBO->destroy();
     }
 
     void setupMesh(QOpenGLShaderProgram *shader)
