@@ -137,8 +137,6 @@ void PlanetViewer::drawSkybox()
 void PlanetViewer::draw ()
 {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    drawClippingPlane ();
-
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
 
     glEnable(GL_LIGHTING);
@@ -156,29 +154,6 @@ void PlanetViewer::draw ()
 
     glDisable(GL_LIGHTING);
     update();
-}
-
-void PlanetViewer::drawClippingPlane ()
-{
-	glEnable (GL_LIGHTING);
-
-    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-
-
-	GLdouble equation[4];
-	glGetClipPlane (GL_CLIP_PLANE0, equation);
-
-	qreal p[] = { 0., -equation[3] / equation[1], 0. };
-	qreal projP[3];
-    camera ()->getWorldCoordinatesOf (p, projP);
-
-	qreal norm[] =
-			{ equation[0] + p[0], equation[1] + p[1], equation[2] + p[2] };
-	qreal normResult[3];
-	qglviewer::Vec normal (normResult[0] - projP[0], normResult[1] - projP[1],
-							normResult[2] - projP[2]);
-	qglviewer::Vec point (projP[0], projP[1], projP[2]);
-
 }
 
 void PlanetViewer::clear ()
@@ -279,12 +254,6 @@ std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)
 	return stream;
 }
 
-void PlanetViewer::shaderLighting()
-{
-    //this->planet.shaderLighting();
-    update();
-}
-
 void PlanetViewer::keyPressEvent (QKeyEvent *e)
 {
 	switch (e->key ())
@@ -296,10 +265,13 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
             changeDisplayMode();
             break;
         case Qt::Key_S:
-            shaderLighting();
+            planet.shaderLighting = !planet.shaderLighting;
             break;
         case Qt::Key_C:
             updateCamera(qglviewer::Vec (0.,0.,0.));
+            break;
+        case Qt::Key_O:
+            planet.oceanDraw = !planet.oceanDraw;
             break;
 		default:
 			QGLViewer::keyPressEvent (e);

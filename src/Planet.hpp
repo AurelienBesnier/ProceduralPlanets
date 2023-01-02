@@ -33,9 +33,12 @@ private:
 
     void triangulate();
     void drawPlanet(const qglviewer::Camera *camera);
+    void drawOcean(const qglviewer::Camera *camera);
 
 public:
-    Mesh mesh;
+    Mesh mesh, oceanMesh;
+    bool shaderLighting = false;
+    bool oceanDraw = true;
     PlateParameters plateParams;
     QOpenGLShaderProgram *program=nullptr, *oceanProgram = nullptr;
     GLuint programID, oceanProgramID;
@@ -50,6 +53,7 @@ public:
     void init ();
     void initGLSL();
     void makeSphere ();
+    void makeOcean ();
     void makePlates ();
     void initElevations();
     void initPlanet ();
@@ -66,7 +70,7 @@ public:
 	void setPlateNumber (int _plateNum);
 	void setRadius (double _r);
     double getRadius () const;
-	void setElems (int _elems);
+    void setElems (int _elems);
 
 	void setOceanicElevation (double _e);
 	void setContinentalElevation (double _e);

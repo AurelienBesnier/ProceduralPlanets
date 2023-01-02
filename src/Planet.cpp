@@ -32,11 +32,11 @@ void Planet::init ()
     needInitBuffers = true;
     program = new QOpenGLShaderProgram();
     oceanProgram = new QOpenGLShaderProgram();
-    this->plateNum = 5;
-    this->radius = 6370;
+    this->plateNum = 4;
+    this->radius = 6370*1000;
     this->elems = 6000;
-    this->plateParams.oceanicElevation=-10;
-    this->plateParams.continentalElevation=10;
+    this->plateParams.oceanicElevation=-10*1000;
+    this->plateParams.continentalElevation=10*1000;
 }
 
 void Planet::initGLSL ()
@@ -46,7 +46,6 @@ void Planet::initGLSL ()
     glFunctions->glEnable (GL_LIGHTING);
     glFunctions->glEnable (GL_COLOR_MATERIAL);
     glFunctions->glEnable (GL_BLEND);
-    glFunctions->glEnable (GL_TEXTURE_2D);
     glFunctions->glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable ( GL_DEBUG_OUTPUT);
     glFunctions->glDebugMessageCallback (Planet::MessageCallback, 0);
@@ -71,9 +70,7 @@ void Planet::initGLSL ()
         std::cerr<<program->log().toStdString()<<std::endl;
         std::cerr<<"Error linking program"<<std::endl;
     }
-    program->bind();
     programID = program->programId();
-    program->release();
 
     vShaderPath = QString::fromStdString(path + "ocean.vert");
     fShaderPath = QString::fromStdString(path + "ocean.frag");
@@ -93,18 +90,62 @@ void Planet::initGLSL ()
         std::cerr<<oceanProgram->log().toStdString()<<std::endl;
         std::cerr<<"Error linking program"<<std::endl;
     }
-    oceanProgram->bind();
-    oceanProgram->release();
+    oceanProgramID = oceanProgram->programId();
 }
 
 void Planet::initPlanet ()
 {
     makeSphere ();
     triangulate();
+    makeOcean();
     makePlates ();
     initElevations();
 
     planetCreated = true;
+}
+
+void Planet::makeOcean ()
+{
+    std::cout<<"Making ocean mesh..."<<std::endl;
+    oceanMesh.vertices.resize(elems);
+    std::vector<QVector3D> pos;
+
+    double goldenRatio = (1 + pow(5,0.5))/2;
+
+    for (long i = 0; i < elems; ++i)
+    {
+        double theta = 2 * PI * i / goldenRatio;
+        double phi = acosf(1 - 2 * (i+0.5f) / elems);
+        double x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
+
+        QVector3D position = QVector3D (x * radius, y * radius, z * radius) ;
+        double squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
+        double length = sqrt(squareLength);
+        QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
+        pos.push_back(position);
+        oceanMesh.vertices[i].pos=position;
+        oceanMesh.vertices[i].normal=normal;
+        oceanMesh.vertices[i].color=QVector3D(0,0,1);
+    }
+
+    Point_set points;
+    for(const QVector3D &po: pos)
+        points.insert(Point(po.x(),po.y(),po.z()));
+
+    typedef std::array<std::size_t, 3> Facet; // Triple of indices
+    std::vector<Facet> facets;
+    // The function is called using directly the points raw iterators
+    
+    CGAL::advancing_front_surface_reconstruction(points.points().begin(),
+      points.points().end(),
+      std::back_inserter(facets));
+    for(size_t i = 0; i<facets.size(); ++i)
+    {
+        for(size_t j = 0; j<3; ++j)
+            oceanMesh.indices.push_back(facets[i][j]);
+    }
+
+    std::cout<<"Done!"<<std::endl;
 }
 
 void Planet::makeSphere ()
@@ -290,9 +331,9 @@ void Planet::initElevations()
                 if(rng < 0.2f)
                     mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.2f);
                 if(rng >= 0.2f && rng < 0.8f)
-                    mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.5f);
-                if( rng >= 0.8f)
                     mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.8f);
+                if( rng >= 0.8f)
+                    mesh.vertices[point].color = QVector3D(0.0f,0.3f,0.8f);
                 double elevation = (plateParams.oceanicElevation) * rng;
                 mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
             }
@@ -321,7 +362,6 @@ void Planet::initElevations()
 
 void Planet::drawPlanet(const qglviewer::Camera *camera)
 {
-
     float pMatrix[16];
     float mvMatrix[16];
     camera->getProjectionMatrix (pMatrix);
@@ -342,10 +382,38 @@ void Planet::drawPlanet(const qglviewer::Camera *camera)
     program->setUniformValue(program->uniformLocation("lightColor"), lightColor);
     program->setUniformValue(program->uniformLocation("viewPos"), camPos);
     program->setUniformValue(program->uniformLocation("lightPos"), camPos);
-    program->setUniformValue(program->uniformLocation("lighting"), int(false));
+    program->setUniformValue(program->uniformLocation("lighting"), int(this->shaderLighting));
 
     mesh.Draw(program);
     program->release();
+}
+
+void Planet::drawOcean(const qglviewer::Camera *camera)
+{
+    float pMatrix[16];
+    float mvMatrix[16];
+    camera->getProjectionMatrix (pMatrix);
+    camera->getModelViewMatrix (mvMatrix);
+
+    QVector3D camPos(camera->position().x,camera->position().y,camera->position().z);
+    QVector3D lightColor(1,0.9,0.8);
+    oceanProgram->bind();
+
+    glFunctions->glUniformMatrix4fv (
+             glFunctions->glGetUniformLocation (oceanProgramID, "proj_matrix"), 1,
+             GL_FALSE,
+             pMatrix);
+    glFunctions->glUniformMatrix4fv (
+             glFunctions->glGetUniformLocation (oceanProgramID, "mv_matrix"), 1,
+             GL_FALSE,
+             mvMatrix);
+    oceanProgram->setUniformValue(oceanProgram->uniformLocation("lightColor"), lightColor);
+    oceanProgram->setUniformValue(oceanProgram->uniformLocation("viewPos"), camPos);
+    oceanProgram->setUniformValue(oceanProgram->uniformLocation("lightPos"), camPos);
+    oceanProgram->setUniformValue(oceanProgram->uniformLocation("lighting"), int(false));
+
+    oceanMesh.Draw(oceanProgram);
+    oceanProgram->release();
 }
 
 void Planet::draw (const qglviewer::Camera *camera)
@@ -355,8 +423,12 @@ void Planet::draw (const qglviewer::Camera *camera)
 
     if(needInitBuffers && planetCreated){
         mesh.setupMesh(program);
+        oceanMesh.setupMesh(oceanProgram);
+        oceanMesh.vertices.clear();
         needInitBuffers = false;
     } else {
+        if(oceanDraw)
+            drawOcean(camera);
         drawPlanet(camera);
     }
 }
@@ -367,6 +439,7 @@ void Planet::clear ()
     {
         plates.clear();
         mesh.clear();
+        oceanMesh.clear();
         one_ring.clear();
 
 		planetCreated = false;
@@ -437,14 +510,14 @@ void Planet::saveOFF () const
 
 void Planet::setOceanicElevation (double _e)
 {
-  plateParams.oceanicElevation = _e;
+  plateParams.oceanicElevation = _e*1000;
   std::cout << "Oceanic elevation: " << this->plateParams.oceanicElevation
     << std::endl;
 }
 
 void Planet::setContinentalElevation (double _e)
 {
-  plateParams.continentalElevation = _e;
+  plateParams.continentalElevation = _e*1000;
   std::cout << "Continental elevation: "
     << this->plateParams.continentalElevation << std::endl;
 }
@@ -458,7 +531,7 @@ void Planet::setPlateNumber (int _plateNum)
 
 void Planet::setRadius (double _r)
 {
-  this->radius = _r;
+  this->radius = _r*1000;
 
   std::cout << "planet radius set to " << this->radius << std::endl;
 }

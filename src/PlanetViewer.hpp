@@ -92,12 +92,9 @@ protected:
 
     virtual void draw ();
     virtual void drawSkybox();
-    virtual void shaderLighting ();
 	virtual void init ();
 	virtual QString helpString () const;
 	virtual void keyPressEvent (QKeyEvent *e);
-
-	void drawClippingPlane ();
 
     void changeDisplayMode(){
         if(displayMode == WIRE)

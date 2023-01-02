@@ -32,8 +32,10 @@ public:
     {
         shader->bind();
         VAO->bind();
+        EBO->bind();
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
         VAO->release();
+        EBO->release();
         shader->release();
     }
 
