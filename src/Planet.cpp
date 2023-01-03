@@ -172,9 +172,11 @@ void Planet::makeSphere ()
         double squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
         double length = sqrt(squareLength);
         QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
+        QVector2D texCoord = QVector2D((float )i / elems, (float)i / elems);
         pos[i]=position;
         mesh.vertices[i].pos=position;
         mesh.vertices[i].normal=normal;
+        mesh.vertices[i].texCoords = texCoord;
     }
     std::cout<<"Done!"<<std::endl;
 }
@@ -327,6 +329,7 @@ void Planet::initElevations()
                     mesh.vertices[point].color = QVector3D(0.0f,0.3f,0.8f);
                 double elevation = (plateParams.oceanicElevation) * rng;
                 mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                mesh.vertices[point].elevation = rng;
             }
 
         } else { // intialize continental plate
@@ -345,6 +348,7 @@ void Planet::initElevations()
                     mesh.vertices[point].color = QVector3D(1.0f,1.0f,1.0f);
                 double elevation = (plateParams.continentalElevation)* rng;
                 mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal);
+                mesh.vertices[point].elevation = rng;
             }
         }
     }

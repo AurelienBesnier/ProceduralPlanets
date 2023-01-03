@@ -14,7 +14,13 @@
 
 struct Vertex {
     QVector3D pos, normal, color;
+    QVector2D texCoords;
+    double elevation;
     unsigned int plate_id;
+};
+
+struct Texture {
+    unsigned int id;
 };
 
 class Mesh
@@ -25,6 +31,7 @@ private:
 public:
     QOpenGLVertexArrayObject *VAO;
     std::vector<Vertex> vertices;
+    std::vector<Texture> textures;
     std::vector<unsigned int> indices;
     Mesh(){}
 
@@ -76,6 +83,12 @@ public:
 
         shader->enableAttributeArray(2);
         shader->setAttributeBuffer(2, GL_FLOAT, offsetof(Vertex, color), 3, sizeof(Vertex));
+
+        shader->enableAttributeArray(3);
+        shader->setAttributeBuffer(3, GL_FLOAT, offsetof(Vertex, texCoords), 2, sizeof(Vertex));
+        
+        shader->enableAttributeArray(4);
+        shader->setAttributeBuffer(4, GL_DOUBLE, offsetof(Vertex, elevation), 1, sizeof(Vertex));
 
         VAO->release();
         VBO->release();

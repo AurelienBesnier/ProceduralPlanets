@@ -7,6 +7,8 @@ uniform bool lighting;
 in vec3 position;
 in vec3 normal;
 in vec3 color;
+in vec2 texCoord;
+flat in double elevation;
 
 out vec4 fragColor;
 
