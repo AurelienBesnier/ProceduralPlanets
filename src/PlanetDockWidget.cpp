@@ -24,6 +24,8 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
     numPlateSlider->setMaximum (20);
     numPlateSlider->setValue(4);
 
+
+
 	planetParamLayout->addWidget (numPlateSlider, 0, 1, 1, 1);
 
 	platenumLabel = new QLabel (
@@ -77,6 +79,22 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	oceanicElevation->setText("-10");
 	oceanParamLayout->addWidget (oceanicElevation, 2, 1, 1, 1);
 
+	nbOctaveNoiseOceanic = new QSlider (oceanicPlateBox);
+	nbOctaveNoiseOceanic->setOrientation (Qt::Horizontal);
+    nbOctaveNoiseOceanic->setMinimum (1);
+    nbOctaveNoiseOceanic->setMaximum (8);
+    nbOctaveNoiseOceanic->setValue(1);
+
+	oOctaveLabel = new QLabel (
+			QString ("Octaves oceanic noise:%1").arg (nbOctaveNoiseOceanic->value ()),
+			oceanicPlateBox);
+	oceanParamLayout->addWidget (oOctaveLabel, 3, 0, 1, 1);
+	oceanParamLayout->addWidget (nbOctaveNoiseOceanic, 3, 1, 1, 1);
+	connect (nbOctaveNoiseOceanic, SIGNAL(valueChanged(int)), viewer,
+				SLOT(setOceanicOctave(int)));
+	connect (nbOctaveNoiseOceanic, SIGNAL(valueChanged(int)), this,
+				SLOT(setOceanicOctaveText()));
+
 	connect (oceanicElevation, SIGNAL(textChanged(QString)), viewer,
 				SLOT(setOceanicElevation(QString)));
 
@@ -92,6 +110,22 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	continentalElevation = new QLineEdit ();
 	continentalElevation->setText("10");
 	contParamLayout->addWidget (continentalElevation, 2, 1, 1, 1);
+
+	nbOctaveNoiseContinental = new QSlider (continentalPlateBox);
+	nbOctaveNoiseContinental->setOrientation (Qt::Horizontal);
+    nbOctaveNoiseContinental->setMinimum (1);
+    nbOctaveNoiseContinental->setMaximum (8);
+    nbOctaveNoiseContinental->setValue(1);
+
+	cOctaveLabel = new QLabel (
+		QString ("Octaves continental noise:%1").arg (nbOctaveNoiseContinental->value ()),
+		continentalPlateBox);
+	contParamLayout->addWidget (cOctaveLabel, 3, 0, 1, 1);
+	contParamLayout->addWidget (nbOctaveNoiseContinental, 3, 1, 1, 1);
+	connect (nbOctaveNoiseContinental, SIGNAL(valueChanged(int)), viewer,
+				SLOT(setContinentalOctave(int)));
+	connect (nbOctaveNoiseContinental, SIGNAL(valueChanged(int)), this,
+				SLOT(setContinentalOctaveText()));
 
 	connect (continentalElevation, SIGNAL(textChanged(QString)), viewer,
 				SLOT(setContinentElevation(QString)));
@@ -113,5 +147,19 @@ void PlanetDockWidget::setPlateNumText ()
 {
 	platenumLabel->setText (
 			QString ("Plate Number:%1").arg (numPlateSlider->value ()));
+	update ();
+}
+
+void PlanetDockWidget::setOceanicOctaveText ()
+{
+	oOctaveLabel->setText (
+			QString ("Octaves oceanic noise:%1").arg (nbOctaveNoiseOceanic->value ()));
+	update ();
+}
+
+void PlanetDockWidget::setContinentalOctaveText ()
+{
+	cOctaveLabel->setText (
+			QString ("Octaves continental noise:%1").arg (nbOctaveNoiseContinental->value ()));
 	update ();
 }

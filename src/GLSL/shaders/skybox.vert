@@ -9,5 +9,6 @@ out vec3 TexCoords;
 void main(void)
 {
     TexCoords = i_position.xyz;
-    gl_Position = proj_matrix * view * vec4(i_position.xyz, 1.0);
+    vec4 pos = proj_matrix * view * vec4(i_position, 1.0);
+    gl_Position = pos.xyww;
 }

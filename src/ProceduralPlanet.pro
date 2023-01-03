@@ -15,14 +15,16 @@ SOURCES += Main.cpp \
     Planet.cpp \
     PlanetDockWidget.cpp \
     PlanetViewer.cpp \
-    Window.cpp 
+    Window.cpp \
+    Noise.cpp
 HEADERS += \
     Planet.hpp \
     PlanetDockWidget.hpp \
     PlanetViewer.hpp \
     Plate.hpp \
     Mesh.hpp \
-    Window.hpp
+    Window.hpp \
+    Noise.hpp
 LIBS = -lQGLViewer-qt5 \
     -lglut \
     -lGLU \

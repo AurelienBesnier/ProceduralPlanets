@@ -16,6 +16,10 @@ Planet::Planet (QOpenGLContext *context)
 {
     glContext = context;
     glFunctions = glContext->extraFunctions();
+    float frequency = 3.0f, amplitude = 1.0f, lacunarity = 2.0f,persistence = 0.8f;
+    this->noise = SimplexNoise(frequency, amplitude, lacunarity, persistence);
+    this->octaveContinent=1;
+    this->octaveOcean=1;
     init ();
     initGLSL ();
 }
@@ -172,7 +176,6 @@ void Planet::makeSphere ()
         mesh.vertices[i].pos=position;
         mesh.vertices[i].normal=normal;
     }
-
     std::cout<<"Done!"<<std::endl;
 }
 
@@ -182,7 +185,7 @@ void Planet::triangulate()
     std::cout<<"triangulation started..."<<std::endl;
     Point_set points;
     for(const QVector3D &po: pos)
-        points.insert(Point(po.x(),po.y(),po.z()));
+        points.insert(Point(po[0],po[1],po[2]));
 
     typedef std::array<std::size_t, 3> Facet; // Triple of indices
     std::vector<Facet> facets;
@@ -237,11 +240,7 @@ void Planet::makePlates ()
     std::cout<<"Segmentation started..."<<std::endl;
     start = std::chrono::system_clock::now();
     collect_one_ring(pos,mesh.indices,one_ring);
-    end = std::chrono::system_clock::now();
     one_ring.shrink_to_fit();
-
-    elapsed_seconds = end - start;
-    std::cout << "elapsed time for one ring computation: " << elapsed_seconds.count() << "s\n";
 
     plates.clear ();
     plates.resize (plateNum);
@@ -302,17 +301,9 @@ void Planet::makePlates ()
             next_ids[i].clear();
         }
     }
-
-    for(size_t i = 0; i< mesh.vertices.size(); ++i){ 
-      std::vector<unsigned int> neighbours = one_ring[i];
-      for(size_t n = 0; n < neighbours.size(); ++n)
-      {
-        if(mesh.vertices[neighbours[n]].plate_id!= mesh.vertices[i].plate_id && mesh.vertices[neighbours[n]].color != QVector3D(0,0,0))
-        {
-          mesh.vertices[neighbours[n]].color=QVector3D(0,0,0);
-        }
-      }
-    }
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end - start;
+    std::cout << "elapsed time for segmentation: " << elapsed_seconds.count() << "s"<<std::endl;
     std::cout<<"Segmentation finished!"<<std::endl;
 }
 
@@ -327,7 +318,7 @@ void Planet::initElevations()
         {
             for(unsigned int &point : plate.points)
             {
-                double rng = prng.generateDouble();
+                double rng = noise.fractal(octaveOcean,mesh.vertices[point].pos.x(),mesh.vertices[point].pos.y())+1.0;
                 if(rng < 0.2f)
                     mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.2f);
                 if(rng >= 0.2f && rng < 0.8f)
@@ -341,10 +332,14 @@ void Planet::initElevations()
         } else { // intialize continental plate
             for(unsigned int &point : plate.points)
             {
-                double rng = prng.generateDouble();
+                double rng = noise.fractal(octaveContinent,mesh.vertices[point].pos.x(),mesh.vertices[point].pos.y())+0.5;
                 if(rng < 0.2f)
                     mesh.vertices[point].color = QVector3D(0.6f,0.5f,0.1f);
-                if(rng >= 0.2f && rng < 0.8f)
+                if(rng < 0.0f)
+                    mesh.vertices[point].color = QVector3D(0.7f,0.7f,0.1f);
+                if(rng >= 0.6f && rng < 0.8f)
+                    mesh.vertices[point].color = QVector3D(0.1f,0.4f,0.1f);
+                if(rng >= 0.2f && rng < 0.6f)
                     mesh.vertices[point].color = QVector3D(0.1f,0.7f,0.1f);
                 if( rng >= 0.8f)
                     mesh.vertices[point].color = QVector3D(1.0f,1.0f,1.0f);
@@ -538,7 +533,7 @@ void Planet::setRadius (double _r)
 
 double Planet::getRadius() const
 {
-  return this->radius;
+    return this->radius;
 }
 
 void Planet::setElems (int _elems)
@@ -548,3 +543,14 @@ void Planet::setElems (int _elems)
   std::cout << "planet elems set to " << this->elems << std::endl;
 }
 
+void Planet::setOceanicOctave(int _o)
+{
+    this->octaveOcean = _o;
+    std::cout << "oceanic octave set to " << this->octaveOcean << std::endl;
+}
+
+void Planet::setContinentalOctave(int _o)
+{
+    this->octaveContinent = _o;
+    std::cout << "continental octave set to " << this->octaveContinent << std::endl;
+}

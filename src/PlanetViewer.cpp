@@ -9,38 +9,6 @@ PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
 {
 }
 
-unsigned int PlanetViewer::loadCubemap()
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	int width, height, nrChannels;
-	for (unsigned int i = 0; i < skyboxFaces.size(); i++)
-	{
-        QImage texture = QImage(skyboxFaces[i].c_str());
-        texture = texture.convertToFormat(QImage::Format_RGB888);
-		unsigned char *data = texture.bits();
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
-                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data
-			);
-		}
-		else
-		{
-			std::cout << "Cubemap tex failed to load at path: " << skyboxFaces[i] << std::endl;
-		}
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	return textureID;
-}  
-
 void PlanetViewer::init ()
 {
     planet = Planet (QOpenGLContext::currentContext ());
@@ -68,6 +36,8 @@ void PlanetViewer::init ()
     skyboxShader->bind();
 
     skyboxTextureID = loadCubemap();
+
+    skyboxShader->setUniformValue(skyboxShader->uniformLocation("skybox"), 0);
 
     skyboxVAO = new QOpenGLVertexArrayObject();
     skyboxVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -101,12 +71,12 @@ void PlanetViewer::init ()
     displayMessage	("Viewer Initiliazed");
 
     skyboxShader->release();
-
 }
 
 void PlanetViewer::drawSkybox()
 {
     glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
     skyboxShader->bind();
     float pMatrix[16];
     float mvMatrix[16];
@@ -117,7 +87,12 @@ void PlanetViewer::drawSkybox()
 
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
+    view = glm::mat4(glm::mat3(view));
+
+    glActiveTexture(GL_TEXTURE0+skyboxTextureID);
+
     camera()->getProjectionMatrix (pMatrix);
+    
     QOpenGLContext::currentContext ()->extraFunctions()->glUniformMatrix4fv (
              QOpenGLContext::currentContext ()->extraFunctions()->glGetUniformLocation (skyboxShader->programId(), "proj_matrix"), 1,
              GL_FALSE,
@@ -126,12 +101,14 @@ void PlanetViewer::drawSkybox()
              QOpenGLContext::currentContext ()->extraFunctions()->glGetUniformLocation (skyboxShader->programId(), "view"), 1,
              GL_FALSE,
              &view[0][0]);
+
     skyboxVAO->bind();
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     skyboxShader->release();
     skyboxVAO->release();
     glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
 }
 
 void PlanetViewer::draw ()
@@ -139,7 +116,6 @@ void PlanetViewer::draw ()
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
 
-    glEnable(GL_LIGHTING);
     glEnable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
 
@@ -152,9 +128,41 @@ void PlanetViewer::draw ()
     drawSkybox();
     planet.draw (camera ());
 
-    glDisable(GL_LIGHTING);
     update();
 }
+
+unsigned int PlanetViewer::loadCubemap()
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < skyboxFaces.size(); i++)
+	{
+        QImage texture = QImage(skyboxFaces[i].c_str());
+        texture = texture.convertToFormat(QImage::Format_RGB888);
+		unsigned char *data = texture.bits();
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path: " << skyboxFaces[i] << std::endl;
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}  
+
 
 void PlanetViewer::clear ()
 {
@@ -224,6 +232,20 @@ void PlanetViewer::setContinentElevation (QString _e)
 		planet.setContinentalElevation (_e.toDouble ());
 		update ();
 	}
+}
+
+void PlanetViewer::setOceanicOctave(int _o)
+{
+	if(!generationFuture.isRunning()){
+        this->planet.setOceanicOctave(_o);
+    }
+}
+
+void PlanetViewer::setContinentalOctave(int _o)
+{
+	if(!generationFuture.isRunning()){
+        this->planet.setContinentalOctave(_o);
+    }
 }
 
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)

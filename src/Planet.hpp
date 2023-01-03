@@ -15,6 +15,7 @@
 
 #include "Plate.hpp"
 #include "Mesh.hpp"
+#include "Noise.hpp"
 
 typedef CGAL::Simple_cartesian<double>                  K;
 typedef K::Point_3                                      Point;
@@ -25,6 +26,8 @@ private:
 	unsigned int plateNum;
 	double radius;
 	int elems;
+    SimplexNoise noise;
+    unsigned int octaveOcean, octaveContinent;
 
     std::vector<QVector3D> pos;
     std::vector<Plate> plates;
@@ -74,6 +77,9 @@ public:
 
 	void setOceanicElevation (double _e);
 	void setContinentalElevation (double _e);
+
+    void setOceanicOctave(int _o);
+    void setContinentalOctave(int _o);
 
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;

@@ -34,7 +34,7 @@ protected:
     QOpenGLVertexArrayObject* skyboxVAO;
     QOpenGLBuffer *skyboxVBO;
     GLuint skyboxTextureID;
-    QOpenGLShaderProgram *skyboxShader;
+    QOpenGLShaderProgram *skyboxShader=nullptr;
     std::vector<std::string> skyboxFaces{
         "./res/skybox/right.jpg",
         "./res/skybox/left.jpg",
@@ -118,6 +118,9 @@ public slots:
     void savePlanetObj ();
 	void setOceanicElevation (QString _e);
 	void setContinentElevation (QString _e);
+
+    void setOceanicOctave(int _o);
+    void setContinentalOctave(int _o);
 signals:
 
 };

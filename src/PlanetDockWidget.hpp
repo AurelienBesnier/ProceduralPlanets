@@ -36,14 +36,15 @@ public:
     QLineEdit *planetRadius, *planetElements;
 
 	//Plate type parameters
-	QLabel *oThicknessLabel, *oElevationLabel;
-	QLineEdit *oceanicThickness, *oceanicElevation;
-	QLabel *cThicknessLabel, *cElevationLabel;
-	QLineEdit *continentalElevation, *continentalThickness;
-
+	QLabel *oOctaveLabel,*oElevationLabel;
+	QLineEdit *oceanicElevation;
+	QLabel *cOctaveLabel, *cElevationLabel;
+	QLineEdit *continentalElevation;
+	QSlider *nbOctaveNoiseContinental, *nbOctaveNoiseOceanic;
 public slots:
 	void setPlateNumText ();
-
+	void setOceanicOctaveText();
+	void setContinentalOctaveText ();
 };
 
 #endif // TEXTUREDOCKWINDOW_H
