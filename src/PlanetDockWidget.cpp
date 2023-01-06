@@ -66,6 +66,10 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	planetParamLayout->addWidget (clearButton, 4, 2, 1, 1);
 	connect (clearButton, SIGNAL(clicked()), viewer, SLOT(clearPlanet()));
 
+	resgementButton = new QPushButton ("Resegment", groupBox);
+	planetParamLayout->addWidget (resgementButton, 5, 1, 1, 2);
+	connect (resgementButton, SIGNAL(clicked()), viewer, SLOT(resegment()));
+
 	//********************Oceanic Editor***********************/
 	QGroupBox *oceanicPlateBox = new QGroupBox ("Oceanic Plate", parent);
 	oceanicPlateBox->setMaximumSize (QSize (16777215, 200));

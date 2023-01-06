@@ -119,6 +119,8 @@ public slots:
 	void setOceanicElevation (QString _e);
 	void setContinentElevation (QString _e);
 
+    void resegment();
+
     void setOceanicOctave(int _o);
     void setContinentalOctave(int _o);
 signals:

@@ -12,6 +12,12 @@
 
 #define PI 3.14159265358979323846
 
+unsigned long long rdtsc(){ // random seed
+    unsigned int lo,hi;
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+    return ((unsigned long long)hi << 32) | lo;
+}
+
 Planet::Planet (QOpenGLContext *context)
 {
     glContext = context;
@@ -58,18 +64,18 @@ void Planet::initGLSL ()
     std::string path = fs.string () + "/GLSL/shaders/";
     QString  vShaderPath = QString::fromStdString(path + "planet.vert");
     QString  fShaderPath = QString::fromStdString(path + "planet.frag");
-    if(!program->addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath))
+    if(!program->addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath)) [[unlikely]]
     {
         std::cerr<<program->log().toStdString()<<std::endl;
         std::cerr<<"Couldn't add VERTEX shader"<<std::endl;
     }
-    if(!program->addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath))
+    if(!program->addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath))[[unlikely]]
     {
         std::cerr<<program->log().toStdString()<<std::endl;
         std::cerr<<"Couldn't add FRAGMENT shader"<<std::endl;
     }
 
-    if(!program->link())
+    if(!program->link())[[unlikely]]
     {
         std::cerr<<program->log().toStdString()<<std::endl;
         std::cerr<<"Error linking program"<<std::endl;
@@ -78,18 +84,18 @@ void Planet::initGLSL ()
 
     vShaderPath = QString::fromStdString(path + "ocean.vert");
     fShaderPath = QString::fromStdString(path + "ocean.frag");
-    if(!oceanProgram->addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath))
+    if(!oceanProgram->addShaderFromSourceFile(QOpenGLShader::Vertex,vShaderPath))[[unlikely]]
     {
         std::cerr<<oceanProgram->log().toStdString()<<std::endl;
         std::cerr<<"Couldn't add VERTEX shader"<<std::endl;
     }
-    if(!oceanProgram->addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath))
+    if(!oceanProgram->addShaderFromSourceFile(QOpenGLShader::Fragment,fShaderPath))[[unlikely]]
     {
         std::cerr<<oceanProgram->log().toStdString()<<std::endl;
         std::cerr<<"Couldn't add FRAGMENT shader"<<std::endl;
     }
 
-    if(!oceanProgram->link())
+    if(!oceanProgram->link())[[unlikely]]
     {
         std::cerr<<oceanProgram->log().toStdString()<<std::endl;
         std::cerr<<"Error linking program"<<std::endl;
@@ -225,10 +231,11 @@ void Planet::collect_one_ring (std::vector<QVector3D> const & i_vertices,
         {
             for(y = 0; y<3 ;++y) // sommets voisins
             {
-                if(j!=y)
+                if(j!=y) [[likely]]
                 {
                     if(std::find(std::execution::par,o_one_ring.begin(), o_one_ring.end(),
-                        o_one_ring[i_triangles[i]]) != o_one_ring.end()){
+                        o_one_ring[i_triangles[i]]) != o_one_ring.end()) [[likely]]
+                    {
                         o_one_ring[i_triangles[i+j]].push_back(i_triangles[i+y]);
                     }
                 }
@@ -237,18 +244,23 @@ void Planet::collect_one_ring (std::vector<QVector3D> const & i_vertices,
     }
 }
 
+
+
 void Planet::makePlates ()
 {
     std::cout<<"Segmentation started..."<<std::endl;
     start = std::chrono::system_clock::now();
-    collect_one_ring(pos,mesh.indices,one_ring);
-    one_ring.shrink_to_fit();
+    
+    if(one_ring.size()==0){
+        collect_one_ring(pos,mesh.indices,one_ring);
+        one_ring.shrink_to_fit();
+    }
 
     plates.clear ();
     plates.resize (plateNum);
 
     QRandomGenerator prng;
-    prng.seed(time(nullptr));
+    prng.seed(rdtsc());
     std::set<unsigned int> tmp_init;
     std::vector<QVector3D> colors(plateNum);
     std::vector<std::vector<unsigned int>> last_ids;
@@ -314,13 +326,14 @@ void Planet::initElevations()
     std::cout<<"Initializing plate states..."<<std::endl;
     start = std::chrono::system_clock::now();
     QRandomGenerator prng;
-    prng.seed(time(nullptr));
+    prng.seed(rdtsc());
+    qint32 offsetX = prng.bounded(0,10000000), offsetY = prng.bounded(0,10000000);
     for(Plate &plate: plates){
         if(plate.type == OCEANIC) // intialize oceanic plate
         {
-            for(unsigned int &point : plate.points)
-            {
-                double rng = noise.fractal(octaveOcean,mesh.vertices[point].pos.x(),mesh.vertices[point].pos.y())+1.0;
+            for(const unsigned int &point : plate.points)
+            { 
+                double rng = noise.fractal(octaveOcean,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY)+1.0;
                 if(rng < 0.2f)
                     mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.2f);
                 if(rng >= 0.2f && rng < 0.8f)
@@ -333,9 +346,9 @@ void Planet::initElevations()
             }
 
         } else { // intialize continental plate
-            for(unsigned int &point : plate.points)
+            for(const unsigned int &point : plate.points)
             {
-                double rng = noise.fractal(octaveContinent,mesh.vertices[point].pos.x(),mesh.vertices[point].pos.y())+0.5;
+                double rng = noise.fractal(octaveContinent,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY)+0.5;
                 if(rng < 0.2f)
                     mesh.vertices[point].color = QVector3D(0.6f,0.5f,0.1f);
                 if(rng < 0.0f)
@@ -356,6 +369,46 @@ void Planet::initElevations()
     elapsed_seconds = end - start;
     std::cout << "Initialization time: " << elapsed_seconds.count() << "s\n";
     std::cout<<"Initialization finished!"<<std::endl;
+}
+
+void Planet::resetHeights()
+{
+    for(Plate &plate: plates){ // Reinitialize height of the points
+        if(plate.type == OCEANIC)
+        {
+            for(const unsigned int &point : plate.points)
+            {
+                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                mesh.vertices[point].elevation = 0.0;
+            }
+
+        } else { 
+            for(const unsigned int &point : plate.points)
+            {
+                std::cout<<mesh.vertices[point].elevation<<std::endl;
+                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
+                mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal);
+                mesh.vertices[point].elevation = 0.0;
+            }
+        }
+    }
+}
+
+void Planet::resegment()
+{
+    std::cout<<"Resegmentating..."<<std::endl;
+    start = std::chrono::system_clock::now();
+
+    resetHeights();
+
+    needInitBuffers = true;
+    makePlates();
+    initElevations();
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end - start;
+    std::cout << "Resegmentating time: " << elapsed_seconds.count() << "s\n";
+    std::cout<<"Resegmentating finished!"<<std::endl;
 }
 
 
@@ -422,10 +475,11 @@ void Planet::draw (const qglviewer::Camera *camera)
 
     if(needInitBuffers && planetCreated){
         mesh.setupMesh(program);
-        oceanMesh.setupMesh(oceanProgram);
+        if(!oceanMesh.VAO->isCreated())[[unlikely]]
+            oceanMesh.setupMesh(oceanProgram);
         oceanMesh.vertices.clear();
         needInitBuffers = false;
-    } else {
+    } else { [[likely]]
         if(oceanDraw)
             drawOcean(camera);
         drawPlanet(camera);

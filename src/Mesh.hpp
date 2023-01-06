@@ -26,10 +26,10 @@ struct Texture {
 class Mesh
 {
 private:
-    QOpenGLBuffer *VBO, *EBO;
+    QOpenGLBuffer *VBO=new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer), *EBO=new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
 
 public:
-    QOpenGLVertexArrayObject *VAO;
+    QOpenGLVertexArrayObject *VAO=new QOpenGLVertexArrayObject();
     std::vector<Vertex> vertices;
     std::vector<Texture> textures;
     std::vector<unsigned int> indices;
@@ -59,9 +59,13 @@ public:
     {
         shader->bind();
         std::cout<<"Creating Mesh Buffers..."<<std::endl;
-        VAO = new QOpenGLVertexArrayObject();
-        VBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-        EBO = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+
+        if(VAO->isCreated())
+        {
+            VAO->destroy();
+            VBO->destroy();
+            EBO->destroy();
+        }
         VAO->create();
         VBO->create();
         EBO->create();

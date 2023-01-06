@@ -31,7 +31,7 @@ public:
 
 	//General planet parameters
     QSlider *numPlateSlider;
-	QPushButton *confirmButton, *clearButton;
+	QPushButton *confirmButton, *clearButton, *resgementButton;
 	QLabel *platenumLabel, *planetRadiusLabel, *planetElementLabel;
     QLineEdit *planetRadius, *planetElements;
 

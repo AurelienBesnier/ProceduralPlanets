@@ -30,17 +30,17 @@ private:
     unsigned int octaveOcean, octaveContinent;
 
     std::vector<QVector3D> pos;
-    std::vector<Plate> plates;
     std::vector<std::vector<unsigned int> >  one_ring;
-    bool needInitBuffers = true;
 
     void triangulate();
     void drawPlanet(const qglviewer::Camera *camera);
     void drawOcean(const qglviewer::Camera *camera);
 
 public:
+    std::vector<Plate> plates;
     Mesh mesh, oceanMesh;
     bool shaderLighting = false;
+    bool needInitBuffers = true;
     bool oceanDraw = true;
     PlateParameters plateParams;
     QOpenGLShaderProgram *program=nullptr, *oceanProgram = nullptr;
@@ -59,6 +59,8 @@ public:
     void makeOcean ();
     void makePlates ();
     void initElevations();
+    void resetHeights();
+    void resegment();
     void initPlanet ();
     void collect_one_ring (std::vector<QVector3D> const & i_vertices,
     std::vector< unsigned int > const & i_triangles,

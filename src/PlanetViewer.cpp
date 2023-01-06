@@ -79,7 +79,6 @@ void PlanetViewer::drawSkybox()
     glDepthFunc(GL_LEQUAL);
     skyboxShader->bind();
     float pMatrix[16];
-    float mvMatrix[16];
     glm::mat4 view;
     glm::vec3 cameraPos   = glm::vec3(camera()->position().x, camera()->position().y,  camera()->position().z);
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -136,8 +135,6 @@ unsigned int PlanetViewer::loadCubemap()
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	int width, height, nrChannels;
 	for (unsigned int i = 0; i < skyboxFaces.size(); i++)
 	{
         QImage texture = QImage(skyboxFaces[i].c_str());
@@ -210,11 +207,23 @@ void PlanetViewer::generatePlanet ()
 
 void PlanetViewer::clearPlanet ()
 {
-    displayMessage	("Planet cleared");
 	if(!generationFuture.isRunning()){
 		planet.clear ();
+        displayMessage	("Planet cleared");
 		update ();
 	}
+}
+
+void PlanetViewer::resegment()
+{
+	if(!generationFuture.isRunning()){
+        //generationFuture = QtConcurrent::run( 
+            //[this]{
+                displayMessage("Resegmenting...");
+                planet.resegment();
+                displayMessage("Done!");
+           // });
+    }
 }
 
 void PlanetViewer::setOceanicElevation (QString _e)
