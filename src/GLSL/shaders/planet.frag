@@ -6,13 +6,32 @@ uniform bool lighting;
 
 in vec3 position;
 in vec3 normal;
-in vec3 color;
 in vec2 texCoord;
-flat in double elevation;
+smooth in float elevation;
 
 out vec4 fragColor;
 
+vec3 elevationToColor ()
+{
+    if(elevation < 0.2 && elevation > 0.0)
+        return vec3(0.6,0.5,0.1);
+    if(elevation >= 0.6 && elevation < 0.8)
+        return vec3(0.1,0.4,0.1);
+    if(elevation >= 0.2 && elevation < 0.6)
+        return vec3(0.1,0.7,0.1);
+    if(elevation >= 0.8)
+        return vec3(1.0,1.0,1.0);
+
+    if(elevation < -0.0 && elevation > -0.2)
+        return vec3(0.0,0.3,0.6);
+    if(elevation <= -0.2 && elevation > -0.8)
+        return vec3(0.0,0.0,0.6);
+    else
+        return vec3(0.0,0.0,0.2);
+}
+
 void main(void) {
+    vec3 color = elevationToColor();
     if(lighting){
         float ambientStrength = 0.1;
         vec3 ambient = ambientStrength * lightColor;

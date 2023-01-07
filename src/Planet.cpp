@@ -135,7 +135,6 @@ void Planet::makeOcean ()
         pos.push_back(position);
         oceanMesh.vertices[i].pos=position;
         oceanMesh.vertices[i].normal=normal;
-        oceanMesh.vertices[i].color=QVector3D(0,0,1);
     }
 
     Point_set points;
@@ -197,7 +196,6 @@ void Planet::triangulate()
 
     typedef std::array<std::size_t, 3> Facet; // Triple of indices
     std::vector<Facet> facets;
-    // The function is called using directly the points raw iterators
     
     start = std::chrono::system_clock::now();
 
@@ -281,7 +279,6 @@ void Planet::makePlates ()
         { first_point_of_plate = prng.bounded((unsigned int)mesh.vertices.size()-1); }
         tmp_init.insert(first_point_of_plate);
 
-        mesh.vertices[first_point_of_plate].color = colors[i];
         mesh.vertices[first_point_of_plate].plate_id = i;
         plates[i].points.push_back(first_point_of_plate);
         last_ids[i] = one_ring[first_point_of_plate];
@@ -305,7 +302,6 @@ void Planet::makePlates ()
                     {
                         tmp_init.insert(neighbours[n]);
                         plates[i].points.push_back(neighbours[n]);
-                        mesh.vertices[neighbours[n]].color=colors[i];
                         mesh.vertices[neighbours[n]].plate_id=i;
                         next_ids[i].push_back(neighbours[n]);
                     }
@@ -327,38 +323,22 @@ void Planet::initElevations()
     start = std::chrono::system_clock::now();
     QRandomGenerator prng;
     prng.seed(rdtsc());
-    qint32 offsetX = prng.bounded(0,10000000), offsetY = prng.bounded(0,10000000);
+    qint32 offsetX = prng.bounded(0,10000000), offsetY = prng.bounded(0,10000000),offsetZ = prng.bounded(0,10000000);
     for(Plate &plate: plates){
         if(plate.type == OCEANIC) // intialize oceanic plate
         {
             for(const unsigned int &point : plate.points)
             { 
-                double rng = noise.fractal(octaveOcean,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY)+1.0;
-                if(rng < 0.2f)
-                    mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.2f);
-                if(rng >= 0.2f && rng < 0.8f)
-                    mesh.vertices[point].color = QVector3D(0.0f,0.0f,0.8f);
-                if( rng >= 0.8f)
-                    mesh.vertices[point].color = QVector3D(0.0f,0.3f,0.8f);
+                double rng = noise.fractal(octaveOcean,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY,mesh.vertices[point].pos.z()+offsetZ)+1.0;
                 double elevation = (plateParams.oceanicElevation) * rng;
                 mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
-                mesh.vertices[point].elevation = rng;
+                mesh.vertices[point].elevation = -rng;
             }
 
         } else { // intialize continental plate
             for(const unsigned int &point : plate.points)
             {
-                double rng = noise.fractal(octaveContinent,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY)+0.5;
-                if(rng < 0.2f)
-                    mesh.vertices[point].color = QVector3D(0.6f,0.5f,0.1f);
-                if(rng < 0.0f)
-                    mesh.vertices[point].color = QVector3D(0.7f,0.7f,0.1f);
-                if(rng >= 0.6f && rng < 0.8f)
-                    mesh.vertices[point].color = QVector3D(0.1f,0.4f,0.1f);
-                if(rng >= 0.2f && rng < 0.6f)
-                    mesh.vertices[point].color = QVector3D(0.1f,0.7f,0.1f);
-                if( rng >= 0.8f)
-                    mesh.vertices[point].color = QVector3D(1.0f,1.0f,1.0f);
+                double rng = noise.fractal(octaveContinent,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY,mesh.vertices[point].pos.z()+offsetZ)+0.5;
                 double elevation = (plateParams.continentalElevation)* rng;
                 mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal);
                 mesh.vertices[point].elevation = rng;
@@ -379,14 +359,13 @@ void Planet::resetHeights()
             for(const unsigned int &point : plate.points)
             {
                 double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
-                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
                 mesh.vertices[point].elevation = 0.0;
             }
 
         } else { 
             for(const unsigned int &point : plate.points)
             {
-                std::cout<<mesh.vertices[point].elevation<<std::endl;
                 double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
                 mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal);
                 mesh.vertices[point].elevation = 0.0;

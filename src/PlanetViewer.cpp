@@ -198,11 +198,15 @@ void PlanetViewer::setPlanetElem (QString _elems)
 
 void PlanetViewer::generatePlanet ()
 {
-    displayMessage	("Generating planet");
+    
 	if (planet.planetCreated)
 		planet.clear ();
 	if(!generationFuture.isRunning())
-		generationFuture = QtConcurrent::run( [this]{planet.initPlanet(); update ();});
+		generationFuture = QtConcurrent::run(
+        [this]{
+            displayMessage	("Generating planet");
+            planet.initPlanet(); update ();
+        });
 }
 
 void PlanetViewer::clearPlanet ()
@@ -217,12 +221,8 @@ void PlanetViewer::clearPlanet ()
 void PlanetViewer::resegment()
 {
 	if(!generationFuture.isRunning()){
-        //generationFuture = QtConcurrent::run( 
-            //[this]{
-                displayMessage("Resegmenting...");
-                planet.resegment();
-                displayMessage("Done!");
-           // });
+        planet.resegment();
+        displayMessage ("Resegmented");
     }
 }
 
