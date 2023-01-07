@@ -27,8 +27,8 @@ void main(void) {
         vec3 specular = specularStrength * spec * lightColor;
 
         vec3 result = (ambient + diffuse + specular) * color;
-        fragColor = vec4(result,0);
+        fragColor = vec4(result,1);
     }
     else
-        fragColor = vec4(color,0.5);
+        fragColor = vec4(color,1);
 }

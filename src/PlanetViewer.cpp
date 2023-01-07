@@ -75,7 +75,7 @@ void PlanetViewer::init ()
 
 void PlanetViewer::drawSkybox()
 {
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
     skyboxShader->bind();
     float pMatrix[16];
@@ -114,9 +114,6 @@ void PlanetViewer::draw ()
 {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
-
-    glEnable (GL_DEPTH_TEST);
-    glDisable (GL_BLEND);
 
     if(displayMode == WIRE){
        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
@@ -201,12 +198,13 @@ void PlanetViewer::generatePlanet ()
     
 	if (planet.planetCreated)
 		planet.clear ();
-	if(!generationFuture.isRunning())
+	if(!generationFuture.isRunning()){
+        displayMessage	("Generating planet");
 		generationFuture = QtConcurrent::run(
         [this]{
-            displayMessage	("Generating planet");
             planet.initPlanet(); update ();
         });
+    }
 }
 
 void PlanetViewer::clearPlanet ()

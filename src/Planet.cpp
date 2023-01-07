@@ -114,6 +114,14 @@ void Planet::initPlanet ()
     planetCreated = true;
 }
 
+QVector3D normalize(const QVector3D &v)
+{        
+    double squareLength = v.x()*v.x() + v.y()*v.y() + v.z()*v.z();
+    double length = sqrt(squareLength);
+    
+    return QVector3D(v.x()/length,v.y()/length,v.z()/length);
+}
+
 void Planet::makeOcean ()
 {
     std::cout<<"Making ocean mesh..."<<std::endl;
@@ -128,10 +136,8 @@ void Planet::makeOcean ()
         double phi = acosf(1 - 2 * (i+0.5f) / elems);
         double x = cosf(theta)*sinf(phi), y=sinf(theta)*sinf(phi), z=cosf(phi);
 
-        QVector3D position = QVector3D (x * radius, y * radius, z * radius) ;
-        double squareLength = position.x()*position.x() + position.y()*position.y() + position.z()*position.z(); ;
-        double length = sqrt(squareLength);
-        QVector3D normal = QVector3D(position.x()/length,position.y()/length,position.z()/length);
+        QVector3D position = QVector3D (x * radius, y * radius, z * radius);
+        QVector3D normal = normalize(position);
         pos.push_back(position);
         oceanMesh.vertices[i].pos=position;
         oceanMesh.vertices[i].normal=normal;
@@ -143,7 +149,6 @@ void Planet::makeOcean ()
 
     typedef std::array<std::size_t, 3> Facet; // Triple of indices
     std::vector<Facet> facets;
-    // The function is called using directly the points raw iterators
     
     CGAL::advancing_front_surface_reconstruction(points.points().begin(),
       points.points().end(),
@@ -242,8 +247,6 @@ void Planet::collect_one_ring (std::vector<QVector3D> const & i_vertices,
     }
 }
 
-
-
 void Planet::makePlates ()
 {
     std::cout<<"Segmentation started..."<<std::endl;
@@ -266,10 +269,15 @@ void Planet::makePlates ()
 
     plates[0].type=OCEANIC; colors[0] = QVector3D(0,0,1);
     plates[1].type=CONTINENTAL; colors[1] = QVector3D(0,1,0);
+
+    plates[0].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
+    plates[1].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
+
     for(unsigned short i = 2; i < plateNum; ++i){
         double rng = prng.generateDouble();
         plates[i].type = rng > 0.5 ? OCEANIC : CONTINENTAL;
         colors[i] = rng > 0.5 ? QVector3D(0,0,1) : QVector3D(0,1,0);
+        plates[i].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
     }
 
     for(unsigned short i = 0; i < plateNum; ++i)
