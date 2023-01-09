@@ -24,11 +24,13 @@ enum DisplayMode{WIRE=0, SOLID=1};
 class PlanetViewer : public QGLViewer {
 Q_OBJECT
 
+friend class PlanetDockWidget;
+
 public:
     PlanetViewer (QWidget *parent);
 protected:
     Planet planet;
-    qglviewer::Vec cam;
+    bool planetCreated = false;
 	QFuture<void> generationFuture;
 
     QOpenGLVertexArrayObject* skyboxVAO;
@@ -124,7 +126,7 @@ public slots:
     void setOceanicOctave(int _o);
     void setContinentalOctave(int _o);
 signals:
-
+    void planetFinished();
 };
 
 #endif

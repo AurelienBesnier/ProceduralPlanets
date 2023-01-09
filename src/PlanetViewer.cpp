@@ -120,6 +120,13 @@ void PlanetViewer::draw ()
        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
     }
 
+    if(planet.planetCreated && !planetCreated)
+    {
+        planetCreated = true;
+        emit this->planetFinished();
+
+    }
+
     drawSkybox();
     planet.draw (camera ());
 
@@ -160,7 +167,7 @@ unsigned int PlanetViewer::loadCubemap()
 void PlanetViewer::clear ()
 {
 	if(!generationFuture.isRunning()){
-		planet.clear ();
+        planet.clear ();
 		update ();
 	}
 }
@@ -168,8 +175,8 @@ void PlanetViewer::clear ()
 void PlanetViewer::setPlateNumber (int _plateNum)
 {
 	if(!generationFuture.isRunning()){
-		planet.clear ();
-    	planet.setPlateNumber (_plateNum);
+        planet.clear ();
+        planet.setPlateNumber (_plateNum);
 		update ();
 	}
 }
@@ -177,8 +184,8 @@ void PlanetViewer::setPlateNumber (int _plateNum)
 void PlanetViewer::setPlanetRadius (QString _r)
 {
 	if(!generationFuture.isRunning()){
-		planet.clear ();
-    	planet.setRadius (_r.toDouble ());
+        planet.clear ();
+        planet.setRadius (_r.toDouble ());
 		update ();
 	}
 }
@@ -186,8 +193,8 @@ void PlanetViewer::setPlanetRadius (QString _r)
 void PlanetViewer::setPlanetElem (QString _elems)
 {
 	if(!generationFuture.isRunning()){
-		planet.clear ();
-    	planet.setElems (_elems.toInt());
+        planet.clear ();
+        planet.setElems (_elems.toInt());
 		update ();
 	}
 }
@@ -195,8 +202,9 @@ void PlanetViewer::setPlanetElem (QString _elems)
 void PlanetViewer::generatePlanet ()
 {
     
-	if (planet.planetCreated)
-		planet.clear ();
+    if (planet.planetCreated){
+        planet.clear ();
+    }
 	if(!generationFuture.isRunning()){
         displayMessage	("Generating planet");
 		generationFuture = QtConcurrent::run(
@@ -209,7 +217,7 @@ void PlanetViewer::generatePlanet ()
 void PlanetViewer::clearPlanet ()
 {
 	if(!generationFuture.isRunning()){
-		planet.clear ();
+        planet.clear ();
         displayMessage	("Planet cleared");
 		update ();
 	}
@@ -217,7 +225,7 @@ void PlanetViewer::clearPlanet ()
 
 void PlanetViewer::resegment()
 {
-	if(!generationFuture.isRunning() && planet.planetCreated){
+    if(!generationFuture.isRunning() && planet.planetCreated){
         planet.resegment();
         displayMessage ("Resegmented");
     }
@@ -226,7 +234,7 @@ void PlanetViewer::resegment()
 void PlanetViewer::setOceanicElevation (QString _e)
 {
 	if(!generationFuture.isRunning()){
-		planet.setOceanicElevation (_e.toDouble ());
+        planet.setOceanicElevation (_e.toDouble ());
 		update ();
 	}
 }
@@ -234,8 +242,8 @@ void PlanetViewer::setOceanicElevation (QString _e)
 void PlanetViewer::setContinentElevation (QString _e)
 {
 	if(!generationFuture.isRunning()){
-		planet.clear ();
-		planet.setContinentalElevation (_e.toDouble ());
+        planet.clear ();
+        planet.setContinentalElevation (_e.toDouble ());
 		update ();
 	}
 }
@@ -266,13 +274,13 @@ void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 void PlanetViewer::savePlanetOff ()
 {
     displayMessage	("Planet saved as planet.off");
-	planet.saveOFF ();
+    planet.saveOFF ();
 }
 
 void PlanetViewer::savePlanetObj ()
 {
     displayMessage	("Planet saved as planet.obj");
-	planet.save ();
+    planet.save ();
 }
 
 std::istream& operator>> (std::istream &stream, qglviewer::Vec &v)

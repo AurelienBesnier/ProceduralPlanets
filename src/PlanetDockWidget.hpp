@@ -41,12 +41,17 @@ public:
 	QLabel *cOctaveLabel, *cElevationLabel;
 	QLineEdit *continentalElevation;
 	QSlider *nbOctaveNoiseContinental, *nbOctaveNoiseOceanic;
-	QGridLayout *plateListLayout;
+	QGridLayout *plateListLayout, *PlateListGridLayout;
+	QGroupBox *plateListBox;
+	QListWidget *plateList;
 public slots:
 	void setPlateNumText ();
 	void setOceanicOctaveText();
 	void setContinentalOctaveText ();
 	void setPlateIndicators();
+
+signals:
+    void planetFinished();
 };
 
 #endif // TEXTUREDOCKWINDOW_H

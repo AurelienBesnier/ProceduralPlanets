@@ -144,11 +144,12 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	continentalElevation->setValidator (validator);
 
 	//********************Plate list***********************/
-	connect(this, SIGNAL(planetFinished()),this, SLOT(setPlateIndicators()));
-	QGroupBox *plateListBox = new QGroupBox ("Plate list",
-													parent);
+	plateListBox = new QGroupBox ("Plate list", parent);
+    connect(viewer, SIGNAL(planetFinished()), this, SLOT(setPlateIndicators()));
 	plateListBox->setMaximumSize (QSize (16777215, 200));
+	plateList = new QListWidget(parent);
 	plateListLayout = new QGridLayout (plateListBox);
+	plateListLayout->addWidget(plateList);
 
 	contentLayout->addWidget (plateListBox);
 
@@ -180,8 +181,12 @@ void PlanetDockWidget::setContinentalOctaveText ()
 
 void PlanetDockWidget::setPlateIndicators()
 {
-	for(unsigned short i = 0; i < viewer.plates.size(); i++)
+    for(unsigned int i = 0; i < viewer->planet.plates.size(); i++)
 	{
-		//TODO: Make handler of plates
+		QListWidgetItem *newItem = new QListWidgetItem;
+		newItem->setText(QString::number(i));
+		plateList->insertItem(i, newItem);
 	}
+
+	plateListBox->adjustSize();
 }

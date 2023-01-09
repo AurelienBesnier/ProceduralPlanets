@@ -22,7 +22,7 @@ Planet::Planet (QOpenGLContext *context)
 {
     glContext = context;
     glFunctions = glContext->extraFunctions();
-    float frequency = 5.0f, amplitude = 2.0f, lacunarity = 2.0f,persistence = 0.5f;
+    float frequency = 5.0f, amplitude = 2.0f, lacunarity = 2.0f,persistence = 0.7f;
     this->noise = SimplexNoise(frequency, amplitude, lacunarity, persistence);
     this->octaveContinent=1;
     this->octaveOcean=1;
@@ -112,7 +112,6 @@ void Planet::initPlanet ()
     initElevations();
 
     planetCreated = true;
-    emit this->planetFinished();
 }
 
 QVector3D normalize(const QVector3D &v)
@@ -264,12 +263,11 @@ void Planet::makePlates ()
     QRandomGenerator prng;
     prng.seed(rdtsc());
     std::set<unsigned int> tmp_init;
-    std::vector<QVector3D> colors(plateNum);
     std::vector<std::vector<unsigned int>> last_ids;
     last_ids.resize(plateNum);
 
-    plates[0].type=OCEANIC; colors[0] = QVector3D(0,0,1);
-    plates[1].type=CONTINENTAL; colors[1] = QVector3D(0,1,0);
+    plates[0].type=OCEANIC; plates[0].color = QColor(prng.generateDouble(),prng.generateDouble(),prng.generateDouble());
+    plates[1].type=CONTINENTAL; plates[1].color = QColor(prng.generateDouble(),prng.generateDouble(),prng.generateDouble());
 
     plates[0].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
     plates[1].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
@@ -277,7 +275,7 @@ void Planet::makePlates ()
     for(unsigned short i = 2; i < plateNum; ++i){
         double rng = prng.generateDouble();
         plates[i].type = rng > 0.5 ? OCEANIC : CONTINENTAL;
-        colors[i] = rng > 0.5 ? QVector3D(0,0,1) : QVector3D(0,1,0);
+        plates[i].color = QColor(prng.generateDouble(),prng.generateDouble(),prng.generateDouble());
         plates[i].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
     }
 
@@ -599,9 +597,4 @@ void Planet::setContinentalOctave(int _o)
 {
     this->octaveContinent = _o;
     std::cout << "continental octave set to " << this->octaveContinent << std::endl;
-}
-
-void Planet::planetFinished()
-{
-    std::cout<<"[SIGNAL] Planet Finished"<<std::endl;
 }

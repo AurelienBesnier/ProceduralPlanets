@@ -9,6 +9,7 @@ enum PlateType {
 
 struct Plate {
 	PlateType type;
+	QColor color;
 	std::vector<unsigned int> points;
     QVector3D mouvement;
 	double e;
