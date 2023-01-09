@@ -102,6 +102,9 @@ public:
               << message << std::endl;
         }
     }
+
+signals:
+    void planetFinished();
 };
 
 #endif // PLANET_H

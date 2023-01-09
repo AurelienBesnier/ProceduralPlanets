@@ -48,7 +48,7 @@ set(PROJECT_RESOURCES
 )
 
 add_compile_options(
-    -Wall -pedantic -O3 -std=c++20 -march=native
+    -Wall -pedantic -O3 -ftree-vectorize -pipe -fpic -std=c++20 -march=native
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_SHADERS})

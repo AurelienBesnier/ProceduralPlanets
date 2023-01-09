@@ -22,7 +22,7 @@ Planet::Planet (QOpenGLContext *context)
 {
     glContext = context;
     glFunctions = glContext->extraFunctions();
-    float frequency = 3.0f, amplitude = 1.0f, lacunarity = 2.0f,persistence = 0.8f;
+    float frequency = 5.0f, amplitude = 2.0f, lacunarity = 2.0f,persistence = 0.5f;
     this->noise = SimplexNoise(frequency, amplitude, lacunarity, persistence);
     this->octaveContinent=1;
     this->octaveOcean=1;
@@ -42,7 +42,7 @@ void Planet::init ()
     needInitBuffers = true;
     program = new QOpenGLShaderProgram();
     oceanProgram = new QOpenGLShaderProgram();
-    this->plateNum = 4;
+    this->plateNum = 17;
     this->radius = 6370*1000;
     this->elems = 6000;
     this->plateParams.oceanicElevation=-10*1000;
@@ -112,6 +112,7 @@ void Planet::initPlanet ()
     initElevations();
 
     planetCreated = true;
+    emit this->planetFinished();
 }
 
 QVector3D normalize(const QVector3D &v)
@@ -598,4 +599,9 @@ void Planet::setContinentalOctave(int _o)
 {
     this->octaveContinent = _o;
     std::cout << "continental octave set to " << this->octaveContinent << std::endl;
+}
+
+void Planet::planetFinished()
+{
+    std::cout<<"[SIGNAL] Planet Finished"<<std::endl;
 }

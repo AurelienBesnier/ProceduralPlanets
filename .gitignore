@@ -97,3 +97,14 @@ ProceduralPlanet
 
 *.off
 *.obj
+
+*.log
+*.aux
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.png
+*.svg
+*.jpg

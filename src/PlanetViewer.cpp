@@ -75,7 +75,7 @@ void PlanetViewer::init ()
 
 void PlanetViewer::drawSkybox()
 {
-    //glDepthMask(GL_FALSE);
+    glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
     skyboxShader->bind();
     float pMatrix[16];
@@ -112,8 +112,7 @@ void PlanetViewer::drawSkybox()
 
 void PlanetViewer::draw ()
 {
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    this->cam = camera ()->worldCoordinatesOf (qglviewer::Vec (0., 0., 0.));
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     if(displayMode == WIRE){
        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
@@ -218,7 +217,7 @@ void PlanetViewer::clearPlanet ()
 
 void PlanetViewer::resegment()
 {
-	if(!generationFuture.isRunning()){
+	if(!generationFuture.isRunning() && planet.planetCreated){
         planet.resegment();
         displayMessage ("Resegmented");
     }

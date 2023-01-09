@@ -21,10 +21,8 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	numPlateSlider = new QSlider (groupBox);
 	numPlateSlider->setOrientation (Qt::Horizontal);
     numPlateSlider->setMinimum (2);
-    numPlateSlider->setMaximum (20);
-    numPlateSlider->setValue(4);
-
-
+    numPlateSlider->setMaximum (30);
+    numPlateSlider->setValue(17);
 
 	planetParamLayout->addWidget (numPlateSlider, 0, 1, 1, 1);
 
@@ -49,6 +47,8 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 
     planetElements = new QLineEdit ();
     planetElements->setText("6000");
+	QValidator *intValidator = new QIntValidator(10, 60000000, this);
+	planetElements->setValidator(intValidator);
 
 	planetElementLabel = new QLabel (QString ("Planet Resolution: "));
 	planetParamLayout->addWidget (planetElementLabel, 2, 0, 1, 1);
@@ -143,7 +143,17 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	oceanicElevation->setValidator (validator);
 	continentalElevation->setValidator (validator);
 
+	//********************Plate list***********************/
+	connect(this, SIGNAL(planetFinished()),this, SLOT(setPlateIndicators()));
+	QGroupBox *plateListBox = new QGroupBox ("Plate list",
+													parent);
+	plateListBox->setMaximumSize (QSize (16777215, 200));
+	plateListLayout = new QGridLayout (plateListBox);
+
+	contentLayout->addWidget (plateListBox);
+
 	contentLayout->addStretch (0);
+
 	this->setWidget (contents);
 }
 
@@ -166,4 +176,12 @@ void PlanetDockWidget::setContinentalOctaveText ()
 	cOctaveLabel->setText (
 			QString ("Octaves continental noise:%1").arg (nbOctaveNoiseContinental->value ()));
 	update ();
+}
+
+void PlanetDockWidget::setPlateIndicators()
+{
+	for(unsigned short i = 0; i < viewer.plates.size(); i++)
+	{
+		//TODO: Make handler of plates
+	}
 }
