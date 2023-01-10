@@ -16,7 +16,7 @@ struct Vertex {
     QVector3D pos, normal;
     QVector2D texCoords;
     float elevation;
-    unsigned int plate_id;
+    float plate_id;
 };
 
 struct Texture {
@@ -92,7 +92,7 @@ public:
         shader->setAttributeBuffer(3, GL_FLOAT, offsetof(Vertex, elevation), 1, sizeof(Vertex));
 
         shader->enableAttributeArray(4);
-        shader->setAttributeBuffer(4, GL_UNSIGNED_INT, offsetof(Vertex, plate_id), 1, sizeof(Vertex));
+        shader->setAttributeBuffer(4, GL_FLOAT, offsetof(Vertex, plate_id), 1, sizeof(Vertex));
 
         VAO->release();
         VBO->release();

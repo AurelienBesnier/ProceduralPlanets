@@ -3,12 +3,13 @@ uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform vec3 lightColor;
 uniform bool lighting;
+uniform float selected_plate;
 
 in vec3 position;
 in vec3 normal;
 in vec2 texCoord;
 smooth in float elevation;
-in uint plate_id;
+smooth in float plate_id;
 
 out vec4 fragColor;
 
@@ -52,6 +53,17 @@ void main(void) {
         fragColor = vec4(result,1);
     }
     else{
-        fragColor = vec4(color,1);
+        if(selected_plate == plate_id)
+        {
+            vec4 front = vec4(1,0,1,0.4);
+            vec4 back = vec4(color, 0.9);
+            vec3 col = 0.4 * front.rgb + (1-0.4)*back.a*back.rgb;
+
+            fragColor = vec4(col,1);
+        }
+        else
+        {
+            fragColor = vec4(color,1);
+        }
     }
 }

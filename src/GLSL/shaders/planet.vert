@@ -3,7 +3,7 @@ layout (location=0) in vec3 i_position;
 layout (location=1) in vec3 i_normals;
 layout (location=2) in vec2 i_texCoord;
 layout (location=3) in float i_elevation;
-layout (location=4) in uint i_plate_id;
+layout (location=4) in float i_plate_id;
 
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;
@@ -12,7 +12,7 @@ out vec3 position;
 out vec3 normal;
 out vec2 texCoord;
 out float elevation;
-out uint plate_id;
+out float plate_id;
 
 void main(void)
 {

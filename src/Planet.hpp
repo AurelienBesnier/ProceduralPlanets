@@ -38,10 +38,9 @@ private:
 
 public:
     std::vector<Plate> plates;
+    float selectedPlateID = -1;
     Mesh mesh, oceanMesh;
-    bool shaderLighting = false;
-    bool needInitBuffers = true;
-    bool oceanDraw = true;
+    bool shaderLighting = false, needInitBuffers = true, oceanDraw = true;
     PlateParameters plateParams;
     QOpenGLShaderProgram *program=nullptr, *oceanProgram = nullptr;
     GLuint programID, oceanProgramID;

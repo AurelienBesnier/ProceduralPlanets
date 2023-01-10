@@ -150,6 +150,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
     connect(viewer, SIGNAL(planetFinished()), this, SLOT(setPlateIndicators()));
 	plateListBox->setMaximumSize (QSize (16777215, 200));
 	plateList = new QListWidget(parent);
+	connect(plateList, SIGNAL(itemClicked(QListWidgetItem*)), viewer, SLOT(selectPlate(QListWidgetItem*)));
 	plateListLayout = new QGridLayout (plateListBox);
 	plateListLayout->addWidget(plateList);
 

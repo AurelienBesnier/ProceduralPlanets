@@ -262,6 +262,17 @@ void PlanetViewer::setContinentalOctave(int _o)
     }
 }
 
+
+void PlanetViewer::selectPlate(QListWidgetItem* item)
+{
+    int id = item->text().toDouble ();
+
+    std::cout<<"Plate n°"<<id<<" selected"<<std::endl;
+
+    planet.selectedPlateID = (float)id;
+    update();
+}
+
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 {
     camera ()->setSceneCenter (center);

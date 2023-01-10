@@ -421,6 +421,7 @@ void Planet::drawPlanet(const qglviewer::Camera *camera)
     program->setUniformValue(program->uniformLocation("viewPos"), camPos);
     program->setUniformValue(program->uniformLocation("lightPos"), camPos);
     program->setUniformValue(program->uniformLocation("lighting"), int(this->shaderLighting));
+    program->setUniformValue(program->uniformLocation("selected_plate"), selectedPlateID);
 
     mesh.Draw(program);
     program->release();
@@ -448,7 +449,7 @@ void Planet::drawOcean(const qglviewer::Camera *camera)
     oceanProgram->setUniformValue(oceanProgram->uniformLocation("lightColor"), lightColor);
     oceanProgram->setUniformValue(oceanProgram->uniformLocation("viewPos"), camPos);
     oceanProgram->setUniformValue(oceanProgram->uniformLocation("lightPos"), camPos);
-    oceanProgram->setUniformValue(oceanProgram->uniformLocation("lighting"), int(false));
+    oceanProgram->setUniformValue(oceanProgram->uniformLocation("lighting"), int(this->shaderLighting));
 
     oceanMesh.Draw(oceanProgram);
     oceanProgram->release();

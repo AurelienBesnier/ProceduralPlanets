@@ -6,6 +6,7 @@
 #include <QtConcurrent>
 #include <QFuture>
 #include <QThread>
+#include <QListWidgetItem>
 
 #include <iostream>
 #include <fstream>
@@ -125,6 +126,8 @@ public slots:
 
     void setOceanicOctave(int _o);
     void setContinentalOctave(int _o);
+
+    void selectPlate(QListWidgetItem* item);
 signals:
     void planetFinished();
 };
