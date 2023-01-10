@@ -50,6 +50,9 @@ public slots:
 	void setContinentalOctaveText ();
 	void setPlateIndicators();
 
+	void clear();
+	void generate();
+
 signals:
     void planetFinished();
 };

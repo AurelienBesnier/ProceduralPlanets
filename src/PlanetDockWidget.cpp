@@ -61,10 +61,12 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	confirmButton = new QPushButton ("Generate", groupBox);
 	planetParamLayout->addWidget (confirmButton, 4, 1, 1, 1);
 	connect (confirmButton, SIGNAL(clicked()), viewer, SLOT(generatePlanet()));
+	connect (confirmButton, SIGNAL(clicked()), this, SLOT(generate()));
 
 	clearButton = new QPushButton ("Clear", groupBox);
 	planetParamLayout->addWidget (clearButton, 4, 2, 1, 1);
 	connect (clearButton, SIGNAL(clicked()), viewer, SLOT(clearPlanet()));
+	connect (clearButton, SIGNAL(clicked()), this, SLOT(clear()));
 
 	resgementButton = new QPushButton ("Resegment", groupBox);
 	planetParamLayout->addWidget (resgementButton, 5, 1, 1, 2);
@@ -189,4 +191,15 @@ void PlanetDockWidget::setPlateIndicators()
 	}
 
 	plateListBox->adjustSize();
+}
+
+
+void PlanetDockWidget::clear()
+{
+	plateList->clear();
+}
+
+void PlanetDockWidget::generate()
+{
+	plateList->clear();
 }

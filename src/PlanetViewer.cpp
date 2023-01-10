@@ -167,7 +167,7 @@ unsigned int PlanetViewer::loadCubemap()
 void PlanetViewer::clear ()
 {
 	if(!generationFuture.isRunning()){
-        planet.clear ();
+        planet.clear ();planetCreated =false;
 		update ();
 	}
 }
@@ -209,7 +209,7 @@ void PlanetViewer::generatePlanet ()
         displayMessage	("Generating planet");
 		generationFuture = QtConcurrent::run(
         [this]{
-            planet.initPlanet(); update ();
+            planet.initPlanet(); update (); planetCreated =false;
         });
     }
 }

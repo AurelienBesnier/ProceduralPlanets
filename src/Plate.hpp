@@ -14,6 +14,7 @@ struct Plate {
     QVector3D mouvement;
 	double e;
 	double z;
+	bool selected = false;
 };
 
 struct PlateParameters {

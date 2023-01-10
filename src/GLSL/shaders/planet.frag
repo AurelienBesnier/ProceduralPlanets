@@ -8,6 +8,7 @@ in vec3 position;
 in vec3 normal;
 in vec2 texCoord;
 smooth in float elevation;
+in uint plate_id;
 
 out vec4 fragColor;
 
@@ -50,6 +51,7 @@ void main(void) {
         vec3 result = (ambient + diffuse + specular) * color;
         fragColor = vec4(result,1);
     }
-    else
+    else{
         fragColor = vec4(color,1);
+    }
 }

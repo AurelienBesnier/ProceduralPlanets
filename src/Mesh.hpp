@@ -91,6 +91,9 @@ public:
         shader->enableAttributeArray(3);
         shader->setAttributeBuffer(3, GL_FLOAT, offsetof(Vertex, elevation), 1, sizeof(Vertex));
 
+        shader->enableAttributeArray(4);
+        shader->setAttributeBuffer(4, GL_UNSIGNED_INT, offsetof(Vertex, plate_id), 1, sizeof(Vertex));
+
         VAO->release();
         VBO->release();
         EBO->release();
