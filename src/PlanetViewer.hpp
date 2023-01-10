@@ -123,6 +123,7 @@ public slots:
 	void setContinentElevation (QString _e);
 
     void resegment();
+    void deselect();
 
     void setOceanicOctave(int _o);
     void setContinentalOctave(int _o);

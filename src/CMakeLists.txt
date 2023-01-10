@@ -44,6 +44,8 @@ set(PROJECT_RESOURCES
     res/skybox/left.jpg
     res/skybox/right.jpg
     res/skybox/top.jpg
+    res/icons/ocean.png
+    res/icons/continent.png
     icon.svg
 )
 

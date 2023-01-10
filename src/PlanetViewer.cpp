@@ -267,9 +267,13 @@ void PlanetViewer::selectPlate(QListWidgetItem* item)
 {
     int id = item->text().toDouble ();
 
-    std::cout<<"Plate n°"<<id<<" selected"<<std::endl;
-
     planet.selectedPlateID = (float)id;
+    update();
+}
+
+void PlanetViewer::deselect()
+{
+    planet.selectedPlateID = (float)-1.0f;
     update();
 }
 

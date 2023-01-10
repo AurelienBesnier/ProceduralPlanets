@@ -37,7 +37,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 
 	planetRadius = new QLineEdit ();
     planetRadius->setText("6370");
-	planetParamLayout->addWidget (planetRadius, 1, 1, 1, 1);
+	planetParamLayout->addWidget (planetRadius, 1, 1, 1, 2);
 
 	planetRadiusLabel = new QLabel (QString ("Planet Radius (in km):"));
 	planetParamLayout->addWidget (planetRadiusLabel, 1, 0, 1, 1);
@@ -53,7 +53,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	planetElementLabel = new QLabel (QString ("Planet Resolution: "));
 	planetParamLayout->addWidget (planetElementLabel, 2, 0, 1, 1);
 
-	planetParamLayout->addWidget (planetElements, 2, 1, 1, 1);
+	planetParamLayout->addWidget (planetElements, 2, 1, 1, 2);
 
 	connect (planetElements, SIGNAL(textChanged(QString)), viewer,
                 SLOT(setPlanetElem(QString)));
@@ -151,8 +151,12 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	plateListBox->setMaximumSize (QSize (16777215, 200));
 	plateList = new QListWidget(parent);
 	connect(plateList, SIGNAL(itemClicked(QListWidgetItem*)), viewer, SLOT(selectPlate(QListWidgetItem*)));
+
+	QPushButton* deselectButton = new QPushButton ("Deselect", plateListBox);
+	connect (deselectButton, SIGNAL(clicked()), viewer, SLOT(deselect()));
 	plateListLayout = new QGridLayout (plateListBox);
 	plateListLayout->addWidget(plateList);
+	plateListLayout->addWidget (deselectButton, 1, 2, 1, 1);
 
 	contentLayout->addWidget (plateListBox);
 
@@ -186,7 +190,15 @@ void PlanetDockWidget::setPlateIndicators()
 {
     for(unsigned int i = 0; i < viewer->planet.plates.size(); i++)
 	{
-		QListWidgetItem *newItem = new QListWidgetItem;
+		QListWidgetItem *newItem = new QListWidgetItem();
+		if(viewer->planet.plates[i].type == OCEANIC)
+		{
+			newItem->setIcon(QIcon("res/icons/ocean.png"));
+		}
+		else
+		{
+			newItem->setIcon(QIcon("res/icons/continent.png"));
+		}
 		newItem->setText(QString::number(i));
 		plateList->insertItem(i, newItem);
 	}
