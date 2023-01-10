@@ -108,3 +108,5 @@ ProceduralPlanet
 *.svg
 docs/*.jpg
 docs/*.png
+
+docs/html

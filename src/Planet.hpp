@@ -21,6 +21,10 @@ typedef CGAL::Simple_cartesian<double>                  K;
 typedef K::Point_3                                      Point;
 typedef CGAL::Point_set_3<Point>                        Point_set;
 
+/**
+ * @brief Planet Class.
+ * Class reprensenting a planet.
+ */
 class Planet{
 private:
 	unsigned int plateNum;
@@ -32,8 +36,23 @@ private:
     std::vector<QVector3D> pos;
     std::vector<std::vector<unsigned int> >  one_ring;
 
+    /**
+     * @brief triangulation method.
+     * 
+     */
     void triangulate();
+    /**
+     * @brief method to draw the planet surface.
+     * 
+     * @param camera  
+     */
     void drawPlanet(const qglviewer::Camera *camera);
+
+    /**
+     * @brief method to draw the ocean
+     * 
+     * @param camera 
+     */
     void drawOcean(const qglviewer::Camera *camera);
 
 public:
@@ -52,38 +71,155 @@ public:
     Planet (QOpenGLContext *context);
 	~Planet ();
 
+    /**
+     * @brief Initialisation method
+     * This method setup the variables of the class to a default values.
+     */
     void init ();
+
+    /**
+     * @brief Initilisation method of the OpenGL context.
+     * This method initialise the OpenGL context with default values.
+     */
     void initGLSL();
+
+    /**
+     * @brief Method to initialize points of the sphere. 
+     * This method samples the points of a fibonacci sphere to construct the mesh.
+     */
     void makeSphere ();
+
+    /**
+     * @brief Method to build the mesh of the ocean.
+     * 
+     */
     void makeOcean ();
+
+    /**
+     * @brief Method initilizing the plates
+     * This method segments the mesh in different regions.
+     */
     void makePlates ();
+
+    /**
+     * @brief Method to initialize the elevation of the points of the mesh
+     * 
+     */
     void initElevations();
+
+    /**
+     * @brief Method that reset the elevations of the mesh.
+     * 
+     */
     void resetHeights();
+
+    /**
+     * @brief Method to resegement the mesh.
+     * 
+     */
     void resegment();
+    
+    /**
+     * @brief Method to initialize the planet. 
+     * 
+     */
     void initPlanet ();
+
+    /**
+     * @brief Method to get the one_ring of each vertices of the mesh.
+     * 
+     * @param i_vertices 
+     * @param i_triangles 
+     * @param o_one_ring 
+     */
     void collect_one_ring (std::vector<QVector3D> const & i_vertices,
     std::vector< unsigned int > const & i_triangles,
     std::vector<std::vector<unsigned int> > & o_one_ring);
 
+    /**
+    * @brief Method to draw the whole planet.
+    * 
+    * @param camera 
+    */
     void draw (const qglviewer::Camera *camera);
 
+    /**
+    * @brief Method to clear the planet.
+    * 
+    */
 	void clear ();
+
+    /**
+     * @brief Method to save the mesh as an .obj file.
+     * 
+     */
 	void save () const;
+
+    /**
+     * @brief Method to save the mesh as an .off file.
+     * 
+     */
 	void saveOFF () const;
 
+    /**
+     * @brief Set the Plate Number object
+     * 
+     * @param _plateNum 
+     */
 	void setPlateNumber (int _plateNum);
+
+    /**
+     * @brief Set the Radius object
+     * 
+     * @param _r 
+     */
 	void setRadius (double _r);
+
+    /**
+     * @brief Get the Radius object
+     * 
+     * @return double 
+     */
     double getRadius () const;
+
+    /**
+     * @brief Set the Elems object
+     * 
+     * @param _elems 
+     */
     void setElems (int _elems);
 
+    /**
+     * @brief Set the Oceanic Elevation object
+     * 
+     * @param _e 
+     */
 	void setOceanicElevation (double _e);
+
+    /**
+     * @brief Set the Continental Elevation object
+     * 
+     * @param _e 
+     */
 	void setContinentalElevation (double _e);
 
+    /**
+     * @brief Set the Oceanic Octave object
+     * 
+     * @param _o 
+     */
     void setOceanicOctave(int _o);
+
+    /**
+     * @brief Set the Continental Octave object
+     * 
+     * @param _o 
+     */
     void setContinentalOctave(int _o);
 
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
+
     static void /*GLAPIENTRY */ MessageCallback (GLenum source, GLenum type,
                           GLuint id, GLenum severity,
                           GLsizei length,
