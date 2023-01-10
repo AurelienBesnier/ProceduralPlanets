@@ -105,6 +105,6 @@ ProceduralPlanet
 *.snm
 *.synctex.gz
 *.toc
-*.png
 *.svg
-*.jpg
+docs/*.jpg
+docs/*.png
