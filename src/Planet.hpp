@@ -217,6 +217,9 @@ public:
      */
     void setContinentalOctave(int _o);
 
+    void reelevateOcean();
+    void reelevateContinent();
+
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
 

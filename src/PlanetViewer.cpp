@@ -231,6 +231,24 @@ void PlanetViewer::resegment()
     }
 }
 
+
+void PlanetViewer::reelevateOcean()
+{
+    if(!generationFuture.isRunning() && planet.planetCreated){
+
+        planet.reelevateOcean();
+        displayMessage ("Re-elevating Ocean");
+    }
+
+}
+void PlanetViewer::reelevateContinent()
+{
+    if(!generationFuture.isRunning() && planet.planetCreated){
+        planet.reelevateContinent();
+        displayMessage ("Re-elevating Continent");
+    }
+}
+
 void PlanetViewer::setOceanicElevation (QString _e)
 {
 	if(!generationFuture.isRunning()){

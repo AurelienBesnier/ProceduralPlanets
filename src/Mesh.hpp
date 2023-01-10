@@ -23,6 +23,10 @@ struct Texture {
     unsigned int id;
 };
 
+/**
+ * @brief Class reprensenting a Mesh.
+ * 
+ */
 class Mesh
 {
 private:
@@ -35,6 +39,12 @@ public:
     std::vector<unsigned int> indices;
     Mesh(){}
 
+
+    /**
+     * @brief Draws the mesh with the shader param.
+     * 
+     * @param shader 
+     */
     void Draw(QOpenGLShaderProgram *shader)
     {
         shader->bind();
@@ -46,6 +56,10 @@ public:
         shader->release();
     }
 
+    /**
+     * @brief Clears all the mesh data
+     * 
+     */
     void clear()
     {
         vertices.clear();
@@ -55,6 +69,11 @@ public:
         EBO->destroy();
     }
 
+    /**
+     * @brief Setup the mesh with the shader param.
+     * 
+     * @param shader 
+     */
     void setupMesh(QOpenGLShaderProgram *shader)
     {
         shader->bind();

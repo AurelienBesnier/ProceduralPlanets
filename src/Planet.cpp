@@ -397,6 +397,73 @@ void Planet::resegment()
     std::cout<<"Resegmentating finished!"<<std::endl;
 }
 
+void Planet::reelevateOcean()
+{
+    for(Plate &plate: plates){ // Reinitialize height of the points
+        if(plate.type == OCEANIC)
+        {
+            for(const unsigned int &point : plate.points)
+            {
+                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
+                mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                mesh.vertices[point].elevation = 0.0;
+            }
+
+        }
+    }
+    needInitBuffers = true;
+
+    QRandomGenerator prng;
+    prng.seed(rdtsc());
+    qint32 offsetX = prng.bounded(0,10000000), offsetY = prng.bounded(0,10000000),offsetZ = prng.bounded(0,10000000);
+    for(Plate &plate: plates){
+        if(plate.type == OCEANIC) // intialize oceanic plate
+        {
+            for(const unsigned int &point : plate.points)
+            { 
+                double rng = noise.fractal(octaveOcean,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY,mesh.vertices[point].pos.z()+offsetZ)+1.0;
+                double elevation = (plateParams.oceanicElevation) * rng;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                mesh.vertices[point].elevation = -rng;
+            }
+
+        } 
+    }
+
+}
+
+void Planet::reelevateContinent()
+{
+    for(Plate &plate: plates){ // Reinitialize height of the points
+        if(plate.type == CONTINENTAL)
+        {
+            for(const unsigned int &point : plate.points)
+            {
+                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
+                mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal);
+                mesh.vertices[point].elevation = 0.0;
+            }
+        }
+    }
+    needInitBuffers = true;
+
+    QRandomGenerator prng;
+    prng.seed(rdtsc());
+    qint32 offsetX = prng.bounded(0,10000000), offsetY = prng.bounded(0,10000000),offsetZ = prng.bounded(0,10000000);
+    for(Plate &plate: plates){
+        if(plate.type == CONTINENTAL) 
+        {
+            for(const unsigned int &point : plate.points)
+            {
+                double rng = noise.fractal(octaveContinent,mesh.vertices[point].pos.x()+offsetX,mesh.vertices[point].pos.y()+offsetY,mesh.vertices[point].pos.z()+offsetZ)+0.5;
+                double elevation = (plateParams.continentalElevation)* rng;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal);
+                mesh.vertices[point].elevation = rng;
+            }
+        }
+    }
+}
+
 
 void Planet::drawPlanet(const qglviewer::Camera *camera)
 {

@@ -104,6 +104,10 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	connect (oceanicElevation, SIGNAL(textChanged(QString)), viewer,
 				SLOT(setOceanicElevation(QString)));
 
+	reInitElevationOcean = new QPushButton ("Re-init Elevations", oceanicPlateBox);
+	oceanParamLayout->addWidget (reInitElevationOcean, 4, 1, 1, 2);
+	connect (reInitElevationOcean, SIGNAL(clicked()), viewer, SLOT(reelevateOcean()));
+
 	//********************Continent Editor***********************/
 	QGroupBox *continentalPlateBox = new QGroupBox ("Continental Plate",
 													parent);
@@ -135,6 +139,10 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 
 	connect (continentalElevation, SIGNAL(textChanged(QString)), viewer,
 				SLOT(setContinentElevation(QString)));
+
+	reInitElevationCont = new QPushButton ("Re-init Elevations", oceanicPlateBox);
+	contParamLayout->addWidget (reInitElevationCont, 4, 1, 1, 2);
+	connect (reInitElevationCont, SIGNAL(clicked()), viewer, SLOT(reelevateContinent()));
 
 	//Make lineedits accept numbers only
     QDoubleValidator *validator = new QDoubleValidator (-10000.0, 10000.0, 6,

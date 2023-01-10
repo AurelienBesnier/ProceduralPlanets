@@ -24,6 +24,8 @@ cmake ..
 make -j
 ```
 
+To build the documentation, use `doxygen` in the root directory.
+
 
 # References
 ## Articles
