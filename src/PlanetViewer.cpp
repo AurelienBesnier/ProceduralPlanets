@@ -124,7 +124,7 @@ void PlanetViewer::draw ()
     {
         planetCreated = true;
         emit this->planetFinished();
-
+        displayMessage("Planet created !");
     }
 
     drawSkybox();
@@ -206,7 +206,7 @@ void PlanetViewer::generatePlanet ()
         planet.clear ();
     }
 	if(!generationFuture.isRunning()){
-        displayMessage	("Generating planet");
+        displayMessage	("Generating planet...",-1);
 		generationFuture = QtConcurrent::run(
         [this]{
             planet.initPlanet(); update (); planetCreated =false;

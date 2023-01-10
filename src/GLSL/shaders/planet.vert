@@ -1,4 +1,4 @@
-#version 460
+#version 420
 layout (location=0) in vec3 i_position;
 layout (location=1) in vec3 i_normals;
 layout (location=2) in vec2 i_texCoord;
@@ -11,8 +11,8 @@ uniform mat4 proj_matrix;
 out vec3 position;
 out vec3 normal;
 out vec2 texCoord;
-out float elevation;
-out float plate_id;
+out smooth float elevation;
+out smooth float plate_id;
 
 void main(void)
 {

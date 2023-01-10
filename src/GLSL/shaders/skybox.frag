@@ -1,4 +1,4 @@
-#version 460
+#version 420
 in vec3 TexCoords;
 uniform samplerCube skybox;
 
