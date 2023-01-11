@@ -59,7 +59,7 @@ public:
     std::vector<Plate> plates;
     float selectedPlateID = -1;
     Mesh mesh, oceanMesh;
-    bool shaderLighting = false, needInitBuffers = true, oceanDraw = true;
+    bool shaderLighting = false, needInitBuffers = true, oceanDraw = true, textures = false;
     PlateParameters plateParams;
     QOpenGLShaderProgram *program=nullptr, *oceanProgram = nullptr;
     GLuint programID, oceanProgramID;
@@ -225,7 +225,6 @@ public:
      * 
      * @param point 
      * @param mesh 
-     * @return int the id closest to the point param.
      */
     void closestPoint(QVector3D point);
 

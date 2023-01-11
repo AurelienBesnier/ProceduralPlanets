@@ -19,9 +19,6 @@ struct Vertex {
     float plate_id;
 };
 
-struct Texture {
-    unsigned int id;
-};
 
 /**
  * @brief Class reprensenting a Mesh.
@@ -35,7 +32,7 @@ private:
 public:
     QOpenGLVertexArrayObject *VAO=new QOpenGLVertexArrayObject();
     std::vector<Vertex> vertices;
-    std::vector<Texture> textures;
+    std::vector<unsigned int> textures;
     std::vector<unsigned int> indices;
     Mesh(){}
 
@@ -50,9 +47,124 @@ public:
         shader->bind();
         VAO->bind();
         EBO->bind();
+        if(textures.size() != 0)
+        {
+            for(size_t i = 0; i<textures.size(); i++)
+            {
+                glActiveTexture(GL_TEXTURE0+textures[i]);
+                glBindTexture(GL_TEXTURE_2D, textures[i]);
+            }
+        }
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
         VAO->release();
         EBO->release();
+        shader->release();
+    }
+
+    void setTextures(QOpenGLShaderProgram *shader)
+    {
+        shader->bind();
+
+        unsigned int textureID;
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        QImage texture = QImage("./res/snow_02_diff_2k.jpg");
+        texture = texture.convertToFormat(QImage::Format_RGB888);
+        unsigned char *data = texture.bits();
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 
+                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+        }
+        else
+        {
+            std::cout << "tex failed "<< std::endl;
+        }
+        
+        textures.push_back(textureID);
+        
+        shader->setUniformValue(shader->uniformLocation("snow"), textureID);
+
+        unsigned int textureID2;
+        glGenTextures(1, &textureID2);
+        glBindTexture(GL_TEXTURE_2D, textureID2);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        texture = QImage("./res/rocks_ground_05_diff_2k.jpg");
+        texture = texture.convertToFormat(QImage::Format_RGB888);
+        unsigned char *data2 = texture.bits();
+        if (data2)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 
+                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data2
+            );
+        }
+        else
+        {
+            std::cout << "tex failed "<< std::endl;
+        }
+        
+        textures.push_back(textureID2);
+        
+        shader->setUniformValue(shader->uniformLocation("rocks"), textureID2);
+
+
+        unsigned int textureID3;
+        glGenTextures(1, &textureID3);
+        glBindTexture(GL_TEXTURE_2D, textureID3);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        texture = QImage("./res/coast_sand_01_diff_2k.jpg");
+        texture = texture.convertToFormat(QImage::Format_RGB888);
+        unsigned char *data3 = texture.bits();
+        if (data3)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 
+                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data3
+            );
+        }
+        else
+        {
+            std::cout << "tex failed "<< std::endl;
+        }
+        textures.push_back(textureID3);
+        
+        shader->setUniformValue(shader->uniformLocation("sand"), textureID3);
+
+
+        unsigned int textureID4;
+        glGenTextures(1, &textureID4);
+        glBindTexture(GL_TEXTURE_2D, textureID4);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        texture = QImage("./res/coast_sand_rocks_02_diff_2k.jpg");
+        texture = texture.convertToFormat(QImage::Format_RGB888);
+        unsigned char *data4 = texture.bits();
+        if (data4)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 
+                        0, GL_RGB, texture.width(), texture.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data4
+            );
+        }
+        else
+        {
+            std::cout << "tex failed "<< std::endl;
+        }
+        
+        textures.push_back(textureID4);
+        
+        shader->setUniformValue(shader->uniformLocation("grass"), textureID4);
         shader->release();
     }
 
@@ -63,6 +175,7 @@ public:
     void clear()
     {
         vertices.clear();
+        textures.clear();
         indices.clear();
         VAO->destroy();
         VBO->destroy();

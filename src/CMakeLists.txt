@@ -5,7 +5,6 @@ find_package(CGAL REQUIRED COMPONENTS Core)
 find_package(TBB REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
-find_package(GLU REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -49,6 +48,10 @@ set(PROJECT_RESOURCES
     res/skybox/top.jpg
     res/icons/ocean.png
     res/icons/continent.png
+    res/snow_02_diff_2k.jpg
+    res/rocks_ground_05_diff_2k.jpg
+    res/coast_sand_rocks_02_diff_2k.jpg
+    res/coast_sand_01_diff_2k.jpg
     icon.svg
 )
 

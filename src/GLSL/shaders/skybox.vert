@@ -10,5 +10,5 @@ void main(void)
 {
     TexCoords = i_position.xyz;
     vec4 pos = proj_matrix * view * vec4(i_position, 1.0);
-    gl_Position = pos.xyww;
+    gl_Position = pos;
 }

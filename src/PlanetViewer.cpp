@@ -50,6 +50,7 @@ void PlanetViewer::init ()
     skyboxShader->enableAttributeArray(0);
     skyboxShader->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float));
 
+
     skyboxVAO->release();
     skyboxVBO->release();
 
@@ -101,6 +102,10 @@ void PlanetViewer::drawSkybox()
              QOpenGLContext::currentContext ()->extraFunctions()->glGetUniformLocation (skyboxShader->programId(), "view"), 1,
              GL_FALSE,
              &view[0][0]);
+
+
+     QOpenGLContext::currentContext ()->extraFunctions()->glUniform1i(
+         QOpenGLContext::currentContext ()->extraFunctions()->glGetUniformLocation(skyboxShader->programId(), "skybox"), skyboxTextureID);
 
     skyboxVAO->bind();
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
@@ -343,6 +348,10 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
         case Qt::Key_O:
             planet.oceanDraw = !planet.oceanDraw;
             break;
+
+        case Qt::Key_T:
+            planet.textures = !planet.textures;
+            break;
 		default:
 			QGLViewer::keyPressEvent (e);
 	}
@@ -363,10 +372,10 @@ void PlanetViewer::mousePressEvent (QMouseEvent *e)
 
             GLdouble xw,yw,zw;
             GLfloat winx, winy, winz;
-            winx = e->localPos().x();
-            winy = (viewport[3] - e->localPos().y());
+            winx = e->pos().x();
+            winy = (viewport[3] - e->pos().y());
             winz = 0;
-            
+
             gluUnProject(winx, winy, winz, modelview, projection, viewport, &xw, &yw, &zw);
 
             planet.closestPoint(QVector3D(xw,yw,zw));

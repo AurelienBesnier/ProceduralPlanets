@@ -3,7 +3,12 @@ uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform vec3 lightColor;
 uniform bool lighting;
+uniform bool texRender;
 uniform float selected_plate;
+uniform sampler2D snow;
+uniform sampler2D grass;
+uniform sampler2D rocks;
+uniform sampler2D sand;
 
 in vec3 position;
 in vec3 normal;
@@ -32,8 +37,27 @@ vec3 elevationToColor ()
         return vec3(0.0,0.0,0.2);
 }
 
+vec4 elevationToTexture()
+{    
+    if(elevation < 0.2 && elevation > 0.0)
+        return texture(sand, texCoord);
+    if(elevation >= 0.6 && elevation < 0.8)
+        return texture(rocks, texCoord);
+    if(elevation >= 0.2 && elevation < 0.6)
+        return texture(grass, texCoord);
+    if(elevation >= 0.8)
+        return texture(snow, texCoord);
+
+}
+
+vec3 color;
+vec4 colTex;
+
 void main(void) {
-    vec3 color = elevationToColor();
+    if(texRender){
+        colTex = elevationToTexture();
+    }
+    color = elevationToColor();
     if(lighting){
         float ambientStrength = 0.1;
         vec3 ambient = ambientStrength * lightColor;
@@ -63,7 +87,10 @@ void main(void) {
         }
         else
         {
-            fragColor = vec4(color,1);
+            if(texRender && elevation > 0)
+                fragColor = colTex;
+            else
+                fragColor = vec4(color,1);
         }
     }
 }

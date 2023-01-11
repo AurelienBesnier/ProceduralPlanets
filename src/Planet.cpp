@@ -520,8 +520,9 @@ void Planet::drawPlanet(const qglviewer::Camera *camera)
     program->setUniformValue(program->uniformLocation("lightColor"), lightColor);
     program->setUniformValue(program->uniformLocation("viewPos"), camPos);
     program->setUniformValue(program->uniformLocation("lightPos"), camPos);
-    program->setUniformValue(program->uniformLocation("lighting"), int(this->shaderLighting));
+    program->setUniformValue(program->uniformLocation("lighting"), int(shaderLighting));
     program->setUniformValue(program->uniformLocation("selected_plate"), selectedPlateID);
+    program->setUniformValue(program->uniformLocation("texRender"), int(textures));
 
     mesh.Draw(program);
     program->release();
@@ -562,6 +563,7 @@ void Planet::draw (const qglviewer::Camera *camera)
 
     if(needInitBuffers && planetCreated){
         mesh.setupMesh(program);
+        //mesh.setTextures(program);
         if(!oceanMesh.VAO->isCreated())[[unlikely]]
             oceanMesh.setupMesh(oceanProgram);
         oceanMesh.vertices.clear();
