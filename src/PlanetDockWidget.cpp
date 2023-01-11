@@ -164,7 +164,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	connect (deselectButton, SIGNAL(clicked()), viewer, SLOT(deselect()));
 	plateListLayout = new QGridLayout (plateListBox);
 	plateListLayout->addWidget(plateList);
-	plateListLayout->addWidget (deselectButton, 1, 2, 1, 1);
+	plateListLayout->addWidget (deselectButton, 2, 1, 1, 1);
 
 	contentLayout->addWidget (plateListBox);
 

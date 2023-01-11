@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QGLViewer/manipulatedCameraFrame.h>
 #include <filesystem>
+#include <GL/glu.h> 
 
 
 PlanetViewer::PlanetViewer (QWidget *parent) : QGLViewer (parent)
@@ -345,6 +346,35 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
 		default:
 			QGLViewer::keyPressEvent (e);
 	}
+}
+
+void PlanetViewer::mousePressEvent (QMouseEvent *e)
+{
+    switch (e->button())
+    {
+        case Qt::MiddleButton:
+            double projection[16];
+            double modelview[16];
+            camera()->getProjectionMatrix (projection);
+            camera()->getModelViewMatrix (modelview);
+
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+
+            GLdouble xw,yw,zw;
+            GLfloat winx, winy, winz;
+            winx = e->localPos().x();
+            winy = (viewport[3] - e->localPos().y());
+            winz = 0;
+            
+            gluUnProject(winx, winy, winz, modelview, projection, viewport, &xw, &yw, &zw);
+
+            planet.closestPoint(QVector3D(xw,yw,zw));
+            break;
+        default:
+            QGLViewer::mousePressEvent (e);
+            break;
+    }
 }
 
 QString PlanetViewer::helpString () const

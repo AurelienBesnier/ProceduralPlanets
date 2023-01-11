@@ -3,6 +3,9 @@ project (ProceduralPlanet)
 include(ImportQGLViewer.cmake)
 find_package(CGAL REQUIRED COMPONENTS Core)
 find_package(TBB REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(GLU REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -61,7 +64,7 @@ set_target_properties(${PROJECT_NAME}
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
 )
-target_link_libraries(${PROJECT_NAME} QGLViewer CGAL::CGAL CGAL::CGAL_Core TBB::tbb Threads::Threads)
+target_link_libraries(${PROJECT_NAME} QGLViewer CGAL::CGAL CGAL::CGAL_Core TBB::tbb Threads::Threads ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
 
 #Copy ressources next to executable
 foreach(RES ${PROJECT_SHADERS} ${PROJECT_RESOURCES})

@@ -220,6 +220,15 @@ public:
     void reelevateOcean();
     void reelevateContinent();
 
+    /**
+     * @brief 
+     * 
+     * @param point 
+     * @param mesh 
+     * @return int the id closest to the point param.
+     */
+    void closestPoint(QVector3D point);
+
     QOpenGLContext *glContext;
     QOpenGLExtraFunctions *glFunctions;
 

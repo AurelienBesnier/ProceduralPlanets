@@ -98,6 +98,7 @@ protected:
 	virtual void init ();
 	virtual QString helpString () const;
 	virtual void keyPressEvent (QKeyEvent *e);
+    virtual void mousePressEvent (QMouseEvent *e);
 
     void changeDisplayMode(){
         if(displayMode == WIRE)
