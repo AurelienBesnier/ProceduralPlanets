@@ -181,7 +181,6 @@ void PlanetViewer::clear ()
 void PlanetViewer::setPlateNumber (int _plateNum)
 {
 	if(!generationFuture.isRunning()){
-        planet.clear ();
         planet.setPlateNumber (_plateNum);
 		update ();
 	}
@@ -199,7 +198,6 @@ void PlanetViewer::setPlanetRadius (QString _r)
 void PlanetViewer::setPlanetElem (QString _elems)
 {
 	if(!generationFuture.isRunning()){
-        planet.clear ();
         planet.setElems (_elems.toInt());
 		update ();
 	}
@@ -266,7 +264,6 @@ void PlanetViewer::setOceanicElevation (QString _e)
 void PlanetViewer::setContinentElevation (QString _e)
 {
 	if(!generationFuture.isRunning()){
-        planet.clear ();
         planet.setContinentalElevation (_e.toDouble ());
 		update ();
 	}

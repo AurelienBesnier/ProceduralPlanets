@@ -375,8 +375,8 @@ void Planet::resetHeights()
         {
             for(const unsigned int &point : plate.points)
             {
-                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
-                mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                double elevation = (plateParams.oceanicElevation) * mesh.vertices[point].elevation;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
                 mesh.vertices[point].elevation = 0.0;
             }
 
@@ -414,8 +414,8 @@ void Planet::reelevateOcean()
         {
             for(const unsigned int &point : plate.points)
             {
-                double elevation = mesh.vertices[point].elevation;
-                mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
+                double elevation = (plateParams.oceanicElevation) * mesh.vertices[point].elevation;
+                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
                 mesh.vertices[point].elevation = 0.0;
             }
 
