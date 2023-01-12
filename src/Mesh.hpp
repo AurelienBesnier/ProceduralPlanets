@@ -182,6 +182,17 @@ public:
         EBO->destroy();
     }
 
+    void updateBuffers(QOpenGLShaderProgram *shader)
+    {
+        shader->bind();
+        VBO->bind();
+        void * ptr = VBO->map(QOpenGLBuffer::WriteOnly);
+        memcpy(ptr, vertices.data(), sizeof(Vertex)*vertices.size());
+        VBO->unmap();
+        VBO->release();
+        shader->release();
+    }
+
     /**
      * @brief Setup the mesh with the shader param.
      * 
@@ -209,7 +220,7 @@ public:
         EBO->allocate(indices.data(),sizeof(unsigned int)*indices.size());
 
         VBO->bind();
-        VBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        VBO->setUsagePattern(QOpenGLBuffer::DynamicDraw);
         VBO->allocate(vertices.data(),sizeof(Vertex)*vertices.size());
         shader->enableAttributeArray(0);
         shader->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(Vertex));

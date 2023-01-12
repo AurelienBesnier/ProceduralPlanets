@@ -268,8 +268,8 @@ void Planet::makePlates ()
     std::vector<std::vector<unsigned int>> last_ids;
     last_ids.resize(plateNum);
 
-    plates[0].type=OCEANIC; plates[0].color = QColor(prng.generateDouble(),prng.generateDouble(),prng.generateDouble());
-    plates[1].type=CONTINENTAL; plates[1].color = QColor(prng.generateDouble(),prng.generateDouble(),prng.generateDouble());
+    plates[0].type=OCEANIC;
+    plates[1].type=CONTINENTAL; 
 
     plates[0].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
     plates[1].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
@@ -277,7 +277,6 @@ void Planet::makePlates ()
     for(unsigned short i = 2; i < plateNum; ++i){
         double rng = prng.generateDouble();
         plates[i].type = rng > 0.5 ? OCEANIC : CONTINENTAL;
-        plates[i].color = QColor(prng.generateDouble(),prng.generateDouble(),prng.generateDouble());
         plates[i].mouvement = normalize(QVector3D(prng.generateDouble(),prng.generateDouble(),prng.generateDouble()));
     }
 
@@ -468,7 +467,18 @@ void Planet::reelevateContinent()
 
 void Planet::move()
 {
-    std::cout<<"Movement"<<std::endl;
+    for(Plate &plate: plates)
+    {
+        if(plate.type == CONTINENTAL)
+        {
+            for(const unsigned int &point : plate.points)
+            {
+                mesh.vertices[point].pos += plate.mouvement*100;
+            }
+        }
+    }
+
+    needBuffersUpdate=true;
 }
 
 float dist(const QVector3D& p, const QVector3D &p2)
@@ -577,6 +587,8 @@ void Planet::draw (const qglviewer::Camera *camera)
     } else { [[likely]]
         if(oceanDraw)
             drawOcean(camera);
+        if(needBuffersUpdate)
+            mesh.updateBuffers(program);
         drawPlanet(camera);
     }
 }
