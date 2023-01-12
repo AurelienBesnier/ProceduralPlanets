@@ -1,24 +1,15 @@
-#ifndef TEXTUREDOCKWINDOW_H
-#define TEXTUREDOCKWINDOW_H
+#ifndef PLANETDOCKWINDOW_H
+#define PLANETDOCKWINDOW_H
 
-#include <QButtonGroup>
-#include <QCheckBox>
 #include <QDockWidget>
 #include <QFrame>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QHBoxLayout>
 #include <QLabel>
-#include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
 #include <QPushButton>
 #include <QSlider>
-#include <QSpacerItem>
 #include <QWidget>
-#include <QFormLayout>
 #include <QListWidget>
-#include <QScrollArea>
 #include <QLineEdit>
 
 #include "PlanetViewer.hpp"
@@ -99,4 +90,4 @@ signals:
     void planetFinished();
 };
 
-#endif // TEXTUREDOCKWINDOW_H
+#endif // PLANETDOCKWINDOW_H
