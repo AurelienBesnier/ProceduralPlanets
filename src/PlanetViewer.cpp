@@ -133,6 +133,8 @@ void PlanetViewer::draw ()
         displayMessage("Planet created !");
     }
 
+
+
     drawSkybox();
     planet.draw (camera ());
 
@@ -309,6 +311,7 @@ void PlanetViewer::movement()
         displayMessage("Moving plates");
         for(size_t i = 0; i<timeStep; ++i)
         {
+            years++;
             this->planet.move();
         }
     }
