@@ -56,6 +56,7 @@ void Planet::initGLSL ()
     glFunctions->glEnable (GL_LIGHTING);
     glFunctions->glEnable (GL_COLOR_MATERIAL);
     glFunctions->glEnable (GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_DEPTH);
     glFunctions->glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable ( GL_DEBUG_OUTPUT);
@@ -331,7 +332,7 @@ void Planet::initElevations()
     start = std::chrono::system_clock::now();
     QRandomGenerator prng;
     prng.seed(rdtsc());
-    qint32 offsetX = prng.bounded(0,10000), offsetY = prng.bounded(0,10000),offsetZ = prng.bounded(0,10000);
+    qint32 offsetX = prng.bounded(0,10000), offsetY = prng.bounded(0,10000);
     for(Plate &plate: plates){
         if(plate.type == OCEANIC) // intialize oceanic plate
         {
@@ -416,7 +417,7 @@ void Planet::reelevateOcean()
 
     QRandomGenerator prng;
     prng.seed(rdtsc());
-    qint32 offsetX = prng.bounded(0,10000), offsetY = prng.bounded(0,10000),offsetZ = prng.bounded(0,10000);
+    qint32 offsetX = prng.bounded(0,10000), offsetY = prng.bounded(0,10000);
     for(Plate &plate: plates){
         if(plate.type == OCEANIC) // intialize oceanic plate
         {
@@ -450,7 +451,7 @@ void Planet::reelevateContinent()
 
     QRandomGenerator prng;
     prng.seed(rdtsc());
-    qint32 offsetX = prng.bounded(0,10000), offsetY = prng.bounded(0,10000),offsetZ = prng.bounded(0,10000);
+    qint32 offsetX = prng.bounded(0,10000), offsetY = prng.bounded(0,10000);
     for(Plate &plate: plates){
         if(plate.type == CONTINENTAL) 
         {

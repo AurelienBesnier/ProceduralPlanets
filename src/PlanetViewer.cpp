@@ -380,10 +380,11 @@ void PlanetViewer::mousePressEvent (QMouseEvent *e)
 
             GLdouble xw,yw,zw;
             GLfloat winx, winy, winz;
-            winx = e->pos().x();
-            winy = (viewport[3] - e->pos().y());
+            winx = e->localPos().x();
+            winy = (viewport[3] - e->localPos().y());
             winz = 0;
 
+            glReadPixels(winx, winy, 0, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &winz);
             gluUnProject(winx, winy, winz, modelview, projection, viewport, &xw, &yw, &zw);
 
             planet.closestPoint(QVector3D(xw,yw,zw));
