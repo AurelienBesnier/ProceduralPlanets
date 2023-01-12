@@ -305,6 +305,7 @@ void PlanetViewer::movement()
 {
     if(!generationFuture.isRunning())
     {
+        displayMessage("Moving plates");
         this->planet.move();
     }
 }
@@ -355,6 +356,9 @@ void PlanetViewer::keyPressEvent (QKeyEvent *e)
             break;
         case Qt::Key_O:
             planet.oceanDraw = !planet.oceanDraw;
+            break;
+        case Qt::Key_M:
+            this->movement();
             break;
 
         case Qt::Key_T:

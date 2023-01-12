@@ -18,6 +18,15 @@ unsigned long long rdtsc(){ // random seed
     return ((unsigned long long)hi << 32) | lo;
 }
 
+float dist(const QVector3D& p, const QVector3D &p2)
+{
+    float delta_x = p[0] - p2[0];
+    float delta_y = p[1] - p2[1];
+    float delta_z = p[2] - p2[2];
+
+    return sqrt((delta_x*delta_x) + (delta_y*delta_y) + (delta_z*delta_z));
+}
+
 Planet::Planet (QOpenGLContext *context)
 {
     glContext = context;
@@ -405,7 +414,7 @@ void Planet::reelevateOcean()
         {
             for(const unsigned int &point : plate.points)
             {
-                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
+                double elevation = mesh.vertices[point].elevation;
                 mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal); // move the point along the normal's direction
                 mesh.vertices[point].elevation = 0.0;
             }
@@ -440,7 +449,7 @@ void Planet::reelevateContinent()
         {
             for(const unsigned int &point : plate.points)
             {
-                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
+                double elevation = mesh.vertices[point].elevation;
                 mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal);
                 mesh.vertices[point].elevation = 0.0;
             }
@@ -467,27 +476,41 @@ void Planet::reelevateContinent()
 
 void Planet::move()
 {
+    std::vector<Vertex> vertex_cpy;
+    vertex_cpy.resize(mesh.vertices.size());
+    std::copy (mesh.vertices.begin(), mesh.vertices.end(), vertex_cpy.begin());
     for(Plate &plate: plates)
     {
         if(plate.type == CONTINENTAL)
         {
             for(const unsigned int &point : plate.points)
             {
-                mesh.vertices[point].pos += plate.mouvement*100;
+                for(size_t i = 0; i< one_ring[point].size(); ++i)
+                {
+                    unsigned int neighboring_vertex = one_ring[point][i];
+                    // Checking the type of the plate of the neighboring vertex
+                    if(plates[mesh.vertices[neighboring_vertex].plate_id].type==CONTINENTAL && 
+                    mesh.vertices[neighboring_vertex].plate_id != mesh.vertices[point].plate_id ) // Collision CONTINENT/CONTINENT
+                    {
+                        vertex_cpy[point].pos += plate.mouvement*200;
+                        if(dist(vertex_cpy[point].pos, mesh.vertices[neighboring_vertex].pos) < dist(mesh.vertices[point].pos, mesh.vertices[neighboring_vertex].pos))
+                        {
+                            double elevation = mesh.vertices[point].elevation;
+                            if(elevation < 0.0)
+                                mesh.vertices[point].elevation += -(mesh.vertices[point].elevation*0.00013);
+                            else 
+                                mesh.vertices[point].elevation += mesh.vertices[point].elevation*0.00013;
+
+                            
+                            mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along its normal.
+                        }
+                    }
+                }
             }
         }
     }
 
     needBuffersUpdate=true;
-}
-
-float dist(const QVector3D& p, const QVector3D &p2)
-{
-    float delta_x = p[0] - p2[0];
-    float delta_y = p[1] - p2[1];
-    float delta_z = p[2] - p2[2];
-
-    return sqrt((delta_x*delta_x) + (delta_y*delta_y) + (delta_z*delta_z));
 }
 
 void Planet::closestPoint(QVector3D point)
@@ -587,8 +610,10 @@ void Planet::draw (const qglviewer::Camera *camera)
     } else { [[likely]]
         if(oceanDraw)
             drawOcean(camera);
-        if(needBuffersUpdate)
+        if(needBuffersUpdate){
+            needBuffersUpdate = false;
             mesh.updateBuffers(program);
+        }
         drawPlanet(camera);
     }
 }

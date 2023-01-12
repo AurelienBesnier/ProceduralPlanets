@@ -38,7 +38,7 @@ private:
 
     /**
      * @brief triangulation method.
-     * 
+     * Uses the surface reconstruction of CGAL with the positions of created with makeSphere() method.
      */
     void triangulate();
     /**

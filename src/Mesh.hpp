@@ -38,7 +38,7 @@ public:
 
 
     /**
-     * @brief Draws the mesh with the shader param.
+     * @brief Draws the mesh with the shader program.
      * 
      * @param shader 
      */
@@ -182,6 +182,11 @@ public:
         EBO->destroy();
     }
 
+    /**
+    * @brief Update the VBO in the shader program.
+    * 
+    * @param shader 
+    */
     void updateBuffers(QOpenGLShaderProgram *shader)
     {
         shader->bind();
