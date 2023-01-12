@@ -2,9 +2,10 @@
 Procedural tectonic planets
 
 ## Dependencies
-- QT5
-- libQGLViewer
-- CGAL
+- [QT5](https://www.qt.io)
+- [libQGLViewer](https://libqglviewer.com)
+- [CGAL](https://www.cgal.org)
+- C++ 20 compiler
 
 ## Compilation
 
