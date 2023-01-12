@@ -488,11 +488,12 @@ void Planet::move()
                 for(size_t i = 0; i< one_ring[point].size(); ++i)
                 {
                     unsigned int neighboring_vertex = one_ring[point][i];
-                    // Checking the type of the plate of the neighboring vertex
+                    // Checking the type of the plate of the neighboring vertex.
                     if(plates[mesh.vertices[neighboring_vertex].plate_id].type==CONTINENTAL && 
                     mesh.vertices[neighboring_vertex].plate_id != mesh.vertices[point].plate_id ) // Collision CONTINENT/CONTINENT
                     {
                         vertex_cpy[point].pos += plate.mouvement*200;
+                        //Check if the point would be closer after movement.
                         if(dist(vertex_cpy[point].pos, mesh.vertices[neighboring_vertex].pos) < dist(mesh.vertices[point].pos, mesh.vertices[neighboring_vertex].pos))
                         {
                             double elevation = mesh.vertices[point].elevation;
@@ -501,7 +502,34 @@ void Planet::move()
                             else 
                                 mesh.vertices[point].elevation += mesh.vertices[point].elevation*0.00013;
 
-                            
+                            mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along its normal.
+                        }
+                    }
+                }
+            }
+        }
+
+        if(plate.type == OCEANIC)
+        {
+            for(const unsigned int &point : plate.points)
+            {
+                for(size_t i = 0; i< one_ring[point].size(); ++i)
+                {
+                    unsigned int neighboring_vertex = one_ring[point][i];
+                    // Checking the type of the plate of the neighboring vertex.
+                    if(plates[mesh.vertices[neighboring_vertex].plate_id].type==OCEANIC && 
+                    mesh.vertices[neighboring_vertex].plate_id != mesh.vertices[point].plate_id ) // Collision CONTINENT/CONTINENT
+                    {
+                        vertex_cpy[point].pos += plate.mouvement*200;
+                        //Check if the point would be closer after movement.
+                        if(dist(vertex_cpy[point].pos, mesh.vertices[neighboring_vertex].pos) < dist(mesh.vertices[point].pos, mesh.vertices[neighboring_vertex].pos))
+                        {
+                            double elevation = mesh.vertices[point].elevation;
+                            if(elevation < 0.0)
+                                mesh.vertices[point].elevation += -(mesh.vertices[point].elevation*0.00013);
+                            else 
+                                mesh.vertices[point].elevation += mesh.vertices[point].elevation*0.00013;
+
                             mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along its normal.
                         }
                     }

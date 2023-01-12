@@ -24,6 +24,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
     numPlateSlider->setMaximum (30);
     numPlateSlider->setValue(17);
 
+
 	planetParamLayout->addWidget (numPlateSlider, 0, 1, 1, 1);
 
 	platenumLabel = new QLabel (
@@ -69,13 +70,32 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	connect (clearButton, SIGNAL(clicked()), this, SLOT(clear()));
 
 	resgementButton = new QPushButton ("Resegment", groupBox);
-	planetParamLayout->addWidget (resgementButton, 5, 1, 1, 1);
+	planetParamLayout->addWidget (resgementButton, 5, 1, 1, 2);
 	connect (resgementButton, SIGNAL(clicked()), viewer, SLOT(resegment()));
+	connect (resgementButton, SIGNAL(clicked()), this, SLOT(setPlateIndicators()));
 
+
+	timeStep = new QSlider (groupBox);
+	timeStep->setOrientation (Qt::Horizontal);
+    timeStep->setMinimum (1);
+    timeStep->setMaximum (30);
+    timeStep->setValue(2);
+
+	timeStepLabel = new QLabel (
+		QString ("Time step: %1 My").arg (timeStep->value ()),
+		groupBox);
+
+	connect (timeStep, SIGNAL(valueChanged(int)), viewer,
+			SLOT(setTimeStep(int)));
+	connect (timeStep, SIGNAL(valueChanged(int)), this,
+				SLOT(setTimeStepLabel()));
+
+	planetParamLayout->addWidget (timeStepLabel, 6, 0, 1, 1);
+	planetParamLayout->addWidget (timeStep, 6, 1, 1, 1);
 	movementButton = new QPushButton("Movement", groupBox);
-	planetParamLayout->addWidget (movementButton, 5, 2, 1, 1);
+	planetParamLayout->addWidget (movementButton, 7, 1, 1, 1);
 	connect (movementButton, SIGNAL(clicked()), viewer, SLOT(movement()));
-	
+
 
 	//********************Oceanic Editor***********************/
 	QGroupBox *oceanicPlateBox = new QGroupBox ("Oceanic Plate", parent);
@@ -169,7 +189,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	connect (deselectButton, SIGNAL(clicked()), viewer, SLOT(deselect()));
 	plateListLayout = new QGridLayout (plateListBox);
 	plateListLayout->addWidget(plateList);
-	plateListLayout->addWidget (deselectButton, 2, 1, 1, 1);
+	plateListLayout->addWidget (deselectButton, 2, 0, 1, 2);
 
 	contentLayout->addWidget (plateListBox);
 
@@ -196,6 +216,13 @@ void PlanetDockWidget::setContinentalOctaveText ()
 {
 	cOctaveLabel->setText (
 			QString ("Octaves continental noise:%1").arg (nbOctaveNoiseContinental->value ()));
+	update ();
+}
+
+void PlanetDockWidget::setTimeStepLabel()
+{
+	timeStepLabel->setText (
+		QString ("Time step: %1 My").arg (timeStep->value ()));
 	update ();
 }
 

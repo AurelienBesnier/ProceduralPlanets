@@ -30,13 +30,13 @@ public:
 	PlanetViewer *viewer;
 
 	//General planet parameters
-    QSlider *numPlateSlider;
+    QSlider *numPlateSlider, *timeStep;
 	QPushButton *confirmButton, *clearButton, *resgementButton,
 	 *reInitElevationOcean,  *reInitElevationCont, *movementButton;
-	QLabel *platenumLabel, *planetRadiusLabel, *planetElementLabel;
+	QLabel *platenumLabel, *planetRadiusLabel, *planetElementLabel, *timeStepLabel;
     QLineEdit *planetRadius, *planetElements;
 
-	//Plate type parameters
+	//Plates parameters
 	QLabel *oOctaveLabel,*oElevationLabel;
 	QLineEdit *oceanicElevation;
 	QLabel *cOctaveLabel, *cElevationLabel;
@@ -45,16 +45,57 @@ public:
 	QGridLayout *plateListLayout, *PlateListGridLayout;
 	QGroupBox *plateListBox;
 	QListWidget *plateList;
+
 public slots:
+
+	/**
+	* @brief Set the Plate Num Text object
+	* 
+	*/
 	void setPlateNumText ();
+
+	/**
+	 * @brief Set the Oceanic Octave Text object
+	 * 
+	 */
 	void setOceanicOctaveText();
+
+	/**
+	 * @brief Set the Continental Octave Text object
+	 * 
+	 */
 	void setContinentalOctaveText ();
+
+	/**
+	 * @brief Set the Plate Indicators object
+	 * 
+	 */
 	void setPlateIndicators();
 
+	/**
+	 * @brief Set the Time Step Label object
+	 * 
+	 */
+	void setTimeStepLabel();
+
+	/**
+	 * @brief 
+	 * 
+	 */
 	void clear();
+
+	/**
+	 * @brief 
+	 * 
+	 */
 	void generate();
 
 signals:
+
+	/**
+	 * @brief Signal sent after the planet has been created.
+	 * This signal is used to fill the plate list widget in the Dock Widget.
+	 */
     void planetFinished();
 };
 

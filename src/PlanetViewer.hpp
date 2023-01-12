@@ -34,6 +34,8 @@ protected:
     bool planetCreated = false;
 	QFuture<void> generationFuture;
 
+    unsigned int timeStep = 1;
+
     QOpenGLVertexArrayObject* skyboxVAO;
     QOpenGLBuffer *skyboxVBO;
     GLuint skyboxTextureID;
@@ -122,6 +124,7 @@ public slots:
     void savePlanetObj ();
 	void setOceanicElevation (QString _e);
 	void setContinentElevation (QString _e);
+    void setTimeStep(int _t);
 
     void resegment();
     void deselect();

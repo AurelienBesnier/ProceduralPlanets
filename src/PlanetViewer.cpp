@@ -286,6 +286,10 @@ void PlanetViewer::setContinentalOctave(int _o)
     }
 }
 
+void PlanetViewer::setTimeStep(int _t)
+{
+    this->timeStep = _t;
+}
 
 void PlanetViewer::selectPlate(QListWidgetItem* item)
 {
@@ -306,7 +310,10 @@ void PlanetViewer::movement()
     if(!generationFuture.isRunning())
     {
         displayMessage("Moving plates");
-        this->planet.move();
+        for(size_t i = 0; i<timeStep; ++i)
+        {
+            this->planet.move();
+        }
     }
 }
 
