@@ -5,6 +5,7 @@ Procedural tectonic planets
 - [QT5](https://www.qt.io)
 - [libQGLViewer](https://libqglviewer.com)
 - [CGAL](https://www.cgal.org)
+- C++ 20 compiler
 
 ## Compilation
 
