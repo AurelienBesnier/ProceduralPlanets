@@ -25,7 +25,9 @@ cmake ..
 make -j
 ```
 
-To build the documentation, use `doxygen` in the root directory.
+To build the documentation, use `doxygen` in the root directory. Open the docs/html/index.html to read it.
+
+A presentation video is available in `docs/`.
 
 
 # References
