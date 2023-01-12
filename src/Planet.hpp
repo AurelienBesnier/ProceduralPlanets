@@ -217,8 +217,23 @@ public:
      */
     void setContinentalOctave(int _o);
 
+    /**
+     * @brief 
+     * 
+     */
     void reelevateOcean();
+
+    /**
+     * @brief 
+     * 
+     */
     void reelevateContinent();
+
+    /**
+    * @brief 
+    * 
+    */
+    void move();
 
     /**
      * @brief 

@@ -301,6 +301,14 @@ void PlanetViewer::deselect()
     update();
 }
 
+void PlanetViewer::movement()
+{
+    if(!generationFuture.isRunning())
+    {
+        this->planet.move();
+    }
+}
+
 void PlanetViewer::updateCamera (const qglviewer::Vec &center)
 {
     camera ()->setSceneCenter (center);

@@ -47,7 +47,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 
     planetElements = new QLineEdit ();
     planetElements->setText("6000");
-	QValidator *intValidator = new QIntValidator(10, 60000000, this);
+	QValidator *intValidator = new QIntValidator(10, 6000000, this);
 	planetElements->setValidator(intValidator);
 
 	planetElementLabel = new QLabel (QString ("Planet Resolution: "));
@@ -71,6 +71,10 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	resgementButton = new QPushButton ("Resegment", groupBox);
 	planetParamLayout->addWidget (resgementButton, 5, 1, 1, 2);
 	connect (resgementButton, SIGNAL(clicked()), viewer, SLOT(resegment()));
+
+	movementButton = new QPushButton("Movement", groupBox);
+	planetParamLayout->addWidget (movementButton, 6, 1, 1, 2);
+	connect (movementButton, SIGNAL(clicked()), viewer, SLOT(movement()));
 
 	//********************Oceanic Editor***********************/
 	QGroupBox *oceanicPlateBox = new QGroupBox ("Oceanic Plate", parent);

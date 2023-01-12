@@ -465,6 +465,11 @@ void Planet::reelevateContinent()
     }
 }
 
+void Planet::move()
+{
+    std::cout<<"Movement"<<std::endl;
+}
+
 float dist(const QVector3D& p, const QVector3D &p2)
 {
     float delta_x = p[0] - p2[0];

@@ -125,6 +125,7 @@ public slots:
 
     void resegment();
     void deselect();
+    void movement();
 
     void setOceanicOctave(int _o);
     void setContinentalOctave(int _o);
@@ -132,6 +133,7 @@ public slots:
     void selectPlate(QListWidgetItem* item);
     void reelevateOcean();
     void reelevateContinent();
+
 signals:
     void planetFinished();
 };
