@@ -12,7 +12,6 @@ struct Plate {
 	std::vector<unsigned int> points;
     QVector3D mouvement;
 	double e;
-	double z;
 };
 
 struct PlateParameters {
