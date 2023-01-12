@@ -11,11 +11,11 @@ struct Plate {
 	PlateType type;
 	std::vector<unsigned int> points;
     QVector3D mouvement;
-	double e;
+	float e;
 };
 
 struct PlateParameters {
-	double oceanicElevation, continentalElevation;
+	float oceanicElevation, continentalElevation;
 };
 
 #endif /* PLATE_HPP_ */

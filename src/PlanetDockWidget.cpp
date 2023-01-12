@@ -113,7 +113,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	nbOctaveNoiseOceanic = new QSlider (oceanicPlateBox);
 	nbOctaveNoiseOceanic->setOrientation (Qt::Horizontal);
     nbOctaveNoiseOceanic->setMinimum (1);
-    nbOctaveNoiseOceanic->setMaximum (8);
+    nbOctaveNoiseOceanic->setMaximum (20);
     nbOctaveNoiseOceanic->setValue(1);
 
 	oOctaveLabel = new QLabel (
@@ -149,7 +149,7 @@ PlanetDockWidget::PlanetDockWidget (PlanetViewer *_viewer, QWidget *parent) : QD
 	nbOctaveNoiseContinental = new QSlider (continentalPlateBox);
 	nbOctaveNoiseContinental->setOrientation (Qt::Horizontal);
     nbOctaveNoiseContinental->setMinimum (1);
-    nbOctaveNoiseContinental->setMaximum (8);
+    nbOctaveNoiseContinental->setMaximum (20);
     nbOctaveNoiseContinental->setValue(1);
 
 	cOctaveLabel = new QLabel (

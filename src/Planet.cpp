@@ -421,7 +421,7 @@ void Planet::reelevateOcean()
 
         }
     }
-    needInitBuffers = true;
+    needBuffersUpdate=true;
 
     QRandomGenerator prng;
     prng.seed(rdtsc());
@@ -449,13 +449,13 @@ void Planet::reelevateContinent()
         {
             for(const unsigned int &point : plate.points)
             {
-                double elevation = mesh.vertices[point].elevation;
+                double elevation = (plateParams.continentalElevation) * mesh.vertices[point].elevation;
                 mesh.vertices[point].pos = mesh.vertices[point].pos - ((elevation) * mesh.vertices[point].normal);
                 mesh.vertices[point].elevation = 0.0;
             }
         }
     }
-    needInitBuffers = true;
+    needBuffersUpdate=true;
 
     QRandomGenerator prng;
     prng.seed(rdtsc());
@@ -492,23 +492,21 @@ void Planet::move()
                     if(plates[mesh.vertices[neighboring_vertex].plate_id].type==CONTINENTAL && 
                     mesh.vertices[neighboring_vertex].plate_id != mesh.vertices[point].plate_id ) // Collision CONTINENT/CONTINENT
                     {
-                        vertex_cpy[point].pos += plate.mouvement*200;
+                        vertex_cpy[point].pos += plate.mouvement*100;
                         //Check if the point would be closer after movement.
                         if(dist(vertex_cpy[point].pos, mesh.vertices[neighboring_vertex].pos) < dist(mesh.vertices[point].pos, mesh.vertices[neighboring_vertex].pos))
                         {
-                            double elevation = mesh.vertices[point].elevation*0.00013;
-                            if( mesh.vertices[point].elevation >= plateParams.continentalElevation)
-                            {
-                                
-                            }
-                            else 
-                            {
-                                if(elevation < 0.0)
-                                    mesh.vertices[point].elevation -= (elevation);
-                                else 
-                                    mesh.vertices[point].elevation += elevation;
+                            double elevation = (mesh.vertices[point].elevation) * 0.00013f;
 
-                                mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along its normal.
+                            if(mesh.vertices[point].elevation < 1.0f){
+
+                                if(elevation < 0) [[unlikely]]
+                                {
+                                    elevation = fabsf(elevation);
+                                }
+                                mesh.vertices[point].elevation += elevation;
+
+                                mesh.vertices[point].pos = mesh.vertices[point].pos + ((mesh.vertices[point].elevation) * mesh.vertices[point].normal); // move the point along its normal.
                             }
                         }
                     }
@@ -527,19 +525,22 @@ void Planet::move()
                     if(plates[mesh.vertices[neighboring_vertex].plate_id].type==OCEANIC && 
                     mesh.vertices[neighboring_vertex].plate_id != mesh.vertices[point].plate_id ) // Collision OCEANIC/OCEANIC
                     {
-                        vertex_cpy[point].pos += plate.mouvement*200;
+                        vertex_cpy[point].pos += plate.mouvement*100;
                         //Check if the point would be closer after movement.
                         if(dist(vertex_cpy[point].pos, mesh.vertices[neighboring_vertex].pos) < dist(mesh.vertices[point].pos, mesh.vertices[neighboring_vertex].pos))
                         {
-                            double elevation = mesh.vertices[point].elevation*0.00026;
-                            
-                            if(elevation < 0.0)
-                                mesh.vertices[point].elevation -= (elevation);
-                            else 
+                            double elevation = (mesh.vertices[point].elevation) * 0.00013f;
+
+                            if(mesh.vertices[point].elevation < 1.0f){
+
+                                if(elevation < 0) [[unlikely]]
+                                {
+                                    elevation = fabsf(elevation);
+                                }
                                 mesh.vertices[point].elevation += elevation;
 
-                            mesh.vertices[point].pos = mesh.vertices[point].pos + ((elevation) * mesh.vertices[point].normal); // move the point along its normal.
-                            
+                                mesh.vertices[point].pos = mesh.vertices[point].pos - ((mesh.vertices[point].elevation) * mesh.vertices[point].normal); // move the point along its normal.
+                            }
                         }
                     }
 
@@ -551,19 +552,17 @@ void Planet::move()
                         if(dist(vertex_cpy[point].pos, mesh.vertices[neighboring_vertex].pos) < dist(mesh.vertices[point].pos, mesh.vertices[neighboring_vertex].pos))
                         {
 
-                            double elevation = mesh.vertices[neighboring_vertex].elevation*0.00013;
-                            if(mesh.vertices[neighboring_vertex].elevation >= plateParams.continentalElevation)
-                            {
-                                
-                            }
-                            else 
-                            {
-                                if(elevation < 0.0)
-                                    mesh.vertices[neighboring_vertex].elevation -= (elevation);
-                                else 
-                                    mesh.vertices[neighboring_vertex].elevation += elevation;
+                           double elevation = (mesh.vertices[neighboring_vertex].elevation) * 0.00013f;
 
-                                mesh.vertices[neighboring_vertex].pos = mesh.vertices[neighboring_vertex].pos + ((elevation) * mesh.vertices[neighboring_vertex].normal); // move the point along its normal.
+                            if(mesh.vertices[neighboring_vertex].elevation < 2.0f){
+
+                                if(elevation < 0) [[unlikely]]
+                                {
+                                    elevation = fabsf(elevation);
+                                }
+                                mesh.vertices[neighboring_vertex].elevation += elevation;
+
+                                mesh.vertices[neighboring_vertex].pos = mesh.vertices[neighboring_vertex].pos + ((mesh.vertices[neighboring_vertex].elevation) * mesh.vertices[neighboring_vertex].normal); // move the point along its normal.
                             }
                         }
                     }
