@@ -5,6 +5,21 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage[french]{algorithm2e}
+
+\SetKwInput{Donnees}{\underline{Données}}
+\SetKwInput{Res}{Résultat}
+\SetKwInput{Entree}{\underline{Entrées}}
+\SetKwInput{Sortie}{\underline{Sorties}}
+
+\SetKw{KwA}{à}
+\SetKw{Retour}{\underline{retourner}}
+\SetKwBlock{Deb}{\underline{Début}}{\underline{Fin}}
+\SetKwIF{Si}{SinonSi}{Sinon}{si}{alors}{sinon si}{alors}{finsi}
+\SetKwFor{Pour}{pour}{faire}{finpour}
+\SetKwFor{Tq}{tant que}{faire}{fintq}
+\SetKwFor{PourTous}{pour tous}{faire}{finprts}
 
 \title{Planètes Procédurales}
 \titlegraphic{
@@ -38,10 +53,10 @@
 
 \begin{frame}{Introduction}
 
-\begin{block}{Objectifs}
-
+\begin{block}{Objectif}
+Générer des planètes procédurales et pouvoir les faire évoluer (en temps réel).
 \end{block}
-
+\onslide<2->
 \begin{figure}[H]
         \begin{subfigure}[b]{0.25\textwidth}
                 \centering
@@ -55,11 +70,12 @@
                 \centering
                 \includegraphics[width=.7\textwidth]{qlgviewer}
         \end{subfigure}%
+        \onslide<3>
         \begin{subfigure}[b]{0.25\textwidth}
                 \centering
                 \includegraphics[width=.7\textwidth]{cgal_logo}
         \end{subfigure}
-        \captionof{figure}{Technologies utilisées}
+        \caption{Technologies utilisées}
 \end{figure}
     
 \end{frame}
@@ -69,40 +85,167 @@
 
 \subsection{Création de la sphère}
 \begin{frame}{Création de la sphère}
+\begin{minipage}{0.49\textwidth}
+\begin{scriptsize}
+
+\begin{algorithm}[H]
+\Donnees{goldenRatio=$(1 + 5^{0.5})/2$}
+\Pour{i de 0 à $nb\_elem$}
+{
+        $theta\gets 2\times i  / goldenRatio$\;
+        $phi\gets arccos(1-2\times(i+0.5)/nb\_elems)$\;
+        $x\gets cos(theta) \times sin(phi)$\;
+        $y\gets sin(theta) \times sin(phi)$\;
+        $z\gets cos(phi)$\;
+}
+\end{algorithm}
+
+\end{scriptsize}
+\footnotesize Appliquer ensuite une triangulation de Delaunay sur le nuage de point résultant.
+
+\vspace{50px}
+
+\tiny{Source: \href{https://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/}{extremelearning.com.au}}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\onslide<2>
+\begin{figure}
+ \centering
+ \includegraphics[width=0.8\textwidth]{trig}
+\end{figure}
+\begin{figure}
+ \centering
+ \includegraphics[width=0.8\textwidth]{trig_pole}
+ \caption{Visualisation des triangles du pôle}
+\end{figure}
+
+\end{minipage}
 
 \end{frame}
 
 \subsection{Segmentation}
 \begin{frame}{Segmentation}
 
-\end{frame}
+\begin{block}{Définition}
+Découpage du maillages en sous régions pour y associer une sémantique.
+\end{block}
 
-\begin{frame}{Résultats}
 
 \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.5\textwidth]{segmentation_res}
-        \caption{Résultat de segmentation}
+        \begin{subfigure}[b]{0.5\textwidth}
+                \centering
+                \includegraphics[width=.6\textwidth]{elephant_sdf_partition.png}
+                \caption{Segmentation par valeurs de SDF\footnote{source: \href{https://doc.cgal.org/latest/Surface_mesh_segmentation/index.html}{CGAL}}}
+        \end{subfigure}%
+        \begin{subfigure}[b]{0.5\textwidth}
+                \centering
+                \includegraphics[width=.9\textwidth]{fig3}
+                \caption{Segmentations sur sphères}
+        \end{subfigure}%
+        \captionof{figure}{Différentes segmentations}
 \end{figure}
+
+\end{frame}
+
+\begin{frame}{Segmentation}
+\begin{figure}
+ \centering
+ \includegraphics[width=0.7\textwidth]{plate-tectonics.jpg}
+ \caption{Plaques tectoniques de la Terre}
+\end{figure}
+\tiny{Source:\url{https://geology.com/plate-tectonics.shtml}}
+\end{frame}
+
+
+\begin{frame}{Solution}
+\begin{minipage}{0.45\textwidth}
+ \begin{itemize}
+  \item Calculer le 1-voisinage de chaque point.
+  \item Pour chaque plaques, choisir un point de départ aléatoire.
+  \item Faire un grossissement de régions de chaque plaque avec le 1-voisinage
+  \item Itérer jusqu'à ce que chaque point soit assigné.
+ \end{itemize}
+
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\onslide<2->
+ \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{segmentation_res}
+        \caption{Résultat de segmentation avec 60000 éléments}
+\end{figure}
+\end{minipage}
+
+\onslide<3>
+\begin{block}{Inconvénient}
+Calcul du 1-voisinage long sur de grand maillages(>60000).
+\end{block}
 
 
 \end{frame}
 
 \subsection{Elevation}
 \begin{frame}{Elevation}
+\only<1>{
+Initialisation des élévations:
+\begin{scriptsize}
+\begin{algorithm}[H]
+\Pour{chaque plaques selon leur type}
+{
+        \Pour{chaque point $p$ de la plaque}
+        {
+                $rng\gets noise.fractal(octave, p.x + offsetX, p.y + offsetY, p.z + offsetZ)+offsetType$\;
+                $elevation\gets (plateParams.plateType)\times rng$\;
+                $elevation\gets (plateParams.plateType)\times rng$\;
+                $mesh.vertices[p].pos \gets mesh.vertices[p].pos + ((elevation) \times mesh.vertices[p].normal)$\;
+                $mesh.vertices[p].elevation\gets rng$\;
+        }
+}
+\end{algorithm}
+\end{scriptsize}
+ }
+\only<2>{
+\begin{figure}
+ \centering
+ \includegraphics[width=0.5\textwidth]{init}
+ \caption{Résultat initialisation avec rayon 637km, 6000 éléments, 8 octaves}
+\end{figure}
+}
 
 \end{frame}
 
 
 \section{Collisions}
 \begin{frame}{Collisions}
+Exemple collision Continent/Continent:
+\begin{scriptsize}
+\begin{algorithm}[H]
+\Pour{chaque plaques continentales}
+{
+        \Pour{chaque point $p$ de la plaque}
+        {
+                \Si{$p$ est voisin avec une autre plaque continentale}
+                {
+                        $voisin \gets voisin p$\;
+                        $cpy\_pos\gets p.pos + deplacement$\;
+                        \Si{$distance(cpy\_pos,voisin) < distance(p,voisin)$}
+                        {
+                                $elevation \gets p.elevation \times 0.00013$
+                                $p.elevation \gets p.elevation + elevation$\;
+                                $mesh.vertices[p].pos \gets mesh.vertices[p].pos + ((elevation) \times mesh.vertices[p].normal)$\;
+                        }
+                }
+        }
+}
+\end{algorithm}
+\end{scriptsize}
 
 \end{frame}
 
 
 
-\section{Conclusion}
-\begin{frame}{Conclusion}
+\section{Démonstration}
+\begin{frame}{Démonstration}
 
 \end{frame}
 
